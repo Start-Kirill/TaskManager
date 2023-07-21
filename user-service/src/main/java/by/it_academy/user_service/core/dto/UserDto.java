@@ -21,7 +21,6 @@ public class UserDto {
 
     private UserStatus status;
 
-    private String password;
 
     @JsonProperty("dt_create")
     @JsonSerialize(converter = LocalDateTimeToMillisecondsConverter.class)
@@ -34,13 +33,12 @@ public class UserDto {
     public UserDto() {
     }
 
-    public UserDto(UUID uuid, String mail, String fio, UserRole role, UserStatus status, String password, LocalDateTime dateTimeCreate, LocalDateTime dateTimeUpdate) {
+    public UserDto(UUID uuid, String mail, String fio, UserRole role, UserStatus status, LocalDateTime dateTimeCreate, LocalDateTime dateTimeUpdate) {
         this.uuid = uuid;
         this.mail = mail;
         this.fio = fio;
         this.role = role;
         this.status = status;
-        this.password = password;
         this.dateTimeCreate = dateTimeCreate;
         this.dateTimeUpdate = dateTimeUpdate;
     }
@@ -85,13 +83,6 @@ public class UserDto {
         this.status = status;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     public LocalDateTime getDateTimeCreate() {
         return dateTimeCreate;
