@@ -1,7 +1,9 @@
 package by.it_academy.user_service.service;
 
+import by.it_academy.user_service.core.dto.PageOfUsers;
 import by.it_academy.user_service.core.dto.ResultOrError;
 import by.it_academy.user_service.core.dto.UserCreateDto;
+import by.it_academy.user_service.core.dto.UserDto;
 import by.it_academy.user_service.core.enums.ErrorType;
 import by.it_academy.user_service.core.enums.UserRole;
 import by.it_academy.user_service.core.enums.UserStatus;
@@ -17,10 +19,15 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.passay.*;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService implements IUserService {
@@ -57,8 +64,15 @@ public class UserService implements IUserService {
 
         try {
             User user = this.conversionService.convert(dto, User.class);
+
+            user.setUuid(UUID.randomUUID());
+
+            LocalDateTime now = LocalDateTime.now();
+            user.setDateTimeCreate(now);
+            user.setDateTimeCreate(now);
+
             User save = this.userDao.save(user);
-            resultOrError.setUser(save);
+            resultOrError.setUser(conversionService.convert(save, UserDto.class));
         } catch (DataIntegrityViolationException ex) {
             String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
 
@@ -97,18 +111,130 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ResultOrError update(UserCreateDto dto) {
-        return null;
+    public ResultOrError update(UserCreateDto dto, UUID uuid, Long version) {
+
+        ResultOrError resultOrError = get(uuid);
+
+        if (resultOrError.hasError()) {
+            return resultOrError;
+        }
+
+        UserDto user = resultOrError.getUser();
+
+        resultOrError = validate(dto);
+
+        if (resultOrError.hasError()) {
+            return resultOrError;
+        }
+
+        Long realVersion = this.conversionService.convert(user.getDateTimeUpdate(), Long.class);
+        if (!realVersion.equals(version)) {
+            List<ErrorResponse> errorResponses = new ArrayList<>();
+            errorResponses.add(new ErrorResponse(ErrorType.ERROR, "User versions don't match. Get up-to-user"));
+            resultOrError.setErrorResponses(errorResponses);
+            return resultOrError;
+        }
+
+        User convertedUser = conversionService.convert(dto, User.class);
+        convertedUser.setUuid(uuid);
+        convertedUser.setDateTimeCreate(user.getDateTimeCreate());
+        convertedUser.setDateTimeUpdate(user.getDateTimeUpdate());
+
+        try {
+            User save = this.userDao.save(convertedUser);
+            resultOrError.setUser(conversionService.convert(save, UserDto.class));
+        } catch (DataIntegrityViolationException ex) {
+            String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
+
+            List<SpecificError> specificErrors = new ArrayList<>();
+            List<ErrorResponse> errorResponses = new ArrayList<>();
+
+            if (UNIQUE_MAIL_CONSTRAINT_NAME.equals(constraintName)) {
+                specificErrors.add(new SpecificError("User with such email already exists", MAIL_FIELD_NAME));
+            } else {
+                errorResponses.add(new ErrorResponse(ErrorType.ERROR, "Unknown constraint was triggered"));
+            }
+
+            if (!specificErrors.isEmpty()) {
+                if (resultOrError.getStructuredErrorResponse() == null) {
+                    StructuredErrorResponse structuredErrorResponse = new StructuredErrorResponse();
+                    structuredErrorResponse.setErrors(specificErrors);
+                    structuredErrorResponse.setLogref(ErrorType.STRUCTURED_ERROR);
+                    resultOrError.setStructuredErrorResponse(structuredErrorResponse);
+                } else {
+                    StructuredErrorResponse structuredErrorResponse = resultOrError.getStructuredErrorResponse();
+                    if (structuredErrorResponse.getErrors() == null) {
+                        structuredErrorResponse.setErrors(specificErrors);
+                    } else {
+                        List<SpecificError> errors = structuredErrorResponse.getErrors();
+                        errors.addAll(specificErrors);
+                    }
+                }
+            }
+
+            if (!errorResponses.isEmpty()) {
+                resultOrError.setErrorResponses(errorResponses);
+            }
+
+        } catch (OptimisticLockingFailureException ex) {
+            List<ErrorResponse> errorResponses = new ArrayList<>();
+            errorResponses.add(new ErrorResponse(ErrorType.ERROR, "User versions don't match. Get up-to-user"));
+            resultOrError.setErrorResponses(errorResponses);
+        }
+
+        return resultOrError;
     }
 
     @Override
-    public ResultOrError get() {
-        return null;
+    public ResultOrError get(Integer page, Integer size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        Page<User> userPage = this.userDao.findAll(pageRequest);
+
+        PageOfUsers pageOfUsers = new PageOfUsers();
+        pageOfUsers.setNumber(page);
+        pageOfUsers.setSize(size);
+        pageOfUsers.setTotalPages(userPage.getTotalPages());
+        pageOfUsers.setTotalElements(userPage.getTotalElements());
+        if (page == 0) {
+            pageOfUsers.setFirst(true);
+        } else {
+            pageOfUsers.setFirst(false);
+        }
+
+        if (userPage.hasContent()) {
+            pageOfUsers.setNumberOfElements(userPage.getContent().size());
+        } else {
+            pageOfUsers.setNumberOfElements(0);
+        }
+
+        if (userPage.hasNext()) {
+            pageOfUsers.setLast(false);
+        } else {
+            pageOfUsers.setLast(true);
+        }
+        List<UserDto> userDtos = userPage.getContent().stream().map(u -> conversionService.convert(u, UserDto.class)).toList();
+        pageOfUsers.setContent(userDtos);
+
+        ResultOrError resultOrError = new ResultOrError();
+        resultOrError.setUsers(pageOfUsers);
+        return resultOrError;
     }
 
     @Override
-    public ResultOrError get(Long id) {
-        return null;
+    public ResultOrError get(UUID uuid) {
+        ResultOrError resultOrError = new ResultOrError();
+
+        if (!this.userDao.existsById(uuid)) {
+            List<ErrorResponse> errorResponses = new ArrayList<>();
+            errorResponses.add(new ErrorResponse(ErrorType.ERROR, "User with such id doesn't exist"));
+            resultOrError.setErrorResponses(errorResponses);
+        } else {
+            User user = this.userDao.findById(uuid).orElseThrow();
+            resultOrError.setUser(conversionService.convert(user, UserDto.class));
+        }
+
+        return resultOrError;
     }
 
 
@@ -125,26 +251,64 @@ public class UserService implements IUserService {
         }
 
         String mail = dto.getMail();
+        specificErrorList.addAll(validateMail(mail));
+
+
+        String password = dto.getPassword();
+        specificErrorList.addAll(validatePassword(password, mail));
+
+        UserRole role = dto.getRole();
+        if (role == null) {
+            specificErrorList.add(new SpecificError(
+                    "Role is required",
+                    ROLE_FIELD_NAME
+            ));
+        }
+
+        UserStatus status = dto.getStatus();
+        if (status == null) {
+            specificErrorList.add(new SpecificError(
+                    "Status is required",
+                    STATUS_FIELD_NAME
+            ));
+        }
+
+        if (!specificErrorList.isEmpty()) {
+            resultOrError.setStructuredErrorResponse(
+                    new StructuredErrorResponse(ErrorType.STRUCTURED_ERROR, specificErrorList)
+            );
+        }
+
+        return resultOrError;
+    }
+
+    private List<SpecificError> validateMail(String mail) {
+        List<SpecificError> specificErrors = new ArrayList<>();
         EmailValidator emailValidator = EmailValidator.getInstance();
         if (mail == null || "".equals(mail)) {
-            specificErrorList.add(new SpecificError(
+            specificErrors.add(new SpecificError(
                     "Mail is required",
                     MAIL_FIELD_NAME
             ));
         } else if (!emailValidator.isValid(mail)) {
-            specificErrorList.add(new SpecificError(
+            specificErrors.add(new SpecificError(
                     "Invalid email format",
                     MAIL_FIELD_NAME
             ));
         }
-        String password = dto.getPassword();
+        return specificErrors;
+    }
+
+    private List<SpecificError> validatePassword(String password, String user) {
+        List<SpecificError> specificErrors = new ArrayList<>();
+
         if (password == null || "".equals(password)) {
-            specificErrorList.add(new SpecificError(
+            specificErrors.add(new SpecificError(
                     "Password is required",
                     PASSWORD_FIELD_NAME
             ));
         } else {
-            PasswordData passwordData = new PasswordData(mail, password);
+            PasswordData passwordData = new PasswordData(user, password);
             PasswordValidator passwordValidator = new PasswordValidator(
                     new LengthRule(8, 30),
                     new CharacterRule(EnglishCharacterData.Special),
@@ -165,32 +329,10 @@ public class UserService implements IUserService {
                     errors.append(String.join(",", rsd.getErrorCodes()));
                 }
                 String message = "Password does not match requirements: " + errors;
-                specificErrorList.add(new SpecificError(message, PASSWORD_FIELD_NAME));
+                specificErrors.add(new SpecificError(message, PASSWORD_FIELD_NAME));
             }
         }
-
-        UserRole role = dto.getRole();
-        if (role == null) {
-            specificErrorList.add(new SpecificError(
-                    "Role is required",
-                    ROLE_FIELD_NAME
-            ));
-        }
-
-        UserStatus status = dto.getStatus();
-        if (status == null) {
-            specificErrorList.add(new SpecificError(
-                    "Status is required",
-                    STATUS_FIELD_NAME
-            ));
-        }
-        if (!specificErrorList.isEmpty()) {
-            resultOrError.setStructuredErrorResponse(
-                    new StructuredErrorResponse(ErrorType.STRUCTURED_ERROR, specificErrorList)
-            );
-        }
-
-        return resultOrError;
+        return specificErrors;
     }
 
 }

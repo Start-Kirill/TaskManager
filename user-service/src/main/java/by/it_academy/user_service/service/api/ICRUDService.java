@@ -1,14 +1,14 @@
 package by.it_academy.user_service.service.api;
 
-import java.util.List;
+import java.util.UUID;
 
 public interface ICRUDService<K, T> {
 
     K save(T t);
 
-    K update(T t);
+    K update(T t, UUID uuid, Long version);
 
-    K get();
+    K get(Integer page, Integer size);
 
-    K get(Long id);
+    K get(UUID uuid);
 }

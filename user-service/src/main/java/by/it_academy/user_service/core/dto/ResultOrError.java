@@ -2,15 +2,14 @@ package by.it_academy.user_service.core.dto;
 
 import by.it_academy.user_service.core.errors.ErrorResponse;
 import by.it_academy.user_service.core.errors.StructuredErrorResponse;
-import by.it_academy.user_service.dao.entity.User;
 
 import java.util.List;
 
 public class ResultOrError {
 
-    private User user;
+    private UserDto user;
 
-    private List<User> users;
+    private PageOfUsers users;
 
     private StructuredErrorResponse structuredErrorResponse;
 
@@ -19,26 +18,26 @@ public class ResultOrError {
     public ResultOrError() {
     }
 
-    public ResultOrError(User user, List<User> users, StructuredErrorResponse structuredErrorResponse, List<ErrorResponse> errorResponses) {
+    public ResultOrError(UserDto user, PageOfUsers users, StructuredErrorResponse structuredErrorResponse, List<ErrorResponse> errorResponses) {
         this.user = user;
         this.users = users;
         this.structuredErrorResponse = structuredErrorResponse;
         this.errorResponses = errorResponses;
     }
 
-    public User getUser() {
+    public UserDto getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserDto user) {
         this.user = user;
     }
 
-    public List<User> getUsers() {
+    public PageOfUsers getUsers() {
         return users;
     }
 
-    public void setUsers(List<User> users) {
+    public void setUsers(PageOfUsers users) {
         this.users = users;
     }
 
