@@ -3,6 +3,7 @@ package by.it_academy.user_service.dao.entity;
 import by.it_academy.user_service.core.enums.UserRole;
 import by.it_academy.user_service.core.enums.UserStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-
+@DynamicUpdate
 public class User implements Serializable {
 
     private static final long serialVersionUID = 42L;
@@ -30,8 +31,10 @@ public class User implements Serializable {
 
     private String fio;
 
+    @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    @Enumerated(EnumType.STRING)
     private UserStatus status;
 
     private String password;

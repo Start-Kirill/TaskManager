@@ -1,4 +1,4 @@
-package by.it_academy.user_service.service.support.Converters;
+package by.it_academy.user_service.service.support.converters;
 
 import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.core.dto.UserDto;
