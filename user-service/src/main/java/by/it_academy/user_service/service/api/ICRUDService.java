@@ -8,7 +8,7 @@ public interface ICRUDService<K, T> {
 
     K update(T t);
 
-    List<K> get();
+    K get();
 
     K get(Long id);
 }

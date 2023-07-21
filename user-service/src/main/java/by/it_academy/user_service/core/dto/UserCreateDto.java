@@ -1,7 +1,10 @@
 package by.it_academy.user_service.core.dto;
 
+import by.it_academy.user_service.core.dto.support.json.UserRoleConverter;
+import by.it_academy.user_service.core.dto.support.json.UserStatusConverter;
 import by.it_academy.user_service.core.enums.UserRole;
 import by.it_academy.user_service.core.enums.UserStatus;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class UserCreateDto {
 
@@ -9,8 +12,10 @@ public class UserCreateDto {
 
     private String fio;
 
+    @JsonDeserialize(converter = UserRoleConverter.class)
     private UserRole role;
 
+    @JsonDeserialize(converter = UserStatusConverter.class)
     private UserStatus status;
 
     private String password;
