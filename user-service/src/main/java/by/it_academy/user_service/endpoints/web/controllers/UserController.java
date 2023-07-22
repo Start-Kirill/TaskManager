@@ -3,8 +3,9 @@ package by.it_academy.user_service.endpoints.web.controllers;
 import by.it_academy.user_service.core.dto.ResultOrError;
 import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.core.dto.UserDto;
-import by.it_academy.user_service.core.enums.ErrorType;
-import by.it_academy.user_service.core.errors.ErrorResponse;
+import by.it_academy.user_service.core.errors.SpecificError;
+import by.it_academy.user_service.core.errors.StructuredErrorResponse;
+import by.it_academy.user_service.core.utils.Utils;
 import by.it_academy.user_service.service.api.IUserService;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,20 @@ import java.util.UUID;
 @RequestMapping("/users")
 public class UserController {
 
+    private static final String FIO_FIELD_NAME = "fio";
+
+    private static final String MAIL_FIELD_NAME = "mail";
+
+    private static final String PASSWORD_FIELD_NAME = "password";
+
+    private static final String ROLE_FIELD_NAME = "role";
+
+    private static final String STATUS_FIELD_NAME = "status";
+
+    private static final String UUID_PARAM_NAME = "uuid";
+
+    private static final String DT_UPDATE_PARAM_NAME = "dt_update";
+
     private IUserService userService;
 
     private ConversionService conversionService;
@@ -31,18 +46,19 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody UserCreateDto dto) {
 
-        if (!ifCorrectStructure(dto)) {
-            List<ErrorResponse> errorResponses = new ArrayList<>();
-            errorResponses.add(new ErrorResponse(ErrorType.ERROR, "The request contains invalid data. Change the request and send it again"));
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponses);
+        List<SpecificError> specificErrors = checkCorrectStructure(dto);
+
+        if (!specificErrors.isEmpty()) {
+            StructuredErrorResponse structuredErrorResponse = Utils.makeStructuredError(specificErrors);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(structuredErrorResponse);
         }
 
         ResultOrError resultOrError = this.userService.save(dto);
         if (resultOrError.hasError()) {
             if (resultOrError.getStructuredErrorResponse() != null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultOrError.getStructuredErrorResponse());
+                return ResponseEntity.status(resultOrError.getHttpStatus()).body(resultOrError.getStructuredErrorResponse());
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultOrError.getErrorResponses());
+                return ResponseEntity.status(resultOrError.getHttpStatus()).body(resultOrError.getErrorResponses());
             }
         }
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -51,18 +67,19 @@ public class UserController {
     @PutMapping("/{uuid}/dt_update/{dt_update}")
     public ResponseEntity<?> update(@RequestBody UserCreateDto dto, @PathVariable UUID uuid, @PathVariable Long dt_update) {
 
-        if (!ifCorrectStructure(dto)) {
-            List<ErrorResponse> errorResponses = new ArrayList<>();
-            errorResponses.add(new ErrorResponse(ErrorType.ERROR, "The request contains invalid data. Change the request and send it again"));
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponses);
+        List<SpecificError> specificErrors = checkCorrectStructure(dto);
+
+        if (!specificErrors.isEmpty()) {
+            StructuredErrorResponse structuredErrorResponse = Utils.makeStructuredError(specificErrors);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(structuredErrorResponse);
         }
 
         ResultOrError resultOrError = this.userService.update(dto, uuid, dt_update);
         if (resultOrError.hasError()) {
             if (resultOrError.getStructuredErrorResponse() != null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultOrError.getStructuredErrorResponse());
+                return ResponseEntity.status(resultOrError.getHttpStatus()).body(resultOrError.getStructuredErrorResponse());
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultOrError.getErrorResponses());
+                return ResponseEntity.status(resultOrError.getHttpStatus()).body(resultOrError.getErrorResponses());
             }
         }
 
@@ -75,9 +92,9 @@ public class UserController {
 
         if (resultOrError.hasError()) {
             if (resultOrError.getStructuredErrorResponse() != null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultOrError.getStructuredErrorResponse());
+                return ResponseEntity.status(resultOrError.getHttpStatus()).body(resultOrError.getStructuredErrorResponse());
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultOrError.getErrorResponses());
+                return ResponseEntity.status(resultOrError.getHttpStatus()).body(resultOrError.getErrorResponses());
             }
         }
 
@@ -91,9 +108,9 @@ public class UserController {
 
         if (resultOrError.hasError()) {
             if (resultOrError.getStructuredErrorResponse() != null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultOrError.getStructuredErrorResponse());
+                return ResponseEntity.status(resultOrError.getHttpStatus()).body(resultOrError.getStructuredErrorResponse());
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultOrError.getErrorResponses());
+                return ResponseEntity.status(resultOrError.getHttpStatus()).body(resultOrError.getErrorResponses());
             }
         }
 
@@ -101,23 +118,24 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userDto);
     }
 
-    private boolean ifCorrectStructure(UserCreateDto dto) {
+    private List<SpecificError> checkCorrectStructure(UserCreateDto dto) {
+        List<SpecificError> specificErrors = new ArrayList<>();
         if (dto.getMail() == null) {
-            return false;
+            specificErrors.add(new SpecificError(MAIL_FIELD_NAME, "Field mail is required"));
         }
         if (dto.getFio() == null) {
-            return false;
+            specificErrors.add(new SpecificError(FIO_FIELD_NAME, "Field fio is required"));
         }
         if (dto.getRole() == null) {
-            return false;
+            specificErrors.add(new SpecificError(ROLE_FIELD_NAME, "Field role is required"));
         }
         if (dto.getStatus() == null) {
-            return false;
+            specificErrors.add(new SpecificError(STATUS_FIELD_NAME, "Field status is required"));
         }
         if (dto.getPassword() == null) {
-            return false;
+            specificErrors.add(new SpecificError(PASSWORD_FIELD_NAME, "Field password is required"));
         }
-        return true;
+        return specificErrors;
     }
 
 

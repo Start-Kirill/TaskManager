@@ -2,6 +2,7 @@ package by.it_academy.user_service.core.dto;
 
 import by.it_academy.user_service.core.errors.ErrorResponse;
 import by.it_academy.user_service.core.errors.StructuredErrorResponse;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -15,14 +16,17 @@ public class ResultOrError {
 
     private List<ErrorResponse> errorResponses;
 
+    private HttpStatus httpStatus;
+
     public ResultOrError() {
     }
 
-    public ResultOrError(UserDto user, PageOfUsers users, StructuredErrorResponse structuredErrorResponse, List<ErrorResponse> errorResponses) {
+    public ResultOrError(UserDto user, PageOfUsers users, StructuredErrorResponse structuredErrorResponse, List<ErrorResponse> errorResponses, HttpStatus httpStatus) {
         this.user = user;
         this.users = users;
         this.structuredErrorResponse = structuredErrorResponse;
         this.errorResponses = errorResponses;
+        this.httpStatus = httpStatus;
     }
 
     public UserDto getUser() {
@@ -55,6 +59,14 @@ public class ResultOrError {
 
     public void setErrorResponses(List<ErrorResponse> errorResponses) {
         this.errorResponses = errorResponses;
+    }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
     }
 
     public boolean hasError() {
