@@ -10,6 +10,7 @@ import by.it_academy.user_service.core.enums.UserStatus;
 import by.it_academy.user_service.core.errors.ErrorResponse;
 import by.it_academy.user_service.core.errors.SpecificError;
 import by.it_academy.user_service.core.errors.StructuredErrorResponse;
+import by.it_academy.user_service.core.utils.Utils;
 import by.it_academy.user_service.dao.api.IUserDao;
 import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserService;
@@ -22,6 +23,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -42,7 +44,13 @@ public class UserService implements IUserService {
 
     private static final String STATUS_FIELD_NAME = "status";
 
+    private static final String UUID_PARAM_NAME = "uuid";
+
+    private static final String DT_UPDATE_PARAM_NAME = "dt_update";
+
     private static final String UNIQUE_MAIL_CONSTRAINT_NAME = "users_mail_key";
+
+    private static final String UNIQUE_UUID_CONSTRAINT_NAME = "users_pkey";
 
     private IUserDao userDao;
 
@@ -59,6 +67,7 @@ public class UserService implements IUserService {
         ResultOrError resultOrError = validate(dto);
 
         if (resultOrError.hasError()) {
+            resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
             return resultOrError;
         }
 
@@ -73,6 +82,7 @@ public class UserService implements IUserService {
 
             User save = this.userDao.save(user);
             resultOrError.setUser(conversionService.convert(save, UserDto.class));
+            resultOrError.setHttpStatus(HttpStatus.CREATED);
         } catch (DataIntegrityViolationException ex) {
             String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
 
@@ -81,16 +91,21 @@ public class UserService implements IUserService {
 
             if (UNIQUE_MAIL_CONSTRAINT_NAME.equals(constraintName)) {
                 specificErrors.add(new SpecificError("User with such email already exists", MAIL_FIELD_NAME));
+                resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
+            } else if (UNIQUE_UUID_CONSTRAINT_NAME.equals(constraintName)) {
+                errorResponses.add(new ErrorResponse(ErrorType.ERROR, "Internal failure of server. Duplicate uuid was generated. Repeat request or contact administrator"));
+                resultOrError.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             } else {
                 errorResponses.add(new ErrorResponse(ErrorType.ERROR, "Unknown constraint was triggered"));
+                resultOrError.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
             if (!specificErrors.isEmpty()) {
+
                 if (resultOrError.getStructuredErrorResponse() == null) {
-                    StructuredErrorResponse structuredErrorResponse = new StructuredErrorResponse();
-                    structuredErrorResponse.setErrors(specificErrors);
-                    structuredErrorResponse.setLogref(ErrorType.STRUCTURED_ERROR);
-                    resultOrError.setStructuredErrorResponse(structuredErrorResponse);
+
+                    resultOrError.setStructuredErrorResponse(Utils.makeStructuredError(specificErrors));
+
                 } else {
                     StructuredErrorResponse structuredErrorResponse = resultOrError.getStructuredErrorResponse();
                     if (structuredErrorResponse.getErrors() == null) {
@@ -100,13 +115,12 @@ public class UserService implements IUserService {
                         errors.addAll(specificErrors);
                     }
                 }
-            }
-
-            if (!errorResponses.isEmpty()) {
+            } else {
                 resultOrError.setErrorResponses(errorResponses);
             }
 
         }
+
         return resultOrError;
     }
 
@@ -124,14 +138,15 @@ public class UserService implements IUserService {
         resultOrError = validate(dto);
 
         if (resultOrError.hasError()) {
+            resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
             return resultOrError;
         }
 
         Long realVersion = this.conversionService.convert(user.getDateTimeUpdate(), Long.class);
         if (!realVersion.equals(version)) {
-            List<ErrorResponse> errorResponses = new ArrayList<>();
-            errorResponses.add(new ErrorResponse(ErrorType.ERROR, "User versions don't match. Get up-to-user"));
-            resultOrError.setErrorResponses(errorResponses);
+            StructuredErrorResponse structuredErrorResponse = Utils.makeStructuredError("User date updates (versions) don't match. Get up-to-user", DT_UPDATE_PARAM_NAME);
+            resultOrError.setStructuredErrorResponse(structuredErrorResponse);
+            resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
             return resultOrError;
         }
 
@@ -143,6 +158,7 @@ public class UserService implements IUserService {
         try {
             User save = this.userDao.save(convertedUser);
             resultOrError.setUser(conversionService.convert(save, UserDto.class));
+            resultOrError.setHttpStatus(HttpStatus.OK);
         } catch (DataIntegrityViolationException ex) {
             String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
 
@@ -151,16 +167,17 @@ public class UserService implements IUserService {
 
             if (UNIQUE_MAIL_CONSTRAINT_NAME.equals(constraintName)) {
                 specificErrors.add(new SpecificError("User with such email already exists", MAIL_FIELD_NAME));
+                resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
             } else {
                 errorResponses.add(new ErrorResponse(ErrorType.ERROR, "Unknown constraint was triggered"));
+                resultOrError.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
             if (!specificErrors.isEmpty()) {
                 if (resultOrError.getStructuredErrorResponse() == null) {
-                    StructuredErrorResponse structuredErrorResponse = new StructuredErrorResponse();
-                    structuredErrorResponse.setErrors(specificErrors);
-                    structuredErrorResponse.setLogref(ErrorType.STRUCTURED_ERROR);
-                    resultOrError.setStructuredErrorResponse(structuredErrorResponse);
+
+                    resultOrError.setStructuredErrorResponse(Utils.makeStructuredError(specificErrors));
+
                 } else {
                     StructuredErrorResponse structuredErrorResponse = resultOrError.getStructuredErrorResponse();
                     if (structuredErrorResponse.getErrors() == null) {
@@ -170,16 +187,14 @@ public class UserService implements IUserService {
                         errors.addAll(specificErrors);
                     }
                 }
-            }
-
-            if (!errorResponses.isEmpty()) {
+            } else {
                 resultOrError.setErrorResponses(errorResponses);
             }
 
         } catch (OptimisticLockingFailureException ex) {
-            List<ErrorResponse> errorResponses = new ArrayList<>();
-            errorResponses.add(new ErrorResponse(ErrorType.ERROR, "User versions don't match. Get up-to-user"));
-            resultOrError.setErrorResponses(errorResponses);
+            StructuredErrorResponse structuredErrorResponse = Utils.makeStructuredError("User date updates (versions) don't match. Get up-to-user", DT_UPDATE_PARAM_NAME);
+            resultOrError.setStructuredErrorResponse(structuredErrorResponse);
+            resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
         }
 
         return resultOrError;
@@ -226,12 +241,13 @@ public class UserService implements IUserService {
         ResultOrError resultOrError = new ResultOrError();
 
         if (!this.userDao.existsById(uuid)) {
-            List<ErrorResponse> errorResponses = new ArrayList<>();
-            errorResponses.add(new ErrorResponse(ErrorType.ERROR, "User with such id doesn't exist"));
-            resultOrError.setErrorResponses(errorResponses);
+            StructuredErrorResponse structuredErrorResponse = Utils.makeStructuredError("User with such id doesn't exist", UUID_PARAM_NAME);
+            resultOrError.setStructuredErrorResponse(structuredErrorResponse);
+            resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
         } else {
             User user = this.userDao.findById(uuid).orElseThrow();
             resultOrError.setUser(conversionService.convert(user, UserDto.class));
+            resultOrError.setHttpStatus(HttpStatus.OK);
         }
 
         return resultOrError;
@@ -334,5 +350,6 @@ public class UserService implements IUserService {
         }
         return specificErrors;
     }
+
 
 }

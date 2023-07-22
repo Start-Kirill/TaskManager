@@ -25,14 +25,13 @@ CREATE TABLE app.users
         uuid uuid NOT NULL,
         dt_create timestamp without time zone NOT NULL,
         dt_update timestamp without time zone NOT NULL,
-        mail text,
-        fio text,
-        role text,
-        status text,
-        password text,
+        mail text NOT NULL,
+        fio text NOT NULL,
+        role text NOT NULL,
+        status text NOT NULL,
+        password text NOT NULL,
         PRIMARY KEY (uuid),
         UNIQUE (mail),
-        UNIQUE (uuid)
 
     );
 
