@@ -8,14 +8,14 @@ import by.it_academy.user_service.core.errors.SpecificError;
 import by.it_academy.user_service.core.errors.StructuredErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class ControllerExceptionHandler {
 
     private static final String ROLE_FIELD_NAME = "role";
