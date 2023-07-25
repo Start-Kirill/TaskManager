@@ -6,7 +6,9 @@ import by.it_academy.user_service.core.dto.UserRegistrationDto;
 import by.it_academy.user_service.service.api.IUserAuthenticationService;
 import by.it_academy.user_service.service.api.IUserService;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UserAuthenticationService implements IUserAuthenticationService {
 
     private IUserService userService;

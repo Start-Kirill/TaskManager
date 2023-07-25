@@ -3,7 +3,7 @@ package by.it_academy.user_service.config;
 import by.it_academy.user_service.service.support.converters.GenericMillisecondConverter;
 import by.it_academy.user_service.service.support.converters.GenericUserConverter;
 import by.it_academy.user_service.service.support.converters.GenericUserCreateDtoConverter;
-import by.it_academy.user_service.service.support.converters.GenericUserDtoConverter;
+import by.it_academy.user_service.endpoints.web.support.converters.GenericUserDtoConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

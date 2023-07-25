@@ -1,14 +1,16 @@
 package by.it_academy.user_service.service.api;
 
+import by.it_academy.user_service.core.dto.CustomPage;
+
 import java.util.UUID;
 
 public interface ICRUDService<K, T> {
 
-    K save(T t);
+    void save(T t);
 
-    K update(T t, UUID uuid, Long version);
+    void update(T t, UUID uuid, Long version);
 
-    K get(Integer page, Integer size);
+    CustomPage<K> get(Integer page, Integer size);
 
     K get(UUID uuid);
 }

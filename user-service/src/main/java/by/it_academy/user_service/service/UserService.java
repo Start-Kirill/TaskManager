@@ -1,19 +1,16 @@
 package by.it_academy.user_service.service;
 
-import by.it_academy.user_service.core.dto.PageOfUsers;
-import by.it_academy.user_service.core.dto.ResultOrError;
+import by.it_academy.user_service.core.dto.CustomPage;
 import by.it_academy.user_service.core.dto.UserCreateDto;
-import by.it_academy.user_service.core.dto.UserDto;
 import by.it_academy.user_service.core.enums.ErrorType;
 import by.it_academy.user_service.core.enums.UserRole;
 import by.it_academy.user_service.core.enums.UserStatus;
 import by.it_academy.user_service.core.errors.ErrorResponse;
-import by.it_academy.user_service.core.errors.SpecificError;
-import by.it_academy.user_service.core.errors.StructuredErrorResponse;
-import by.it_academy.user_service.core.utils.Utils;
 import by.it_academy.user_service.dao.api.IUserDao;
 import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserService;
+import by.it_academy.user_service.service.exceptions.common.*;
+import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import by.it_academy.user_service.service.support.passay.CyrillicEnglishCharacterData;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.ConstraintViolationException;
@@ -23,13 +20,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class UserService implements IUserService {
@@ -43,10 +37,6 @@ public class UserService implements IUserService {
     private static final String ROLE_FIELD_NAME = "role";
 
     private static final String STATUS_FIELD_NAME = "status";
-
-    private static final String UUID_PARAM_NAME = "uuid";
-
-    private static final String DT_UPDATE_PARAM_NAME = "dt_update";
 
     private static final String UNIQUE_MAIL_CONSTRAINT_NAME = "users_mail_key";
 
@@ -63,13 +53,8 @@ public class UserService implements IUserService {
 
 
     @Override
-    public ResultOrError save(UserCreateDto dto) {
-        ResultOrError resultOrError = validate(dto);
-
-        if (resultOrError.hasError()) {
-            resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
-            return resultOrError;
-        }
+    public void save(UserCreateDto dto) {
+        validate(dto);
 
         try {
             User user = this.conversionService.convert(dto, User.class);
@@ -81,73 +66,46 @@ public class UserService implements IUserService {
             user.setDateTimeCreate(now);
 
             User save = this.userDao.save(user);
-            resultOrError.setUser(conversionService.convert(save, UserDto.class));
-            resultOrError.setHttpStatus(HttpStatus.CREATED);
         } catch (DataIntegrityViolationException ex) {
-            String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
+            if (ex.contains(ConstraintViolationException.class)) {
+                String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
 
-            List<SpecificError> specificErrors = new ArrayList<>();
-            List<ErrorResponse> errorResponses = new ArrayList<>();
-
-            if (UNIQUE_MAIL_CONSTRAINT_NAME.equals(constraintName)) {
-                specificErrors.add(new SpecificError("User with such email already exists", MAIL_FIELD_NAME));
-                resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
-            } else if (UNIQUE_UUID_CONSTRAINT_NAME.equals(constraintName)) {
-                errorResponses.add(new ErrorResponse(ErrorType.ERROR, "Internal failure of server. Duplicate uuid was generated. Repeat request or contact administrator"));
-                resultOrError.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-            } else {
-                errorResponses.add(new ErrorResponse(ErrorType.ERROR, "Unknown constraint was triggered"));
-                resultOrError.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-
-            if (!specificErrors.isEmpty()) {
-
-                if (resultOrError.getStructuredErrorResponse() == null) {
-
-                    resultOrError.setStructuredErrorResponse(Utils.makeStructuredError(specificErrors));
-
+                if (UNIQUE_MAIL_CONSTRAINT_NAME.equals(constraintName)) {
+                    Map<String, String> errors = new HashMap<>();
+                    errors.put(MAIL_FIELD_NAME, "User with such email already exists");
+                    throw new NotValidUserBodyException(errors);
+                } else if (UNIQUE_UUID_CONSTRAINT_NAME.equals(constraintName)) {
+                    List<ErrorResponse> errors = new ArrayList<>();
+                    errors.add(new ErrorResponse(ErrorType.ERROR, "Internal failure of server. Duplicate uuid was generated. Repeat request or contact administrator"));
+                    throw new GeneratedDataNotCorrectException(errors);
                 } else {
-                    StructuredErrorResponse structuredErrorResponse = resultOrError.getStructuredErrorResponse();
-                    if (structuredErrorResponse.getErrors() == null) {
-                        structuredErrorResponse.setErrors(specificErrors);
-                    } else {
-                        List<SpecificError> errors = structuredErrorResponse.getErrors();
-                        errors.addAll(specificErrors);
-                    }
+                    List<ErrorResponse> errors = new ArrayList<>();
+                    errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
+                    throw new UnknownConstraintException(errors);
                 }
             } else {
-                resultOrError.setErrorResponses(errorResponses);
+                List<ErrorResponse> errors = new ArrayList<>();
+                errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
+                throw new InternalServerErrorException(errors);
             }
-
         }
 
-        return resultOrError;
     }
 
     @Override
-    public ResultOrError update(UserCreateDto dto, UUID uuid, Long version) {
+    public void update(UserCreateDto dto, UUID uuid, Long version) {
 
-        ResultOrError resultOrError = get(uuid);
+        validate(dto);
 
-        if (resultOrError.hasError()) {
-            return resultOrError;
-        }
+        User user = get(uuid);
 
-        UserDto user = resultOrError.getUser();
-
-        resultOrError = validate(dto);
-
-        if (resultOrError.hasError()) {
-            resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
-            return resultOrError;
-        }
 
         Long realVersion = this.conversionService.convert(user.getDateTimeUpdate(), Long.class);
+
         if (!realVersion.equals(version)) {
-            StructuredErrorResponse structuredErrorResponse = Utils.makeStructuredError("User date updates (versions) don't match. Get up-to-user", DT_UPDATE_PARAM_NAME);
-            resultOrError.setStructuredErrorResponse(structuredErrorResponse);
-            resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
-            return resultOrError;
+            List<ErrorResponse> errors = new ArrayList<>();
+            errors.add(new ErrorResponse(ErrorType.ERROR, "User date updates (versions) don't match. Get up-to-date user"));
+            throw new VersionsNotMatchException(errors);
         }
 
         User convertedUser = conversionService.convert(dto, User.class);
@@ -156,173 +114,129 @@ public class UserService implements IUserService {
         convertedUser.setDateTimeUpdate(user.getDateTimeUpdate());
 
         try {
-            User save = this.userDao.save(convertedUser);
-            resultOrError.setUser(conversionService.convert(save, UserDto.class));
-            resultOrError.setHttpStatus(HttpStatus.OK);
+            this.userDao.save(convertedUser);
         } catch (DataIntegrityViolationException ex) {
-            String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
+            if (ex.contains(ConstraintViolationException.class)) {
+                String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
 
-            List<SpecificError> specificErrors = new ArrayList<>();
-            List<ErrorResponse> errorResponses = new ArrayList<>();
-
-            if (UNIQUE_MAIL_CONSTRAINT_NAME.equals(constraintName)) {
-                specificErrors.add(new SpecificError("User with such email already exists", MAIL_FIELD_NAME));
-                resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
-            } else {
-                errorResponses.add(new ErrorResponse(ErrorType.ERROR, "Unknown constraint was triggered"));
-                resultOrError.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-
-            if (!specificErrors.isEmpty()) {
-                if (resultOrError.getStructuredErrorResponse() == null) {
-
-                    resultOrError.setStructuredErrorResponse(Utils.makeStructuredError(specificErrors));
-
+                if (UNIQUE_MAIL_CONSTRAINT_NAME.equals(constraintName)) {
+                    Map<String, String> errors = new HashMap<>();
+                    errors.put(MAIL_FIELD_NAME, "User with such email already exists");
+                    throw new NotValidUserBodyException(errors);
                 } else {
-                    StructuredErrorResponse structuredErrorResponse = resultOrError.getStructuredErrorResponse();
-                    if (structuredErrorResponse.getErrors() == null) {
-                        structuredErrorResponse.setErrors(specificErrors);
-                    } else {
-                        List<SpecificError> errors = structuredErrorResponse.getErrors();
-                        errors.addAll(specificErrors);
-                    }
+                    List<ErrorResponse> errors = new ArrayList<>();
+                    errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
+                    throw new UnknownConstraintException(errors);
                 }
             } else {
-                resultOrError.setErrorResponses(errorResponses);
+                List<ErrorResponse> errors = new ArrayList<>();
+                errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
+                throw new InternalServerErrorException(errors);
             }
 
         } catch (OptimisticLockingFailureException ex) {
-            StructuredErrorResponse structuredErrorResponse = Utils.makeStructuredError("User date updates (versions) don't match. Get up-to-user", DT_UPDATE_PARAM_NAME);
-            resultOrError.setStructuredErrorResponse(structuredErrorResponse);
-            resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
+            List<ErrorResponse> errors = new ArrayList<>();
+            errors.add(new ErrorResponse(ErrorType.ERROR, "User date updates (versions) don't match. Get up-to-date user"));
+            throw new VersionsNotMatchException(errors);
         }
 
-        return resultOrError;
     }
 
     @Override
-    public ResultOrError get(Integer page, Integer size) {
+    public CustomPage<User> get(Integer page, Integer size) {
+
         PageRequest pageRequest = PageRequest.of(page, size);
 
         Page<User> userPage = this.userDao.findAll(pageRequest);
 
-        PageOfUsers pageOfUsers = new PageOfUsers();
-        pageOfUsers.setNumber(page);
-        pageOfUsers.setSize(size);
-        pageOfUsers.setTotalPages(userPage.getTotalPages());
-        pageOfUsers.setTotalElements(userPage.getTotalElements());
+        CustomPage<User> userPageOfUser = new CustomPage<>();
+        userPageOfUser.setNumber(page);
+        userPageOfUser.setSize(size);
+        userPageOfUser.setTotalPages(userPage.getTotalPages());
+        userPageOfUser.setTotalElements(userPage.getTotalElements());
         if (page == 0) {
-            pageOfUsers.setFirst(true);
+            userPageOfUser.setFirst(true);
         } else {
-            pageOfUsers.setFirst(false);
+            userPageOfUser.setFirst(false);
         }
 
         if (userPage.hasContent()) {
-            pageOfUsers.setNumberOfElements(userPage.getContent().size());
+            userPageOfUser.setNumberOfElements(userPage.getContent().size());
         } else {
-            pageOfUsers.setNumberOfElements(0);
+            userPageOfUser.setNumberOfElements(0);
         }
 
         if (userPage.hasNext()) {
-            pageOfUsers.setLast(false);
+            userPageOfUser.setLast(false);
         } else {
-            pageOfUsers.setLast(true);
+            userPageOfUser.setLast(true);
         }
-        List<UserDto> userDtos = userPage.getContent().stream().map(u -> conversionService.convert(u, UserDto.class)).toList();
-        pageOfUsers.setContent(userDtos);
 
-        ResultOrError resultOrError = new ResultOrError();
-        resultOrError.setUsers(pageOfUsers);
-        return resultOrError;
+        userPageOfUser.setContent(userPage.getContent());
+
+        return userPageOfUser;
     }
 
     @Override
-    public ResultOrError get(UUID uuid) {
-        ResultOrError resultOrError = new ResultOrError();
+    public User get(UUID uuid) {
 
         if (!this.userDao.existsById(uuid)) {
-            StructuredErrorResponse structuredErrorResponse = Utils.makeStructuredError("User with such id doesn't exist", UUID_PARAM_NAME);
-            resultOrError.setStructuredErrorResponse(structuredErrorResponse);
-            resultOrError.setHttpStatus(HttpStatus.BAD_REQUEST);
-        } else {
-            User user = this.userDao.findById(uuid).orElseThrow();
-            resultOrError.setUser(conversionService.convert(user, UserDto.class));
-            resultOrError.setHttpStatus(HttpStatus.OK);
+            List<ErrorResponse> errors = new ArrayList<>();
+            errors.add(new ErrorResponse(ErrorType.ERROR, "Such user doesn't exist"));
+            throw new UserNotExistsException(errors);
         }
 
-        return resultOrError;
+        return this.userDao.findById(uuid).orElseThrow();
     }
 
 
-    private ResultOrError validate(UserCreateDto dto) {
-        ResultOrError resultOrError = new ResultOrError();
-        List<SpecificError> specificErrorList = new ArrayList<>();
+    private void validate(UserCreateDto dto) {
+        Map<String, String> errors = new HashMap<>();
 
         String fio = dto.getFio();
         if (fio == null || "".equals(fio)) {
-            specificErrorList.add(new SpecificError(
-                    "Fio is required",
-                    FIO_FIELD_NAME
-            ));
+            errors.put(FIO_FIELD_NAME, "Fio is required");
         }
 
         String mail = dto.getMail();
-        specificErrorList.addAll(validateMail(mail));
-
+        errors.putAll(validateMail(mail));
 
         String password = dto.getPassword();
-        specificErrorList.addAll(validatePassword(password, mail));
+        errors.putAll(validatePassword(password, mail));
 
         UserRole role = dto.getRole();
         if (role == null) {
-            specificErrorList.add(new SpecificError(
-                    "Role is required",
-                    ROLE_FIELD_NAME
-            ));
+            errors.put(ROLE_FIELD_NAME, "Role is required");
         }
 
         UserStatus status = dto.getStatus();
         if (status == null) {
-            specificErrorList.add(new SpecificError(
-                    "Status is required",
-                    STATUS_FIELD_NAME
-            ));
+            errors.put(STATUS_FIELD_NAME, "Status is required");
         }
 
-        if (!specificErrorList.isEmpty()) {
-            resultOrError.setStructuredErrorResponse(
-                    new StructuredErrorResponse(ErrorType.STRUCTURED_ERROR, specificErrorList)
-            );
+        if (!errors.isEmpty()) {
+            throw new NotValidUserBodyException(errors);
         }
-
-        return resultOrError;
     }
 
-    private List<SpecificError> validateMail(String mail) {
-        List<SpecificError> specificErrors = new ArrayList<>();
+    private Map<String, String> validateMail(String mail) {
         EmailValidator emailValidator = EmailValidator.getInstance();
+
+        Map<String, String> errors = new HashMap<>();
+
         if (mail == null || "".equals(mail)) {
-            specificErrors.add(new SpecificError(
-                    "Mail is required",
-                    MAIL_FIELD_NAME
-            ));
+            errors.put(MAIL_FIELD_NAME, "Mail is required");
         } else if (!emailValidator.isValid(mail)) {
-            specificErrors.add(new SpecificError(
-                    "Invalid email format",
-                    MAIL_FIELD_NAME
-            ));
+            errors.put(MAIL_FIELD_NAME, "Invalid email format");
         }
-        return specificErrors;
+        return errors;
     }
 
-    private List<SpecificError> validatePassword(String password, String user) {
-        List<SpecificError> specificErrors = new ArrayList<>();
+    private Map<String, String> validatePassword(String password, String user) {
+        Map<String, String> errors = new HashMap<>();
 
         if (password == null || "".equals(password)) {
-            specificErrors.add(new SpecificError(
-                    "Password is required",
-                    PASSWORD_FIELD_NAME
-            ));
+            errors.put(PASSWORD_FIELD_NAME, "Password is required");
         } else {
             PasswordData passwordData = new PasswordData(user, password);
             PasswordValidator passwordValidator = new PasswordValidator(
@@ -334,21 +248,21 @@ public class UserService implements IUserService {
             RuleResult validate = passwordValidator.validate(passwordData);
             if (!validate.isValid()) {
                 List<RuleResultDetail> details = validate.getDetails();
-                StringBuilder errors = new StringBuilder();
+                StringBuilder stringErrors = new StringBuilder();
                 boolean needComma = false;
                 for (RuleResultDetail rsd : details) {
                     if (needComma) {
-                        errors.append(", ");
+                        stringErrors.append(", ");
                     } else {
                         needComma = true;
                     }
-                    errors.append(String.join(",", rsd.getErrorCodes()));
+                    stringErrors.append(String.join(",", rsd.getErrorCodes()));
                 }
-                String message = "Password does not match requirements: " + errors;
-                specificErrors.add(new SpecificError(message, PASSWORD_FIELD_NAME));
+                String message = "Password does not match requirements: " + stringErrors;
+                errors.put(PASSWORD_FIELD_NAME, message);
             }
         }
-        return specificErrors;
+        return errors;
     }
 
 

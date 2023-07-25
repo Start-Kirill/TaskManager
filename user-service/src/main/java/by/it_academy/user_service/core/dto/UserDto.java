@@ -1,6 +1,6 @@
 package by.it_academy.user_service.core.dto;
 
-import by.it_academy.user_service.core.dto.support.json.LocalDateTimeToMillisecondsConverter;
+import by.it_academy.user_service.endpoints.web.support.json.LocalDateTimeToMillisecondsConverter;
 import by.it_academy.user_service.core.enums.UserRole;
 import by.it_academy.user_service.core.enums.UserStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
