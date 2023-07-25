@@ -1,21 +1,22 @@
 package by.it_academy.user_service.core.errors;
 
 import by.it_academy.user_service.core.enums.ErrorType;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import by.it_academy.user_service.endpoints.web.support.json.StructuredErrorConverter;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import java.util.List;
+import java.util.Map;
 
 public class StructuredErrorResponse {
 
-
     private ErrorType logref;
 
-    private List<SpecificError> errors;
+    @JsonSerialize(converter = StructuredErrorConverter.class)
+    private Map<String, String> errors;
 
     public StructuredErrorResponse() {
     }
 
-    public StructuredErrorResponse(ErrorType logref, List<SpecificError> errors) {
+    public StructuredErrorResponse(ErrorType logref, Map<String, String> errors) {
         this.logref = logref;
         this.errors = errors;
     }
@@ -28,11 +29,11 @@ public class StructuredErrorResponse {
         this.logref = logref;
     }
 
-    public List<SpecificError> getErrors() {
+    public Map<String, String> getErrors() {
         return errors;
     }
 
-    public void setErrors(List<SpecificError> errors) {
+    public void setErrors(Map<String, String> errors) {
         this.errors = errors;
     }
 }

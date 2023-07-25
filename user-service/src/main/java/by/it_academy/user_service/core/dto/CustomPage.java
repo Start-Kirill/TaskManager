@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.List;
 
-@JsonPropertyOrder({"number", "size", "totalPages", "totalElements","first", "numberOfElements", "last", "content"})
-public class PageOfUsers {
+@JsonPropertyOrder({"number", "size", "totalPages", "totalElements", "first", "numberOfElements", "last", "content"})
+public class CustomPage<K> {
 
     private Integer number;
 
@@ -25,12 +25,12 @@ public class PageOfUsers {
 
     private boolean last;
 
-    private List<UserDto> content;
+    private List<K> content;
 
-    public PageOfUsers() {
+    public CustomPage() {
     }
 
-    public PageOfUsers(Integer number, Integer size, Integer totalPages, Long totalElements, boolean first, Integer numberOfElements, boolean last, List<UserDto> content) {
+    public CustomPage(Integer number, Integer size, Integer totalPages, Long totalElements, boolean first, Integer numberOfElements, boolean last, List<K> content) {
         this.number = number;
         this.size = size;
         this.totalPages = totalPages;
@@ -97,11 +97,11 @@ public class PageOfUsers {
         this.last = last;
     }
 
-    public List<UserDto> getContent() {
+    public List<K> getContent() {
         return content;
     }
 
-    public void setContent(List<UserDto> content) {
+    public void setContent(List<K> content) {
         this.content = content;
     }
 }

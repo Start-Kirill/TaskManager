@@ -1,4 +1,4 @@
-package by.it_academy.user_service.core.dto.support.json;
+package by.it_academy.user_service.endpoints.web.support.json;
 
 import com.fasterxml.jackson.databind.util.StdConverter;
 

@@ -2,22 +2,15 @@ package by.it_academy.user_service.core.errors;
 
 public class SpecificError {
 
-    private String message;
     private String field;
+
+    private String message;
 
     public SpecificError() {
     }
 
-    public SpecificError(String message, String field) {
-        this.message = message;
+    public SpecificError(String field, String message) {
         this.field = field;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
         this.message = message;
     }
 
@@ -27,5 +20,13 @@ public class SpecificError {
 
     public void setField(String field) {
         this.field = field;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

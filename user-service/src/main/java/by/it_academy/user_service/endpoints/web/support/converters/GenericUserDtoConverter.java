@@ -1,4 +1,4 @@
-package by.it_academy.user_service.service.support.converters;
+package by.it_academy.user_service.endpoints.web.support.converters;
 
 import by.it_academy.user_service.core.dto.UserDto;
 import by.it_academy.user_service.dao.entity.User;
