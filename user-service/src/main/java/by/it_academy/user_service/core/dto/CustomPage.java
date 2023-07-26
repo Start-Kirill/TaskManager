@@ -73,7 +73,7 @@ public class CustomPage<K> {
         this.totalElements = totalElements;
     }
 
-    public boolean isFirst() {
+    public boolean getFirst() {
         return first;
     }
 
@@ -89,7 +89,7 @@ public class CustomPage<K> {
         this.numberOfElements = numberOfElements;
     }
 
-    public boolean isLast() {
+    public boolean getLast() {
         return last;
     }
 

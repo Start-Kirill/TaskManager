@@ -14,12 +14,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
 @Validated
 public class UserController {
+
+    private static final String CONTENT_FIELD_NAME = "content";
 
     private IUserService userService;
 
@@ -38,8 +42,8 @@ public class UserController {
     }
 
     @PutMapping("/{uuid}/dt_update/{dt_update}")
-    public ResponseEntity<?> update(@RequestBody UserCreateDto dto, @PathVariable UUID uuid, @PathVariable Long dt_update) {
-        this.userService.update(dto, uuid, dt_update);
+    public ResponseEntity<?> update(@RequestBody UserCreateDto dto, @PathVariable UUID uuid, @PathVariable(name = "dt_update") LocalDateTime dtUpdate) {
+        this.userService.update(dto, uuid, dtUpdate);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -48,7 +52,10 @@ public class UserController {
                                  @RequestParam(required = false, defaultValue = "20") @Min(value = 1, message = "Size must not be less than one") Integer size) {
         CustomPage<User> userCustomPage = this.userService.get(page, size);
         CustomPage<UserDto> userDtoCustomPage = new CustomPage<>();
-        BeanUtils.copyProperties(userCustomPage, userDtoCustomPage);
+        BeanUtils.copyProperties(userCustomPage, userDtoCustomPage, CONTENT_FIELD_NAME);
+        List<User> content = userCustomPage.getContent();
+        List<UserDto> userDtos = content.stream().map(u -> this.conversionService.convert(u, UserDto.class)).toList();
+        userDtoCustomPage.setContent(userDtos);
         return ResponseEntity.status(HttpStatus.OK).body(userDtoCustomPage);
     }
 

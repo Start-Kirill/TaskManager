@@ -128,7 +128,7 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(CommonErrorException.class)
     public ResponseEntity<?> handlerGeneratedDataNotCorrectException(CommonErrorException ex) {
         List<ErrorResponse> errors = ex.getErrors();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
     @ExceptionHandler(NullPointerException.class)
