@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -93,14 +94,13 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void update(UserCreateDto dto, UUID uuid, Long version) {
+    public void update(UserCreateDto dto, UUID uuid, LocalDateTime version) {
 
         validate(dto);
 
         User user = get(uuid);
 
-
-        Long realVersion = this.conversionService.convert(user.getDateTimeUpdate(), Long.class);
+        LocalDateTime realVersion = user.getDateTimeUpdate().truncatedTo(ChronoUnit.MILLIS);
 
         if (!realVersion.equals(version)) {
             List<ErrorResponse> errors = new ArrayList<>();
