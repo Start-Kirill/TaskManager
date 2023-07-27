@@ -11,11 +11,13 @@ import jakarta.validation.ElementKind;
 import jakarta.validation.Path;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.*;
@@ -119,15 +121,22 @@ public class ControllerExceptionHandler {
 
 
     @ExceptionHandler(StructuredErrorException.class)
-    public ResponseEntity<?> handlerNotValidUserBodyException(StructuredErrorException ex) {
+    public ResponseEntity<?> handlerStructuredErrorException(StructuredErrorException ex) {
         Map<String, String> errors = ex.getErrors();
         StructuredErrorResponse structuredErrorResponse = new StructuredErrorResponse(ErrorType.STRUCTURED_ERROR, errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(structuredErrorResponse);
     }
 
     @ExceptionHandler(CommonErrorException.class)
-    public ResponseEntity<?> handlerGeneratedDataNotCorrectException(CommonErrorException ex) {
+    public ResponseEntity<?> handlerCommonErrorException(CommonErrorException ex) {
         List<ErrorResponse> errors = ex.getErrors();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handlerHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        List<ErrorResponse> errors = new ArrayList<>();
+        errors.add(new ErrorResponse(ErrorType.ERROR, "Passed data is incorrect or not enough"));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
