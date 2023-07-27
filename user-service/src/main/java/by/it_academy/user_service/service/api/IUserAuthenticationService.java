@@ -1,16 +1,16 @@
 package by.it_academy.user_service.service.api;
 
-import by.it_academy.user_service.core.dto.ResultOrError;
 import by.it_academy.user_service.core.dto.UserLoginDto;
 import by.it_academy.user_service.core.dto.UserRegistrationDto;
+import by.it_academy.user_service.dao.entity.User;
 
 public interface IUserAuthenticationService {
 
-    ResultOrError signIn(UserRegistrationDto dto);
+    void signIn(UserRegistrationDto dto);
 
-    ResultOrError verify(String code, String mail);
+    void verify(String code, String mail);
 
-    ResultOrError login(UserLoginDto dto);
+    void login(UserLoginDto dto);
 
-    ResultOrError getMe();
+    User getMe();
 }

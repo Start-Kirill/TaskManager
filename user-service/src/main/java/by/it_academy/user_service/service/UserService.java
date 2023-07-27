@@ -10,6 +10,7 @@ import by.it_academy.user_service.dao.api.IUserDao;
 import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserService;
 import by.it_academy.user_service.service.exceptions.common.*;
+import by.it_academy.user_service.service.exceptions.structured.MailNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import by.it_academy.user_service.service.support.passay.CyrillicEnglishCharacterData;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -64,7 +65,7 @@ public class UserService implements IUserService {
 
             LocalDateTime now = LocalDateTime.now();
             user.setDateTimeCreate(now);
-            user.setDateTimeCreate(now);
+            user.setDateTimeUpdate(now);
 
             User save = this.userDao.save(user);
         } catch (DataIntegrityViolationException ex) {
@@ -187,6 +188,16 @@ public class UserService implements IUserService {
         }
 
         return this.userDao.findById(uuid).orElseThrow();
+    }
+
+    @Override
+    public User findByMail(String mail) {
+        if (this.userDao.existsByMail(mail)) {
+            return this.userDao.findByMail(mail).orElseThrow();
+        }
+        Map<String, String> errors = new HashMap<>();
+        errors.put(MAIL_FIELD_NAME, "User with such email not exists");
+        throw new MailNotExistsException(errors);
     }
 
 

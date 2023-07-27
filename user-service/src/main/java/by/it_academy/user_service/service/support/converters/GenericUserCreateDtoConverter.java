@@ -4,6 +4,7 @@ import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.core.dto.UserRegistrationDto;
 import by.it_academy.user_service.core.enums.UserRole;
 import by.it_academy.user_service.core.enums.UserStatus;
+import by.it_academy.user_service.dao.entity.User;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 
@@ -16,6 +17,8 @@ public class GenericUserCreateDtoConverter implements GenericConverter {
         HashSet<ConvertiblePair> pairs = new HashSet<>();
 
         pairs.add(new ConvertiblePair(UserRegistrationDto.class, UserCreateDto.class));
+        pairs.add(new ConvertiblePair(User.class, UserCreateDto.class));
+
 
         return pairs;
     }
@@ -28,14 +31,24 @@ public class GenericUserCreateDtoConverter implements GenericConverter {
         }
 
         UserCreateDto userCreateDto = new UserCreateDto();
-        UserRegistrationDto registrationDto = (UserRegistrationDto) source;
+        if (sourceType.getType() == UserRegistrationDto.class) {
+            UserRegistrationDto registrationDto = (UserRegistrationDto) source;
 
-        userCreateDto.setRole(UserRole.USER);
-        userCreateDto.setStatus(UserStatus.WAITING_ACTIVATION);
+            userCreateDto.setRole(UserRole.USER);
+            userCreateDto.setStatus(UserStatus.WAITING_ACTIVATION);
 
-        userCreateDto.setMail(registrationDto.getMail());
-        userCreateDto.setFio(registrationDto.getFio());
-        userCreateDto.setPassword(registrationDto.getPassword());
+            userCreateDto.setMail(registrationDto.getMail());
+            userCreateDto.setFio(registrationDto.getFio());
+            userCreateDto.setPassword(registrationDto.getPassword());
+        } else {
+            User user = (User) source;
+
+            userCreateDto.setPassword(user.getPassword());
+            userCreateDto.setRole(user.getRole());
+            userCreateDto.setStatus(user.getStatus());
+            userCreateDto.setMail(user.getMail());
+            userCreateDto.setFio(user.getFio());
+        }
 
         return userCreateDto;
     }
