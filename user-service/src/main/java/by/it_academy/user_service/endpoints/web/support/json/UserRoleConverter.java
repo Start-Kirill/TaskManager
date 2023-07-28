@@ -1,6 +1,6 @@
 package by.it_academy.user_service.endpoints.web.support.json;
 
-import by.it_academy.user_service.core.enums.UserRole;
+import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.user_service.endpoints.web.exceptions.NotCorrectUserRoleException;
 import com.fasterxml.jackson.databind.util.StdConverter;
 

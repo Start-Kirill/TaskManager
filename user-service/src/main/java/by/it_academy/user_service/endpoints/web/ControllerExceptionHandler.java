@@ -1,11 +1,11 @@
 package by.it_academy.user_service.endpoints.web;
 
-import by.it_academy.user_service.core.enums.ErrorType;
-import by.it_academy.user_service.core.errors.ErrorResponse;
-import by.it_academy.user_service.core.errors.StructuredErrorResponse;
-import by.it_academy.user_service.core.exceptions.CommonErrorException;
-import by.it_academy.user_service.core.exceptions.CommonInternalErrorException;
-import by.it_academy.user_service.core.exceptions.StructuredErrorException;
+import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
+import by.it_academy.task_manager_common.dto.errors.StructuredErrorResponse;
+import by.it_academy.task_manager_common.enums.ErrorType;
+import by.it_academy.task_manager_common.exceptions.CommonErrorException;
+import by.it_academy.task_manager_common.exceptions.CommonInternalErrorException;
+import by.it_academy.task_manager_common.exceptions.StructuredErrorException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ElementKind;

@@ -1,11 +1,10 @@
 package by.it_academy.user_service.service;
 
-import by.it_academy.user_service.core.dto.CustomPage;
+import by.it_academy.task_manager_common.dto.CustomPage;
 import by.it_academy.user_service.core.dto.UserCreateDto;
-import by.it_academy.user_service.core.enums.ErrorType;
-import by.it_academy.user_service.core.enums.UserRole;
+import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.user_service.core.enums.UserStatus;
-import by.it_academy.user_service.core.errors.ErrorResponse;
+import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.user_service.dao.api.IUserDao;
 import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserService;

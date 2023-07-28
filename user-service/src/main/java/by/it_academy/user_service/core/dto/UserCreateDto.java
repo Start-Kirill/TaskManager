@@ -1,6 +1,6 @@
 package by.it_academy.user_service.core.dto;
 
-import by.it_academy.user_service.core.enums.UserRole;
+import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.user_service.core.enums.UserStatus;
 import by.it_academy.user_service.endpoints.web.support.json.UserRoleConverter;
 import by.it_academy.user_service.endpoints.web.support.json.UserStatusConverter;

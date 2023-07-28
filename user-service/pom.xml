@@ -89,6 +89,12 @@
             <version>1.6.3</version>
         </dependency>
 
+        <dependency>
+            <groupId>by.it_academy.taskManagerDto</groupId>
+            <artifactId>task-manager-common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
     </dependencies>
 
 

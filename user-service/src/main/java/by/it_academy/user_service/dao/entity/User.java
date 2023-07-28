@@ -1,6 +1,6 @@
 package by.it_academy.user_service.dao.entity;
 
-import by.it_academy.user_service.core.enums.UserRole;
+import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.user_service.core.enums.UserStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;

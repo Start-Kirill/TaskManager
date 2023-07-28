@@ -1,6 +1,6 @@
 package by.it_academy.user_service.service.api;
 
-import by.it_academy.user_service.core.dto.CustomPage;
+import by.it_academy.task_manager_common.dto.CustomPage;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
