@@ -1,6 +1,7 @@
 package by.it_academy.user_service.service;
 
 import by.it_academy.task_manager_common.dto.CustomPage;
+import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.user_service.core.enums.UserStatus;

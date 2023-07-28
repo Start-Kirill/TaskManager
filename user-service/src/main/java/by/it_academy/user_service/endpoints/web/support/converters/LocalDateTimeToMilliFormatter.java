@@ -1,6 +1,7 @@
 package by.it_academy.user_service.endpoints.web.support.converters;
 
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
+import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.user_service.endpoints.web.exceptions.NotCorrectValueException;
 import org.springframework.format.Formatter;
 
