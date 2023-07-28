@@ -14,6 +14,7 @@
     <groupId>by.it_academy</groupId>
     <artifactId>user-service</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>user-service</name>
 
 
     <properties>
@@ -87,7 +88,6 @@
             <artifactId>passay</artifactId>
             <version>1.6.3</version>
         </dependency>
-
 
     </dependencies>
 
