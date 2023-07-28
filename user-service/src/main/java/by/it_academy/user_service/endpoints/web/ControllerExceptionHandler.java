@@ -1,10 +1,11 @@
 package by.it_academy.user_service.endpoints.web;
 
-import by.it_academy.user_service.core.dto.exceptions.common.CommonErrorException;
-import by.it_academy.user_service.core.dto.exceptions.structured.StructuredErrorException;
 import by.it_academy.user_service.core.enums.ErrorType;
 import by.it_academy.user_service.core.errors.ErrorResponse;
 import by.it_academy.user_service.core.errors.StructuredErrorResponse;
+import by.it_academy.user_service.core.exceptions.CommonErrorException;
+import by.it_academy.user_service.core.exceptions.CommonInternalErrorException;
+import by.it_academy.user_service.core.exceptions.StructuredErrorException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ElementKind;
@@ -17,7 +18,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.*;
@@ -131,6 +131,12 @@ public class ControllerExceptionHandler {
     public ResponseEntity<?> handlerCommonErrorException(CommonErrorException ex) {
         List<ErrorResponse> errors = ex.getErrors();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    @ExceptionHandler(CommonInternalErrorException.class)
+    public ResponseEntity<?> handlerCommonInternalErrorException(CommonInternalErrorException ex) {
+        List<ErrorResponse> errors = ex.getErrors();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_service?ApplicationName=user-service
+server:
+  port: 80

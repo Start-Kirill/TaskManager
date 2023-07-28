@@ -1,6 +1,6 @@
 package by.it_academy.user_service.endpoints.web.exceptions;
 
-import by.it_academy.user_service.core.dto.exceptions.common.CommonErrorException;
+import by.it_academy.user_service.core.exceptions.CommonErrorException;
 import by.it_academy.user_service.core.errors.ErrorResponse;
 
 import java.util.List;

@@ -1,0 +1,7 @@
+version: '3.5'
+services:
+  swagger-ui:
+    build: swagger-ui
+    image: taskmanager_swagger-ui:1.0.0
+    ports:
+      - "81:8080"

@@ -1,6 +1,6 @@
 package by.it_academy.user_service.endpoints.web.exceptions;
 
-import by.it_academy.user_service.core.dto.exceptions.structured.StructuredErrorException;
+import by.it_academy.user_service.core.exceptions.StructuredErrorException;
 
 import java.util.Map;
 
