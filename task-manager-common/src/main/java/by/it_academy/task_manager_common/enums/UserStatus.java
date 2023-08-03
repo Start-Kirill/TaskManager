@@ -1,4 +1,4 @@
-package by.it_academy.user_service.core.enums;
+package by.it_academy.task_manager_common.enums;
 
 public enum UserStatus {
     WAITING_ACTIVATION("WAITING_ACTIVATION"), ACTIVATED("ACTIVATED"), DEACTIVATED("DEACTIVATED");

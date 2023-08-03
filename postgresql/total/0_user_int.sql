@@ -13,7 +13,7 @@ END
 $do$;
 
 CREATE DATABASE user_service
-            WITH OWNER = user_service;
+            WITH OWNER = user_service
             ENCODING = 'UTF8'
             CONNECTION LIMIT = -1
             IS_TEMPLATE = False;

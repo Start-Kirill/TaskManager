@@ -1,18 +1,22 @@
 package by.it_academy.audit_service.core.dto;
 
-import by.it_academy.audit_service.core.enums.EssenceType;
+import by.it_academy.task_manager_common.dto.UserDto;
+import by.it_academy.task_manager_common.enums.EssenceType;
 import by.it_academy.task_manager_common.support.json.converters.LocalDateTimeToMillisecondsConverter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+
+@JsonPropertyOrder({"uuid", "dt_create", "user", "text", "type", "id"})
 public class AuditDto {
 
     private UUID uuid;
 
-    @JsonProperty(namespace = "dt_create")
+    @JsonProperty("dt_create")
     @JsonSerialize(converter = LocalDateTimeToMillisecondsConverter.class)
     private LocalDateTime dtCreate;
 

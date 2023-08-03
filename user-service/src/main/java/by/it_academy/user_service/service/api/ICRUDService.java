@@ -7,9 +7,9 @@ import java.util.UUID;
 
 public interface ICRUDService<K, T> {
 
-    void save(T t);
+    K save(T t);
 
-    void update(T t, UUID uuid, LocalDateTime version);
+    K update(T t, UUID uuid, LocalDateTime version);
 
     CustomPage<K> get(Integer page, Integer size);
 

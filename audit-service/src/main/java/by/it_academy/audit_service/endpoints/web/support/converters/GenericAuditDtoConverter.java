@@ -1,8 +1,8 @@
 package by.it_academy.audit_service.endpoints.web.support.converters;
 
 import by.it_academy.audit_service.core.dto.AuditDto;
-import by.it_academy.audit_service.core.dto.UserDto;
 import by.it_academy.audit_service.dao.entity.Audit;
+import by.it_academy.task_manager_common.dto.UserDto;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 

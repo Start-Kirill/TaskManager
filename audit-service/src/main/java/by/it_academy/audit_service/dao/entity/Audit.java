@@ -1,10 +1,8 @@
 package by.it_academy.audit_service.dao.entity;
 
-import by.it_academy.audit_service.core.enums.EssenceType;
+import by.it_academy.task_manager_common.enums.EssenceType;
 import by.it_academy.task_manager_common.enums.UserRole;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,10 +26,12 @@ public class Audit {
     private String userFio;
 
     @Column(name = "user_role")
+    @Enumerated(EnumType.STRING)
     private UserRole userRole;
 
     private String text;
 
+    @Enumerated(EnumType.STRING)
     private EssenceType type;
 
     private String id;

@@ -3,6 +3,7 @@ package by.it_academy.audit_service.endpoints.web.controllers;
 import by.it_academy.audit_service.core.dto.AuditDto;
 import by.it_academy.audit_service.dao.entity.Audit;
 import by.it_academy.audit_service.service.api.IAuditService;
+import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.BeanUtils;
@@ -30,8 +31,8 @@ public class AuditController {
     }
 
     @GetMapping
-    public ResponseEntity<?> get(@RequestParam(defaultValue = "0", required = false) @Min(value = 0, message = "Page must be positive value") Integer page,
-                                 @RequestParam(defaultValue = "20", required = false) @Min(value = 1, message = "Size must not be less than one") Integer size) {
+    public ResponseEntity<?> get(@RequestParam(defaultValue = "0", required = false) Integer page,
+                                 @RequestParam(defaultValue = "20", required = false) Integer size) {
         CustomPage<Audit> auditCustomPage = this.auditService.getPage(page, size);
         CustomPage<AuditDto> auditDtoCustomPage = new CustomPage<>();
         BeanUtils.copyProperties(auditCustomPage, auditDtoCustomPage, CONTENT_FIELD_NAME);
@@ -43,7 +44,14 @@ public class AuditController {
     @GetMapping("/{uuid}")
     public ResponseEntity<?> getByUuid(@PathVariable UUID uuid) {
         Audit audit = this.auditService.get(uuid);
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        AuditDto auditDto = this.conversionService.convert(audit, AuditDto.class);
+        return ResponseEntity.status(HttpStatus.OK).body(auditDto);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody AuditCreateDto dto) {
+        this.auditService.create(dto);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
 }

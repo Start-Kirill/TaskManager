@@ -5,17 +5,11 @@ import jakarta.validation.constraints.NotNull;
 
 public class UserRegistrationDto {
 
-    @NotNull(message = "Mail field is missing")
-    @NotEmpty(message = "Mail must not to be empty")
+
     private String mail;
 
-
-    @NotNull(message = "Fio field is missing")
-    @NotEmpty(message = "Fio must not to be empty")
     private String fio;
 
-    @NotNull(message = "Password field is missing")
-    @NotEmpty(message = "Password must not to be empty")
     private String password;
 
     public UserRegistrationDto() {

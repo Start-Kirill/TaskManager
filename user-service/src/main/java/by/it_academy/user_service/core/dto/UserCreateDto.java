@@ -1,30 +1,26 @@
 package by.it_academy.user_service.core.dto;
 
 import by.it_academy.task_manager_common.enums.UserRole;
-import by.it_academy.user_service.core.enums.UserStatus;
+import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.user_service.endpoints.web.support.json.UserRoleConverter;
 import by.it_academy.user_service.endpoints.web.support.json.UserStatusConverter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import jakarta.validation.constraints.NotNull;
 
 public class UserCreateDto {
 
-    @NotNull(message = "Mail field is missing")
     private String mail;
 
-    @NotNull(message = "Fio field is missing")
     private String fio;
 
-    @NotNull(message = "Role field is missing")
     @JsonDeserialize(converter = UserRoleConverter.class)
     private UserRole role;
 
-    @NotNull(message = "Status field is missing")
+
     @JsonDeserialize(converter = UserStatusConverter.class)
     private UserStatus status;
 
-    @NotNull(message = "Password field is missing")
     private String password;
+
 
     public UserCreateDto() {
     }
@@ -77,4 +73,5 @@ public class UserCreateDto {
     public void setPassword(String password) {
         this.password = password;
     }
+
 }

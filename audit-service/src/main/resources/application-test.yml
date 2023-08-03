@@ -2,4 +2,4 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/audit_service?ApplicationName=audit-service
 server:
-  port: 80
+  port: 92
