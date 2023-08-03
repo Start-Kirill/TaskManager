@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_service?ApplicationName=user-service
+server:
+  port: 91
+app:
+  audit:
+    url: http://localhost:${server.port}/audit
+  verification:
+    url: http://localhost:${server.port}/users/verification
