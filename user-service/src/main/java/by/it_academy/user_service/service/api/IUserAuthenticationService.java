@@ -13,4 +13,6 @@ public interface IUserAuthenticationService {
     void login(UserLoginDto dto);
 
     User getMe();
+
+    void sendCodeAgain(String mail);
 }

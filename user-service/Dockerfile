@@ -3,6 +3,6 @@ MAINTAINER ITAcademy
 
 ADD ./target/user-service-1.0-SNAPSHOT.jar /app/
 
-CMD ["java", "-Xmx200m", "-jar", "/app/user-service-1.0-SNAPSHOT.jar"]
+CMD ["java", "-Xmx200m", "-jar", "/app/user-service-1.0-SNAPSHOT.jar", "--add-opens java.base/java.time=ALL-UNNAMED"]
 
 EXPOSE 8080 8089

@@ -1,17 +1,14 @@
 package by.it_academy.user_service.endpoints.web.controllers;
 
-import by.it_academy.user_service.core.dto.CustomPage;
+import by.it_academy.task_manager_common.dto.CustomPage;
+import by.it_academy.task_manager_common.dto.UserDto;
 import by.it_academy.user_service.core.dto.UserCreateDto;
-import by.it_academy.user_service.core.dto.UserDto;
 import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -20,7 +17,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
-@Validated
 public class UserController {
 
     private static final String CONTENT_FIELD_NAME = "content";
@@ -36,7 +32,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody @Valid UserCreateDto dto) {
+    public ResponseEntity<?> create(@RequestBody UserCreateDto dto) {
         this.userService.save(dto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -48,8 +44,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<?> get(@RequestParam(required = false, defaultValue = "0") @Min(value = 0, message = "Page must be positive value") Integer page,
-                                 @RequestParam(required = false, defaultValue = "20") @Min(value = 1, message = "Size must not be less than one") Integer size) {
+    public ResponseEntity<?> get(@RequestParam(required = false, defaultValue = "0") Integer page,
+                                 @RequestParam(required = false, defaultValue = "20") Integer size) {
         CustomPage<User> userCustomPage = this.userService.get(page, size);
         CustomPage<UserDto> userDtoCustomPage = new CustomPage<>();
         BeanUtils.copyProperties(userCustomPage, userDtoCustomPage, CONTENT_FIELD_NAME);

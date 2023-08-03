@@ -1,15 +1,18 @@
 package by.it_academy.user_service.service;
 
-import by.it_academy.user_service.core.dto.CustomPage;
+import by.it_academy.task_manager_common.dto.CustomPage;
+import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
+import by.it_academy.task_manager_common.enums.ErrorType;
+import by.it_academy.task_manager_common.enums.UserRole;
+import by.it_academy.task_manager_common.enums.UserStatus;
+import by.it_academy.task_manager_common.exceptions.structured.NotCorrectPageDataException;
 import by.it_academy.user_service.core.dto.UserCreateDto;
-import by.it_academy.user_service.core.enums.ErrorType;
-import by.it_academy.user_service.core.enums.UserRole;
-import by.it_academy.user_service.core.enums.UserStatus;
-import by.it_academy.user_service.core.errors.ErrorResponse;
 import by.it_academy.user_service.dao.api.IUserDao;
 import by.it_academy.user_service.dao.entity.User;
+import by.it_academy.user_service.service.api.IUserAuditService;
 import by.it_academy.user_service.service.api.IUserService;
-import by.it_academy.user_service.service.exceptions.common.*;
+import by.it_academy.user_service.service.exceptions.common.UserNotExistsException;
+import by.it_academy.user_service.service.exceptions.common.VersionsNotMatchException;
 import by.it_academy.user_service.service.exceptions.commonInternal.GeneratedDataNotCorrectException;
 import by.it_academy.user_service.service.exceptions.commonInternal.InternalServerErrorException;
 import by.it_academy.user_service.service.exceptions.commonInternal.UnknownConstraintException;
@@ -43,6 +46,10 @@ public class UserService implements IUserService {
 
     private static final String STATUS_FIELD_NAME = "status";
 
+    private static final String PAGE_FIELD_NAME = "page";
+
+    private static final String SIZE_FIELD_NAME = "size";
+
     private static final String UNIQUE_MAIL_CONSTRAINT_NAME = "users_mail_key";
 
     private static final String UNIQUE_UUID_CONSTRAINT_NAME = "users_pkey";
@@ -51,14 +58,17 @@ public class UserService implements IUserService {
 
     private ConversionService conversionService;
 
-    public UserService(IUserDao userDao, ConversionService conversionService) {
+    private IUserAuditService auditService;
+
+    public UserService(IUserDao userDao, ConversionService conversionService, IUserAuditService auditService) {
         this.userDao = userDao;
         this.conversionService = conversionService;
+        this.auditService = auditService;
     }
 
 
     @Override
-    public void save(UserCreateDto dto) {
+    public User save(UserCreateDto dto) {
         validate(dto);
 
         try {
@@ -71,6 +81,27 @@ public class UserService implements IUserService {
             user.setDateTimeUpdate(now);
 
             User save = this.userDao.save(user);
+
+//            //            TODO temporarily
+//            AuditCreateDto auditCreateDto = new AuditCreateDto();
+//            User u = this.userDao.findByMail("adming@admin.com").orElseThrow();
+//            UserDto userDto = new UserDto();
+//            userDto.setUuid(u.getUuid());
+//            userDto.setMail(u.getMail());
+//            userDto.setFio(u.getFio());
+//            userDto.setRole(u.getRole());
+//
+//
+//            auditCreateDto.setUser(userDto);
+//
+//            auditCreateDto.setType(EssenceType.USER);
+//            auditCreateDto.setText("Creating user by admin");
+//            auditCreateDto.setId(save.getUuid().toString());
+//
+//            this.auditService.create(auditCreateDto);
+
+            return user;
+
         } catch (DataIntegrityViolationException ex) {
             if (ex.contains(ConstraintViolationException.class)) {
                 String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
@@ -98,7 +129,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void update(UserCreateDto dto, UUID uuid, LocalDateTime version) {
+    public User update(UserCreateDto dto, UUID uuid, LocalDateTime version) {
 
         validate(dto);
 
@@ -118,7 +149,23 @@ public class UserService implements IUserService {
         convertedUser.setDateTimeUpdate(user.getDateTimeUpdate());
 
         try {
-            this.userDao.save(convertedUser);
+//            //            TODO temporarily
+//            AuditCreateDto auditCreateDto = new AuditCreateDto();
+//            User u = this.userDao.findByMail("admin@admin.com").orElseThrow();
+//            UserDto userDto = new UserDto();
+//            userDto.setUuid(u.getUuid());
+//            userDto.setMail(u.getMail());
+//            userDto.setFio(u.getFio());
+//            userDto.setRole(u.getRole());
+//            auditCreateDto.setUser(userDto);
+//
+//            auditCreateDto.setType(EssenceType.USER);
+//            auditCreateDto.setText("Updating user by admin");
+//            auditCreateDto.setId(convertedUser.getUuid().toString());
+//
+//            this.auditService.create(auditCreateDto);
+
+            return this.userDao.save(convertedUser);
         } catch (DataIntegrityViolationException ex) {
             if (ex.contains(ConstraintViolationException.class)) {
                 String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
@@ -149,34 +196,16 @@ public class UserService implements IUserService {
     @Override
     public CustomPage<User> get(Integer page, Integer size) {
 
+        validate(page, size);
+
         PageRequest pageRequest = PageRequest.of(page, size);
 
         Page<User> userPage = this.userDao.findAll(pageRequest);
 
-        CustomPage<User> userPageOfUser = new CustomPage<>();
+        CustomPage<User> userPageOfUser = (CustomPage<User>) this.conversionService.convert(userPage, CustomPage.class);
+
         userPageOfUser.setNumber(page);
         userPageOfUser.setSize(size);
-        userPageOfUser.setTotalPages(userPage.getTotalPages());
-        userPageOfUser.setTotalElements(userPage.getTotalElements());
-        if (page == 0) {
-            userPageOfUser.setFirst(true);
-        } else {
-            userPageOfUser.setFirst(false);
-        }
-
-        if (userPage.hasContent()) {
-            userPageOfUser.setNumberOfElements(userPage.getContent().size());
-        } else {
-            userPageOfUser.setNumberOfElements(0);
-        }
-
-        if (userPage.hasNext()) {
-            userPageOfUser.setLast(false);
-        } else {
-            userPageOfUser.setLast(true);
-        }
-
-        userPageOfUser.setContent(userPage.getContent());
 
         return userPageOfUser;
     }
@@ -252,7 +281,15 @@ public class UserService implements IUserService {
         if (password == null || "".equals(password)) {
             errors.put(PASSWORD_FIELD_NAME, "Password is required");
         } else {
-            PasswordData passwordData = new PasswordData(user, password);
+
+            PasswordData passwordData;
+
+            if (user != null) {
+                passwordData = new PasswordData(user, password);
+            } else {
+                passwordData = new PasswordData(password);
+            }
+
             PasswordValidator passwordValidator = new PasswordValidator(
                     new LengthRule(8, 30),
                     new CharacterRule(EnglishCharacterData.Special),
@@ -277,6 +314,27 @@ public class UserService implements IUserService {
             }
         }
         return errors;
+    }
+
+    private void validate(Integer page, Integer size) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (page == null) {
+            errors.put(PAGE_FIELD_NAME, "Page is missing");
+        } else if (page < 0) {
+            errors.put(PAGE_FIELD_NAME, "Page must not to be negative value");
+        }
+
+        if (size == null) {
+            errors.put(SIZE_FIELD_NAME, "Size is missing");
+        } else if (size < 1) {
+            errors.put(SIZE_FIELD_NAME, "Size must not to be less than 1");
+        }
+
+        if (!errors.isEmpty()) {
+            throw new NotCorrectPageDataException(errors);
+        }
+
     }
 
 

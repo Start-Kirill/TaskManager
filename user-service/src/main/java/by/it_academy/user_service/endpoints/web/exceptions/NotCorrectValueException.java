@@ -1,7 +1,7 @@
 package by.it_academy.user_service.endpoints.web.exceptions;
 
-import by.it_academy.user_service.core.exceptions.CommonErrorException;
-import by.it_academy.user_service.core.errors.ErrorResponse;
+import by.it_academy.task_manager_common.exceptions.CommonErrorException;
+import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 
 import java.util.List;
 

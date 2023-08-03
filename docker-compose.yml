@@ -2,10 +2,10 @@ version: '3.5'
 services:
   db:
     build: postgresql
-    image: taskmanager_postgresql:1.0.0
+    image: taskmanager_postgresql:1.0.3
     restart: always
     volumes:
-      - ./postgresql/user-service/ddl:/docker-entrypoint-initdb.d
+      - ./postgresql/total:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: task_manager
       POSTGRES_PASSWORD: q1w2e3r4
@@ -32,17 +32,23 @@ services:
 
   user-service:
     build: user-service
-    image: taskmanager_user-service:1.0.5
+    image: taskmanager_user-service:1.0.14
+    networks:
+      - taskmanager_ntwrk
+
+  audit-service:
+    build: audit-service
+    image: taskmanager_audit-service:1.0.4
     networks:
       - taskmanager_ntwrk
 
   proxy:
     build: proxy
-    image: taskmanager_proxy:1.0.1
+    image: taskmanager_proxy:1.0.3
     ports:
       - "80:80"
     networks:
       - taskmanager_ntwrk
 networks:
-    taskmanager_ntwrk:
-      name: taskmanager_ntwrk
+  taskmanager_ntwrk:
+    name: taskmanager_ntwrk

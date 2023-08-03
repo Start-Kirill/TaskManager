@@ -2,8 +2,8 @@ package by.it_academy.user_service.service.support.converters;
 
 import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.core.dto.UserRegistrationDto;
-import by.it_academy.user_service.core.enums.UserRole;
-import by.it_academy.user_service.core.enums.UserStatus;
+import by.it_academy.task_manager_common.enums.UserRole;
+import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.user_service.dao.entity.User;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
@@ -47,6 +47,7 @@ public class GenericUserCreateDtoConverter implements GenericConverter {
             userCreateDto.setRole(user.getRole());
             userCreateDto.setStatus(user.getStatus());
             userCreateDto.setMail(user.getMail());
+            userCreateDto.setFio(user.getFio());
             userCreateDto.setFio(user.getFio());
         }
 

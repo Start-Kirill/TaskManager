@@ -1,6 +1,6 @@
 package by.it_academy.user_service.endpoints.web.support.json;
 
-import by.it_academy.user_service.core.enums.UserStatus;
+import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import com.fasterxml.jackson.databind.util.StdConverter;
 
