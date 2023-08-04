@@ -1,20 +1,12 @@
 package by.it_academy.user_service.config;
 
 import by.it_academy.task_manager_common.support.spring.converters.CustomPageConverter;
-import by.it_academy.user_service.config.property.AppProperty;
 import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.endpoints.web.support.converters.GenericUserDtoConverter;
 import by.it_academy.user_service.endpoints.web.support.converters.LocalDateTimeToMilliFormatter;
-import by.it_academy.user_service.service.api.IAuditClient;
 import by.it_academy.user_service.service.support.converters.GenericUserConverter;
 import by.it_academy.user_service.service.support.converters.GenericUserCreateDtoConverter;
 import by.it_academy.user_service.service.support.converters.GenericVerificationCodeConverter;
-import feign.Feign;
-import feign.Logger;
-import feign.gson.GsonDecoder;
-import feign.gson.GsonEncoder;
-import feign.okhttp.OkHttpClient;
-import feign.slf4j.Slf4jLogger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
@@ -40,14 +32,14 @@ public class ApplicationConfig implements WebMvcConfigurer {
         return new LocalDateTimeToMilliFormatter();
     }
 
-    @Bean
-    public IAuditClient auditClient(AppProperty property) {
-        return Feign.builder()
-                .client(new OkHttpClient())
-                .encoder(new GsonEncoder())
-                .decoder(new GsonDecoder())
-                .logger(new Slf4jLogger(IAuditClient.class))
-                .logLevel(Logger.Level.FULL)
-                .target(IAuditClient.class, property.getAudit().getUrl());
-    }
+//    @Bean
+//    public IAuditClient auditClient(AppProperty property) {
+//        return Feign.builder()
+//                .client(new OkHttpClient())
+//                .encoder(new GsonEncoder())
+//                .decoder(new GsonDecoder())
+//                .logger(new Slf4jLogger(IAuditClient.class))
+//                .logLevel(Logger.Level.FULL)
+//                .target(IAuditClient.class, property.getAudit().getUrl());
+//    }
 }

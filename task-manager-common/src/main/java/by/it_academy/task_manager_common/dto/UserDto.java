@@ -23,7 +23,6 @@ public class UserDto {
 
     private UserStatus status;
 
-    private String verificationCode;
 
 
     @JsonProperty("dt_create")
@@ -39,7 +38,7 @@ public class UserDto {
     public UserDto() {
     }
 
-    public UserDto(UUID uuid, String mail, String fio, UserRole role, UserStatus status, LocalDateTime dateTimeCreate, LocalDateTime dateTimeUpdate, String verificationCode) {
+    public UserDto(UUID uuid, String mail, String fio, UserRole role, UserStatus status, LocalDateTime dateTimeCreate, LocalDateTime dateTimeUpdate) {
         this.uuid = uuid;
         this.mail = mail;
         this.fio = fio;
@@ -47,7 +46,6 @@ public class UserDto {
         this.status = status;
         this.dateTimeCreate = dateTimeCreate;
         this.dateTimeUpdate = dateTimeUpdate;
-        this.verificationCode = verificationCode;
     }
 
     public UUID getUuid() {

@@ -1,8 +1,11 @@
 package by.it_academy.user_service.service;
 
+import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
+import by.it_academy.task_manager_common.dto.UserDto;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
+import by.it_academy.task_manager_common.enums.EssenceType;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.task_manager_common.exceptions.structured.NotCorrectPageDataException;
@@ -82,24 +85,6 @@ public class UserService implements IUserService {
 
             User save = this.userDao.save(user);
 
-//            //            TODO temporarily
-//            AuditCreateDto auditCreateDto = new AuditCreateDto();
-//            User u = this.userDao.findByMail("adming@admin.com").orElseThrow();
-//            UserDto userDto = new UserDto();
-//            userDto.setUuid(u.getUuid());
-//            userDto.setMail(u.getMail());
-//            userDto.setFio(u.getFio());
-//            userDto.setRole(u.getRole());
-//
-//
-//            auditCreateDto.setUser(userDto);
-//
-//            auditCreateDto.setType(EssenceType.USER);
-//            auditCreateDto.setText("Creating user by admin");
-//            auditCreateDto.setId(save.getUuid().toString());
-//
-//            this.auditService.create(auditCreateDto);
-
             return user;
 
         } catch (DataIntegrityViolationException ex) {
@@ -149,21 +134,21 @@ public class UserService implements IUserService {
         convertedUser.setDateTimeUpdate(user.getDateTimeUpdate());
 
         try {
-//            //            TODO temporarily
-//            AuditCreateDto auditCreateDto = new AuditCreateDto();
-//            User u = this.userDao.findByMail("admin@admin.com").orElseThrow();
-//            UserDto userDto = new UserDto();
-//            userDto.setUuid(u.getUuid());
-//            userDto.setMail(u.getMail());
-//            userDto.setFio(u.getFio());
-//            userDto.setRole(u.getRole());
-//            auditCreateDto.setUser(userDto);
-//
-//            auditCreateDto.setType(EssenceType.USER);
-//            auditCreateDto.setText("Updating user by admin");
-//            auditCreateDto.setId(convertedUser.getUuid().toString());
-//
-//            this.auditService.create(auditCreateDto);
+            //            TODO temporarily
+            AuditCreateDto auditCreateDto = new AuditCreateDto();
+            User u = this.userDao.findByMail("admin@admin.god").orElseThrow();
+            UserDto userDto = new UserDto();
+            userDto.setUuid(u.getUuid());
+            userDto.setMail(u.getMail());
+            userDto.setFio(u.getFio());
+            userDto.setRole(u.getRole());
+            auditCreateDto.setUser(userDto);
+
+            auditCreateDto.setType(EssenceType.USER);
+            auditCreateDto.setText("Updating user by admin");
+            auditCreateDto.setId(convertedUser.getUuid().toString());
+
+            this.auditService.create(auditCreateDto);
 
             return this.userDao.save(convertedUser);
         } catch (DataIntegrityViolationException ex) {
