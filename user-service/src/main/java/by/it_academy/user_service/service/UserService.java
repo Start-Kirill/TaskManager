@@ -9,6 +9,7 @@ import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.task_manager_common.exceptions.structured.NotCorrectPageDataException;
 import by.it_academy.user_service.core.dto.UserCreateDto;
+import by.it_academy.user_service.core.dto.UserDetailsImpl;
 import by.it_academy.user_service.dao.api.IUserDao;
 import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserAuditService;
@@ -30,6 +31,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,7 +98,14 @@ public class UserService implements IUserService {
             user.setDateTimeUpdate(now);
             User save = this.userDao.save(user);
 
-            makeAudit(user.getUuid());
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            UserDetailsImpl userDetails;
+            if ("anonymousUser".equals(principal)) {
+                userDetails = this.conversionService.convert(save, UserDetailsImpl.class);
+            } else {
+                userDetails = this.userHolder.getUser();
+            }
+            makeAudit(userDetails, save.getUuid());
 
             return save;
 
@@ -148,7 +158,7 @@ public class UserService implements IUserService {
 
         try {
             User save = this.userDao.save(convertedUser);
-            makeAudit(save.getUuid());
+            makeAudit(this.userHolder.getUser(), save.getUuid());
             return save;
         } catch (DataIntegrityViolationException ex) {
             if (ex.contains(ConstraintViolationException.class)) {
@@ -330,9 +340,10 @@ public class UserService implements IUserService {
 
     }
 
-    private void makeAudit(UUID createdUser) {
+    private void makeAudit(UserDetailsImpl userDetails, UUID createdUser) {
 
-        String token = this.tokenHandler.generateAccessToken(this.userHolder.getUser());
+
+        String token = this.tokenHandler.generateAccessToken(userDetails);
 
         AuditCreateDto auditCreateDto = new AuditCreateDto();
 
@@ -340,6 +351,7 @@ public class UserService implements IUserService {
         auditCreateDto.setId(createdUser.toString());
         auditCreateDto.setType(EssenceType.USER);
         auditCreateDto.setText("User was created");
+
 
         this.auditService.create(auditCreateDto);
     }
