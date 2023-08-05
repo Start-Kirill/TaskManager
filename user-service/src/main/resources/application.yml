@@ -30,5 +30,7 @@ app:
     url: http://user-service:${server.port}/users/verification
 feign:
   url: http://audit-service:8080/audit
-
+jwt:
+  secret: IjudckibNeWw0CzOuxn6YtQMGs3bsry2M534Fl7F/us=
+  issuer: Kirill
 

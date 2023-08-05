@@ -7,5 +7,5 @@ public interface IUserService extends ICRUDService<User, UserCreateDto> {
 
     User findByMail(String mail);
 
-
+    boolean existsByMail(String mail);
 }

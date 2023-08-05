@@ -1,11 +1,8 @@
 package by.it_academy.user_service.service;
 
-import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
-import by.it_academy.task_manager_common.dto.UserDto;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
-import by.it_academy.task_manager_common.enums.EssenceType;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.task_manager_common.exceptions.structured.NotCorrectPageDataException;
@@ -30,7 +27,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -63,29 +62,36 @@ public class UserService implements IUserService {
 
     private IUserAuditService auditService;
 
-    public UserService(IUserDao userDao, ConversionService conversionService, IUserAuditService auditService) {
+    private PasswordEncoder passwordEncoder;
+
+    private UserHolder userHolder;
+
+    public UserService(IUserDao userDao, ConversionService conversionService, IUserAuditService auditService, PasswordEncoder passwordEncoder, UserHolder userHolder) {
         this.userDao = userDao;
         this.conversionService = conversionService;
         this.auditService = auditService;
+        this.passwordEncoder = passwordEncoder;
+        this.userHolder = userHolder;
     }
 
 
+    @Transactional
     @Override
     public User save(UserCreateDto dto) {
         validate(dto);
 
         try {
+            dto.setPassword(passwordEncoder.encode(dto.getPassword()));
             User user = this.conversionService.convert(dto, User.class);
-
             user.setUuid(UUID.randomUUID());
-
             LocalDateTime now = LocalDateTime.now();
             user.setDateTimeCreate(now);
             user.setDateTimeUpdate(now);
-
             User save = this.userDao.save(user);
 
-            return user;
+
+
+            return save;
 
         } catch (DataIntegrityViolationException ex) {
             if (ex.contains(ConstraintViolationException.class)) {
@@ -109,10 +115,11 @@ public class UserService implements IUserService {
                 errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
                 throw new InternalServerErrorException(errors);
             }
-        }
 
+        }
     }
 
+    @Transactional
     @Override
     public User update(UserCreateDto dto, UUID uuid, LocalDateTime version) {
 
@@ -134,21 +141,21 @@ public class UserService implements IUserService {
         convertedUser.setDateTimeUpdate(user.getDateTimeUpdate());
 
         try {
-            //            TODO temporarily
-            AuditCreateDto auditCreateDto = new AuditCreateDto();
-            User u = this.userDao.findByMail("admin@admin.god").orElseThrow();
-            UserDto userDto = new UserDto();
-            userDto.setUuid(u.getUuid());
-            userDto.setMail(u.getMail());
-            userDto.setFio(u.getFio());
-            userDto.setRole(u.getRole());
-            auditCreateDto.setUser(userDto);
-
-            auditCreateDto.setType(EssenceType.USER);
-            auditCreateDto.setText("Updating user by admin");
-            auditCreateDto.setId(convertedUser.getUuid().toString());
-
-            this.auditService.create(auditCreateDto);
+//            //            TODO temporarily
+//            AuditCreateDto auditCreateDto = new AuditCreateDto();
+//            User u = this.userDao.findByMail("admin@admin.com").orElseThrow();
+//            UserDto userDto = new UserDto();
+//            userDto.setUuid(u.getUuid());
+//            userDto.setMail(u.getMail());
+//            userDto.setFio(u.getFio());
+//            userDto.setRole(u.getRole());
+//            auditCreateDto.setUser(userDto);
+//
+//            auditCreateDto.setType(EssenceType.USER);
+//            auditCreateDto.setText("Updating user by admin");
+//            auditCreateDto.setId(convertedUser.getUuid().toString());
+//
+//            this.auditService.create(auditCreateDto);
 
             return this.userDao.save(convertedUser);
         } catch (DataIntegrityViolationException ex) {
@@ -178,6 +185,7 @@ public class UserService implements IUserService {
 
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CustomPage<User> get(Integer page, Integer size) {
 
@@ -195,6 +203,7 @@ public class UserService implements IUserService {
         return userPageOfUser;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public User get(UUID uuid) {
 
@@ -207,6 +216,7 @@ public class UserService implements IUserService {
         return this.userDao.findById(uuid).orElseThrow();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public User findByMail(String mail) {
         if (this.userDao.existsByMail(mail)) {
@@ -215,6 +225,12 @@ public class UserService implements IUserService {
         Map<String, String> errors = new HashMap<>();
         errors.put(MAIL_FIELD_NAME, "User with such email not exists");
         throw new MailNotExistsException(errors);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsByMail(String mail) {
+        return this.userDao.existsByMail(mail);
     }
 
 

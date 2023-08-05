@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface IVerificationCodeDao extends CrudRepository<VerificationCode, UUID> {
     VerificationCode findByUser(User user);
 
+    boolean existsByUser(User user);
 }
