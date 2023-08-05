@@ -39,9 +39,6 @@ public class GenericUserDtoConverter implements GenericConverter {
             userDto.setFio(user.getFio());
             userDto.setRole(user.getRole());
             userDto.setStatus(user.getStatus());
-        }else {
-            UserDetailsImpl userDetails = (UserDetailsImpl) source;
-
         }
 
         return userDto;

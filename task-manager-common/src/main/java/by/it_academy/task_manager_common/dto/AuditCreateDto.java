@@ -4,7 +4,7 @@ import by.it_academy.task_manager_common.enums.EssenceType;
 
 public class AuditCreateDto {
 
-    private UserDto user;
+    private String userToken;
 
     private String text;
 
@@ -15,19 +15,19 @@ public class AuditCreateDto {
     public AuditCreateDto() {
     }
 
-    public AuditCreateDto(UserDto user, String text, EssenceType type, String id) {
-        this.user = user;
+    public AuditCreateDto(String userToken, String text, EssenceType type, String id) {
+        this.userToken = userToken;
         this.text = text;
         this.type = type;
         this.id = id;
     }
 
-    public UserDto getUser() {
-        return user;
+    public String getUserToken() {
+        return userToken;
     }
 
-    public void setUser(UserDto user) {
-        this.user = user;
+    public void setUserToken(String userToken) {
+        this.userToken = userToken;
     }
 
     public String getText() {

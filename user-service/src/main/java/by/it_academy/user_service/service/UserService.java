@@ -1,8 +1,10 @@
 package by.it_academy.user_service.service;
 
+import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
+import by.it_academy.task_manager_common.enums.EssenceType;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.task_manager_common.exceptions.structured.NotCorrectPageDataException;
@@ -19,6 +21,7 @@ import by.it_academy.user_service.service.exceptions.commonInternal.UnknownConst
 import by.it_academy.user_service.service.exceptions.structured.MailNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import by.it_academy.user_service.service.support.passay.CyrillicEnglishCharacterData;
+import by.it_academy.user_service.utils.JwtTokenHandler;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.ConstraintViolationException;
 import org.passay.*;
@@ -56,21 +59,24 @@ public class UserService implements IUserService {
 
     private static final String UNIQUE_UUID_CONSTRAINT_NAME = "users_pkey";
 
-    private IUserDao userDao;
+    private final IUserDao userDao;
 
-    private ConversionService conversionService;
+    private final ConversionService conversionService;
 
-    private IUserAuditService auditService;
+    private final IUserAuditService auditService;
 
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    private UserHolder userHolder;
+    private final JwtTokenHandler tokenHandler;
 
-    public UserService(IUserDao userDao, ConversionService conversionService, IUserAuditService auditService, PasswordEncoder passwordEncoder, UserHolder userHolder) {
+    private final UserHolder userHolder;
+
+    public UserService(IUserDao userDao, ConversionService conversionService, IUserAuditService auditService, PasswordEncoder passwordEncoder, JwtTokenHandler tokenHandler, UserHolder userHolder) {
         this.userDao = userDao;
         this.conversionService = conversionService;
         this.auditService = auditService;
         this.passwordEncoder = passwordEncoder;
+        this.tokenHandler = tokenHandler;
         this.userHolder = userHolder;
     }
 
@@ -89,7 +95,7 @@ public class UserService implements IUserService {
             user.setDateTimeUpdate(now);
             User save = this.userDao.save(user);
 
-
+            makeAudit(user.getUuid());
 
             return save;
 
@@ -141,23 +147,9 @@ public class UserService implements IUserService {
         convertedUser.setDateTimeUpdate(user.getDateTimeUpdate());
 
         try {
-//            //            TODO temporarily
-//            AuditCreateDto auditCreateDto = new AuditCreateDto();
-//            User u = this.userDao.findByMail("admin@admin.com").orElseThrow();
-//            UserDto userDto = new UserDto();
-//            userDto.setUuid(u.getUuid());
-//            userDto.setMail(u.getMail());
-//            userDto.setFio(u.getFio());
-//            userDto.setRole(u.getRole());
-//            auditCreateDto.setUser(userDto);
-//
-//            auditCreateDto.setType(EssenceType.USER);
-//            auditCreateDto.setText("Updating user by admin");
-//            auditCreateDto.setId(convertedUser.getUuid().toString());
-//
-//            this.auditService.create(auditCreateDto);
-
-            return this.userDao.save(convertedUser);
+            User save = this.userDao.save(convertedUser);
+            makeAudit(save.getUuid());
+            return save;
         } catch (DataIntegrityViolationException ex) {
             if (ex.contains(ConstraintViolationException.class)) {
                 String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
@@ -336,6 +328,20 @@ public class UserService implements IUserService {
             throw new NotCorrectPageDataException(errors);
         }
 
+    }
+
+    private void makeAudit(UUID createdUser) {
+
+        String token = this.tokenHandler.generateAccessToken(this.userHolder.getUser());
+
+        AuditCreateDto auditCreateDto = new AuditCreateDto();
+
+        auditCreateDto.setUserToken(token);
+        auditCreateDto.setId(createdUser.toString());
+        auditCreateDto.setType(EssenceType.USER);
+        auditCreateDto.setText("User was created");
+
+        this.auditService.create(auditCreateDto);
     }
 
 
