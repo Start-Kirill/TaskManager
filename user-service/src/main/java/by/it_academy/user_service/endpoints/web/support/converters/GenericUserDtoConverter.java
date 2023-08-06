@@ -1,7 +1,8 @@
 package by.it_academy.user_service.endpoints.web.support.converters;
 
 import by.it_academy.task_manager_common.dto.UserDto;
-import by.it_academy.user_service.dao.entity.User;
+import by.it_academy.task_manager_common.dto.UserDetailsImpl;
+import by.it_academy.task_manager_common.entity.User;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 
@@ -14,6 +15,7 @@ public class GenericUserDtoConverter implements GenericConverter {
         HashSet<ConvertiblePair> pairs = new HashSet<>();
 
         pairs.add(new ConvertiblePair(User.class, UserDto.class));
+        pairs.add(new ConvertiblePair(UserDetailsImpl.class, UserDto.class));
 
         return pairs;
     }
@@ -25,16 +27,19 @@ public class GenericUserDtoConverter implements GenericConverter {
             return source;
         }
 
-        User user = (User) source;
         UserDto userDto = new UserDto();
 
-        userDto.setUuid(user.getUuid());
-        userDto.setDateTimeCreate(user.getDateTimeCreate());
-        userDto.setDateTimeUpdate(user.getDateTimeUpdate());
-        userDto.setMail(user.getMail());
-        userDto.setFio(user.getFio());
-        userDto.setRole(user.getRole());
-        userDto.setStatus(user.getStatus());
+        if (sourceType.getType() == User.class) {
+            User user = (User) source;
+
+            userDto.setUuid(user.getUuid());
+            userDto.setDateTimeCreate(user.getDateTimeCreate());
+            userDto.setDateTimeUpdate(user.getDateTimeUpdate());
+            userDto.setMail(user.getMail());
+            userDto.setFio(user.getFio());
+            userDto.setRole(user.getRole());
+            userDto.setStatus(user.getStatus());
+        }
 
         return userDto;
     }

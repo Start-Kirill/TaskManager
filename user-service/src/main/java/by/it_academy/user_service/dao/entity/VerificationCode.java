@@ -1,5 +1,6 @@
 package by.it_academy.user_service.dao.entity;
 
+import by.it_academy.task_manager_common.entity.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 

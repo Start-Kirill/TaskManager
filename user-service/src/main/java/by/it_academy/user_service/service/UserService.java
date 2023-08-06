@@ -1,14 +1,17 @@
 package by.it_academy.user_service.service;
 
+import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
+import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
+import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.task_manager_common.enums.ErrorType;
+import by.it_academy.task_manager_common.enums.EssenceType;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.task_manager_common.exceptions.structured.NotCorrectPageDataException;
 import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.dao.api.IUserDao;
-import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserAuditService;
 import by.it_academy.user_service.service.api.IUserService;
 import by.it_academy.user_service.service.exceptions.common.UserNotExistsException;
@@ -19,6 +22,8 @@ import by.it_academy.user_service.service.exceptions.commonInternal.UnknownConst
 import by.it_academy.user_service.service.exceptions.structured.MailNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import by.it_academy.user_service.service.support.passay.CyrillicEnglishCharacterData;
+import by.it_academy.user_service.utils.JwtTokenHandler;
+import jakarta.persistence.PrePersist;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.ConstraintViolationException;
 import org.passay.*;
@@ -27,7 +32,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -54,53 +63,43 @@ public class UserService implements IUserService {
 
     private static final String UNIQUE_UUID_CONSTRAINT_NAME = "users_pkey";
 
-    private IUserDao userDao;
+    private final IUserDao userDao;
 
-    private ConversionService conversionService;
+    private final ConversionService conversionService;
 
-    private IUserAuditService auditService;
+    private final IUserAuditService auditService;
 
-    public UserService(IUserDao userDao, ConversionService conversionService, IUserAuditService auditService) {
+    private final PasswordEncoder passwordEncoder;
+
+    private final JwtTokenHandler tokenHandler;
+
+    private final UserHolder userHolder;
+
+    public UserService(IUserDao userDao, ConversionService conversionService, IUserAuditService auditService, PasswordEncoder passwordEncoder, JwtTokenHandler tokenHandler, UserHolder userHolder) {
         this.userDao = userDao;
         this.conversionService = conversionService;
         this.auditService = auditService;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenHandler = tokenHandler;
+        this.userHolder = userHolder;
     }
 
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public User save(UserCreateDto dto) {
         validate(dto);
 
         try {
+            dto.setPassword(passwordEncoder.encode(dto.getPassword()));
             User user = this.conversionService.convert(dto, User.class);
-
             user.setUuid(UUID.randomUUID());
-
             LocalDateTime now = LocalDateTime.now();
             user.setDateTimeCreate(now);
             user.setDateTimeUpdate(now);
-
             User save = this.userDao.save(user);
 
-//            //            TODO temporarily
-//            AuditCreateDto auditCreateDto = new AuditCreateDto();
-//            User u = this.userDao.findByMail("adming@admin.com").orElseThrow();
-//            UserDto userDto = new UserDto();
-//            userDto.setUuid(u.getUuid());
-//            userDto.setMail(u.getMail());
-//            userDto.setFio(u.getFio());
-//            userDto.setRole(u.getRole());
-//
-//
-//            auditCreateDto.setUser(userDto);
-//
-//            auditCreateDto.setType(EssenceType.USER);
-//            auditCreateDto.setText("Creating user by admin");
-//            auditCreateDto.setId(save.getUuid().toString());
-//
-//            this.auditService.create(auditCreateDto);
-
-            return user;
+            return save;
 
         } catch (DataIntegrityViolationException ex) {
             if (ex.contains(ConstraintViolationException.class)) {
@@ -124,10 +123,26 @@ public class UserService implements IUserService {
                 errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
                 throw new InternalServerErrorException(errors);
             }
-        }
 
+        }
     }
 
+    @Transactional
+    @Override
+    public User auditedSave(UserCreateDto dto){
+        User save = save(dto);
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetailsImpl userDetails;
+        if ("anonymousUser".equals(principal)) {
+            userDetails = this.conversionService.convert(save, UserDetailsImpl.class);
+        } else {
+            userDetails = this.userHolder.getUser();
+        }
+        makeAudit(userDetails, save.getUuid(), "User was created");
+        return save;
+    }
+
+    @Transactional
     @Override
     public User update(UserCreateDto dto, UUID uuid, LocalDateTime version) {
 
@@ -149,23 +164,9 @@ public class UserService implements IUserService {
         convertedUser.setDateTimeUpdate(user.getDateTimeUpdate());
 
         try {
-//            //            TODO temporarily
-//            AuditCreateDto auditCreateDto = new AuditCreateDto();
-//            User u = this.userDao.findByMail("admin@admin.com").orElseThrow();
-//            UserDto userDto = new UserDto();
-//            userDto.setUuid(u.getUuid());
-//            userDto.setMail(u.getMail());
-//            userDto.setFio(u.getFio());
-//            userDto.setRole(u.getRole());
-//            auditCreateDto.setUser(userDto);
-//
-//            auditCreateDto.setType(EssenceType.USER);
-//            auditCreateDto.setText("Updating user by admin");
-//            auditCreateDto.setId(convertedUser.getUuid().toString());
-//
-//            this.auditService.create(auditCreateDto);
-
-            return this.userDao.save(convertedUser);
+            User save = this.userDao.save(convertedUser);
+            makeAudit(this.userHolder.getUser(), save.getUuid(), "User was updated");
+            return save;
         } catch (DataIntegrityViolationException ex) {
             if (ex.contains(ConstraintViolationException.class)) {
                 String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
@@ -193,6 +194,7 @@ public class UserService implements IUserService {
 
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CustomPage<User> get(Integer page, Integer size) {
 
@@ -210,6 +212,7 @@ public class UserService implements IUserService {
         return userPageOfUser;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public User get(UUID uuid) {
 
@@ -222,6 +225,7 @@ public class UserService implements IUserService {
         return this.userDao.findById(uuid).orElseThrow();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public User findByMail(String mail) {
         if (this.userDao.existsByMail(mail)) {
@@ -230,6 +234,12 @@ public class UserService implements IUserService {
         Map<String, String> errors = new HashMap<>();
         errors.put(MAIL_FIELD_NAME, "User with such email not exists");
         throw new MailNotExistsException(errors);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsByMail(String mail) {
+        return this.userDao.existsByMail(mail);
     }
 
 
@@ -335,6 +345,22 @@ public class UserService implements IUserService {
             throw new NotCorrectPageDataException(errors);
         }
 
+    }
+
+    private void makeAudit(UserDetailsImpl userDetails, UUID createdUser, String message) {
+
+
+        String token = this.tokenHandler.generateAccessToken(userDetails);
+
+        AuditCreateDto auditCreateDto = new AuditCreateDto();
+
+        auditCreateDto.setUserToken(token);
+        auditCreateDto.setId(createdUser.toString());
+        auditCreateDto.setType(EssenceType.USER);
+        auditCreateDto.setText(message);
+
+
+        this.auditService.create("Bearer " + token, auditCreateDto);
     }
 
 

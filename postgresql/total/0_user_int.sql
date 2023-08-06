@@ -51,3 +51,19 @@ CREATE TABLE app.users
 
 ALTER TABLE app.users OWNER TO user_service;
 
+CREATE TABLE app.verification_code
+(
+    user_uuid uuid NOT NULL,
+    code text NOT NULL,
+    dt_create timestamp without time zone NOT NULL,
+    dt_update timestamp without time zone NOT NULL,
+    FOREIGN KEY (user_uuid)
+        REFERENCES app.users (uuid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
+
+ALTER TABLE IF EXISTS app.verification_code
+    OWNER to user_service;
+

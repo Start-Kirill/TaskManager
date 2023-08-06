@@ -2,7 +2,7 @@ version: '3.5'
 services:
   db:
     build: postgresql
-    image: taskmanager_postgresql:1.0.3
+    image: taskmanager_postgresql:1.0.6
     restart: always
     volumes:
       - ./postgresql/total:/docker-entrypoint-initdb.d
@@ -32,13 +32,13 @@ services:
 
   user-service:
     build: user-service
-    image: taskmanager_user-service:1.0.14
+    image: taskmanager_user-service:1.0.15
     networks:
       - taskmanager_ntwrk
 
   audit-service:
     build: audit-service
-    image: taskmanager_audit-service:1.0.4
+    image: taskmanager_audit-service:1.0.5
     networks:
       - taskmanager_ntwrk
 

@@ -3,8 +3,10 @@ package by.it_academy.task_manager_common.dto;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.task_manager_common.support.json.converters.LocalDateTimeToMillisecondsConverter;
+import by.it_academy.task_manager_common.support.json.converters.MillisecondsToLocalDateTimeConverter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.time.LocalDateTime;
@@ -23,23 +25,22 @@ public class UserDto {
 
     private UserStatus status;
 
-    private String verificationCode;
 
 
     @JsonProperty("dt_create")
     @JsonSerialize(converter = LocalDateTimeToMillisecondsConverter.class)
-//    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
+    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
     private LocalDateTime dateTimeCreate;
 
     @JsonProperty("dt_update")
     @JsonSerialize(converter = LocalDateTimeToMillisecondsConverter.class)
-//    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
+    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
     private LocalDateTime dateTimeUpdate;
 
     public UserDto() {
     }
 
-    public UserDto(UUID uuid, String mail, String fio, UserRole role, UserStatus status, LocalDateTime dateTimeCreate, LocalDateTime dateTimeUpdate, String verificationCode) {
+    public UserDto(UUID uuid, String mail, String fio, UserRole role, UserStatus status, LocalDateTime dateTimeCreate, LocalDateTime dateTimeUpdate) {
         this.uuid = uuid;
         this.mail = mail;
         this.fio = fio;
@@ -47,7 +48,6 @@ public class UserDto {
         this.status = status;
         this.dateTimeCreate = dateTimeCreate;
         this.dateTimeUpdate = dateTimeUpdate;
-        this.verificationCode = verificationCode;
     }
 
     public UUID getUuid() {

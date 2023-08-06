@@ -8,7 +8,7 @@ import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.core.dto.UserLoginDto;
 import by.it_academy.user_service.core.dto.UserRegistrationDto;
 import by.it_academy.user_service.core.dto.VerificationCodeCreateDto;
-import by.it_academy.user_service.dao.entity.User;
+import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.user_service.dao.entity.VerificationCode;
 import by.it_academy.user_service.service.api.IUserAuthenticationService;
 import by.it_academy.user_service.service.api.IUserService;
@@ -16,13 +16,16 @@ import by.it_academy.user_service.service.api.IVerificationCodeService;
 import by.it_academy.user_service.service.exceptions.common.NotVerifyUserException;
 import by.it_academy.user_service.service.exceptions.structured.NotCorrectPasswordException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
+import by.it_academy.user_service.utils.JwtTokenHandler;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -35,24 +38,37 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     private static final String FIO_FIELD_NAME = "fio";
 
-    private IUserService userService;
+    private final IUserService userService;
 
-    private IVerificationCodeService verificationCodeService;
+    private final IVerificationCodeService verificationCodeService;
 
-    private ConversionService conversionService;
+    private final ConversionService conversionService;
 
-    private JavaMailSender emailSender;
+    private final JavaMailSender emailSender;
 
-    private AppProperty.Verification verification;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserAuthenticationService(IUserService userService, ConversionService conversionService, JavaMailSender emailSender, AppProperty property, IVerificationCodeService verificationCodeService) {
+    private final JwtTokenHandler tokenHandler;
+
+    private final AppProperty.Verification verification;
+
+    public UserAuthenticationService(IUserService userService,
+                                     ConversionService conversionService,
+                                     JavaMailSender emailSender,
+                                     AppProperty property,
+                                     IVerificationCodeService verificationCodeService,
+                                     PasswordEncoder passwordEncoder,
+                                     JwtTokenHandler tokenHandler) {
         this.userService = userService;
         this.conversionService = conversionService;
         this.emailSender = emailSender;
         this.verification = property.getVerification();
         this.verificationCodeService = verificationCodeService;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenHandler = tokenHandler;
     }
 
+    @Transactional
     @Override
     public void signIn(UserRegistrationDto dto) {
 
@@ -93,22 +109,25 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     //    TODO
     @Override
-    public void login(UserLoginDto dto) {
+    public String login(UserLoginDto dto) {
         validate(dto);
         User user = this.userService.findByMail(dto.getMail());
-        if (!user.getPassword().equals(dto.getPassword())) {
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             Map<String, String> errors = new HashMap<>();
             errors.put(PASSWORD_FIELD_NAME, "Not correct password");
             throw new NotCorrectPasswordException(errors);
         }
+        String token = this.tokenHandler.generateAccessToken(user.getUuid(), user.getMail(), user.getFio(), user.getRole());
+        return token;
     }
 
-    //    TODO
+
     @Override
-    public User getMe() {
-        return null;
+    public User getMe(UUID uuid) {
+        return this.userService.get(uuid);
     }
 
+    @Transactional
     @Override
     public void sendCodeAgain(String mail) {
         validateMail(mail);

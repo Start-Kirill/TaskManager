@@ -1,10 +1,11 @@
 package by.it_academy.user_service.service.support.converters;
 
-import by.it_academy.user_service.core.dto.UserCreateDto;
-import by.it_academy.user_service.core.dto.UserRegistrationDto;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
-import by.it_academy.user_service.dao.entity.User;
+import by.it_academy.task_manager_common.dto.UserDetailsImpl;
+import by.it_academy.user_service.core.dto.UserCreateDto;
+import by.it_academy.user_service.core.dto.UserRegistrationDto;
+import by.it_academy.task_manager_common.entity.User;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 
@@ -18,6 +19,7 @@ public class GenericUserCreateDtoConverter implements GenericConverter {
 
         pairs.add(new ConvertiblePair(UserRegistrationDto.class, UserCreateDto.class));
         pairs.add(new ConvertiblePair(User.class, UserCreateDto.class));
+        pairs.add(new ConvertiblePair(UserDetailsImpl.class, UserCreateDto.class));
 
 
         return pairs;
@@ -40,7 +42,7 @@ public class GenericUserCreateDtoConverter implements GenericConverter {
             userCreateDto.setMail(registrationDto.getMail());
             userCreateDto.setFio(registrationDto.getFio());
             userCreateDto.setPassword(registrationDto.getPassword());
-        } else {
+        } else if (sourceType.getType() == User.class) {
             User user = (User) source;
 
             userCreateDto.setPassword(user.getPassword());
@@ -48,7 +50,14 @@ public class GenericUserCreateDtoConverter implements GenericConverter {
             userCreateDto.setStatus(user.getStatus());
             userCreateDto.setMail(user.getMail());
             userCreateDto.setFio(user.getFio());
-            userCreateDto.setFio(user.getFio());
+        } else {
+            UserDetailsImpl userDetails = (UserDetailsImpl) source;
+
+            userCreateDto.setMail(userDetails.getUsername());
+            userCreateDto.setFio(userDetails.getFio());
+            userCreateDto.setPassword(userCreateDto.getPassword());
+            userCreateDto.setStatus(userDetails.getStatus());
+            userCreateDto.setRole(userDetails.getRole());
         }
 
         return userCreateDto;

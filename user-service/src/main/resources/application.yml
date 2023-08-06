@@ -26,8 +26,12 @@ logging:
 server:
   port: 8080
 app:
-  audit:
-    url: http://audit-service:${server.port}/audit
   verification:
     url: http://user-service:${server.port}/users/verification
+feign:
+  audit:
+    url: http://audit-service:8080/audit
+jwt:
+  secret: IjudckibNeWw0CzOuxn6YtQMGs3bsry2M534Fl7F/us=
+  issuer: Kirill
 

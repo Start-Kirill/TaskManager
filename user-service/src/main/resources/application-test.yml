@@ -4,7 +4,8 @@ spring:
 server:
   port: 91
 app:
-  audit:
-    url: http://localhost:${server.port}/audit
   verification:
     url: http://localhost:${server.port}/users/verification
+feign:
+  audit:
+    url: http://localhost:92/audit

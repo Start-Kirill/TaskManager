@@ -4,6 +4,6 @@ import by.it_academy.task_manager_common.dto.AuditCreateDto;
 
 public interface IUserAuditService {
 
-    void create(AuditCreateDto dto);
+    void create(String header ,AuditCreateDto dto);
 
 }
