@@ -1,15 +1,18 @@
 package by.it_academy.user_service.config;
 
+import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.task_manager_common.support.spring.converters.CustomPageConverter;
-import by.it_academy.user_service.dao.entity.User;
-import by.it_academy.user_service.endpoints.web.support.converters.GenericUserDetailsConverter;
+import by.it_academy.task_manager_common.support.spring.converters.GenericUserDetailsConverter;
 import by.it_academy.user_service.endpoints.web.support.converters.GenericUserDtoConverter;
 import by.it_academy.user_service.endpoints.web.support.converters.LocalDateTimeToMilliFormatter;
+import by.it_academy.user_service.service.UserHolder;
 import by.it_academy.user_service.service.support.converters.GenericUserConverter;
 import by.it_academy.user_service.service.support.converters.GenericUserCreateDtoConverter;
 import by.it_academy.user_service.service.support.converters.GenericVerificationCodeConverter;
+import by.it_academy.user_service.utils.JwtTokenHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +21,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.time.LocalDateTime;
 
 @Configuration
+@Import({JwtTokenHandler.class, UserHolder.class})
 public class ApplicationConfig implements WebMvcConfigurer {
+
+    private final JwtTokenHandler tokenHandler;
+
+    private final UserHolder userHolder;
+
+    public ApplicationConfig(JwtTokenHandler tokenHandler, UserHolder userHolder) {
+        this.tokenHandler = tokenHandler;
+        this.userHolder = userHolder;
+    }
 
     @Override
     public void addFormatters(FormatterRegistry registry) {

@@ -8,7 +8,7 @@ import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.core.dto.UserLoginDto;
 import by.it_academy.user_service.core.dto.UserRegistrationDto;
 import by.it_academy.user_service.core.dto.VerificationCodeCreateDto;
-import by.it_academy.user_service.dao.entity.User;
+import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.user_service.dao.entity.VerificationCode;
 import by.it_academy.user_service.service.api.IUserAuthenticationService;
 import by.it_academy.user_service.service.api.IUserService;

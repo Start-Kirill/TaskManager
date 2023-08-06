@@ -12,4 +12,9 @@ spring:
 logging:
   level:
     org.springframework.web: DEBUG
-
+jwt:
+  secret: IjudckibNeWw0CzOuxn6YtQMGs3bsry2M534Fl7F/us=
+  issuer: Kirill
+feign:
+  user:
+    url: http://user-service:8080/users

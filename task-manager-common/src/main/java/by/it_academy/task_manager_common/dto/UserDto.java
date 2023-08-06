@@ -3,8 +3,10 @@ package by.it_academy.task_manager_common.dto;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.task_manager_common.support.json.converters.LocalDateTimeToMillisecondsConverter;
+import by.it_academy.task_manager_common.support.json.converters.MillisecondsToLocalDateTimeConverter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.time.LocalDateTime;
@@ -27,12 +29,12 @@ public class UserDto {
 
     @JsonProperty("dt_create")
     @JsonSerialize(converter = LocalDateTimeToMillisecondsConverter.class)
-//    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
+    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
     private LocalDateTime dateTimeCreate;
 
     @JsonProperty("dt_update")
     @JsonSerialize(converter = LocalDateTimeToMillisecondsConverter.class)
-//    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
+    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
     private LocalDateTime dateTimeUpdate;
 
     public UserDto() {

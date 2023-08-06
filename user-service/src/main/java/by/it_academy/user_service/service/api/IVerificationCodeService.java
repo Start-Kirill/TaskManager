@@ -1,7 +1,7 @@
 package by.it_academy.user_service.service.api;
 
 import by.it_academy.user_service.core.dto.VerificationCodeCreateDto;
-import by.it_academy.user_service.dao.entity.User;
+import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.user_service.dao.entity.VerificationCode;
 
 import java.time.LocalDateTime;

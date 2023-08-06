@@ -14,10 +14,9 @@ public class UserAuditService implements IUserAuditService {
         this.auditClient = auditClient;
     }
 
-    //    TODO validation
     @Override
-    public void create(AuditCreateDto dto) {
-        this.auditClient.create(dto);
+    public void create(String header, AuditCreateDto dto) {
+        this.auditClient.create(header, dto);
     }
 
 }

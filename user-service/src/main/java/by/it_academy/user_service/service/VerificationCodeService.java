@@ -6,7 +6,7 @@ import by.it_academy.task_manager_common.exceptions.CommonErrorException;
 import by.it_academy.task_manager_common.exceptions.CommonInternalErrorException;
 import by.it_academy.user_service.core.dto.VerificationCodeCreateDto;
 import by.it_academy.user_service.dao.api.IVerificationCodeDao;
-import by.it_academy.user_service.dao.entity.User;
+import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.user_service.dao.entity.VerificationCode;
 import by.it_academy.user_service.service.api.IVerificationCodeService;
 import org.springframework.core.convert.ConversionService;

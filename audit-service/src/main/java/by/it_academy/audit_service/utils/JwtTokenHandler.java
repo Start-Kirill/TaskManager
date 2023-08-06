@@ -1,8 +1,8 @@
-package by.it_academy.user_service.utils;
+package by.it_academy.audit_service.utils;
 
-import by.it_academy.task_manager_common.enums.UserRole;
-import by.it_academy.user_service.config.property.JWTProperty;
+import by.it_academy.audit_service.config.property.JWTProperty;
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
+import by.it_academy.task_manager_common.enums.UserRole;
 import io.jsonwebtoken.*;
 import org.springframework.stereotype.Component;
 
@@ -45,8 +45,8 @@ public class JwtTokenHandler {
                     .signWith(SignatureAlgorithm.HS256, jwtProperty.getSecret())
                     .compact();
             return compact;
-        }catch (Exception ex){
-           throw new RuntimeException(ex.getCause());
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getCause());
 
         }
     }

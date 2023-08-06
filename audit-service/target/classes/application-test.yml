@@ -3,3 +3,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/audit_service?ApplicationName=audit-service
 server:
   port: 92
+feign:
+  user:
+    url: http://localhost:91/users

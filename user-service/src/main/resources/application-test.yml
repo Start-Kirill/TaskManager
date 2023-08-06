@@ -7,4 +7,5 @@ app:
   verification:
     url: http://localhost:${server.port}/users/verification
 feign:
-  url: http://localhost:92/audit
+  audit:
+    url: http://localhost:92/audit

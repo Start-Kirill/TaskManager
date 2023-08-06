@@ -2,10 +2,10 @@ package by.it_academy.user_service.service.support.converters;
 
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
-import by.it_academy.user_service.core.dto.UserDetailsImpl;
+import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.core.dto.UserRegistrationDto;
-import by.it_academy.user_service.dao.entity.User;
+import by.it_academy.task_manager_common.entity.User;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 

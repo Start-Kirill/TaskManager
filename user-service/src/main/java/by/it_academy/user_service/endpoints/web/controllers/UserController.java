@@ -3,7 +3,7 @@ package by.it_academy.user_service.endpoints.web.controllers;
 import by.it_academy.task_manager_common.dto.CustomPage;
 import by.it_academy.task_manager_common.dto.UserDto;
 import by.it_academy.user_service.core.dto.UserCreateDto;
-import by.it_academy.user_service.dao.entity.User;
+import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.user_service.service.api.IUserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.ConversionService;
@@ -33,7 +33,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody UserCreateDto dto) {
-        this.userService.save(dto);
+        this.userService.auditedSave(dto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

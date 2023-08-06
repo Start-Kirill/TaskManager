@@ -1,9 +1,11 @@
-package by.it_academy.user_service.config;
+package by.it_academy.audit_service.config;
 
-import by.it_academy.user_service.endpoints.web.filters.JwtFilter;
+
+import by.it_academy.audit_service.endpoints.web.filters.JwtFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -44,14 +46,8 @@ public class SecurityConfig {
 
         // Set permissions on endpoints
         http.authorizeHttpRequests(requests -> requests
-                .requestMatchers("/users/login").permitAll()
-                .requestMatchers("users/registration").permitAll()
-                .requestMatchers("users/verification/*").permitAll()
-                .requestMatchers("users/verification").permitAll()
-                .requestMatchers("/users/me").authenticated()
-                .requestMatchers("/users").hasAnyAuthority("ROLE_ADMIN")
-                .requestMatchers("/users/*/dt_update/*").hasAnyAuthority("ROLE_ADMIN")
-                .requestMatchers("users/*").authenticated()
+                .requestMatchers(HttpMethod.POST, "/audit").authenticated()
+                .requestMatchers("/audit").hasAnyAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()
         );
 

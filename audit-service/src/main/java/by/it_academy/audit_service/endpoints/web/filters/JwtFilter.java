@@ -1,9 +1,9 @@
-package by.it_academy.user_service.endpoints.web.filters;
+package by.it_academy.audit_service.endpoints.web.filters;
 
+import by.it_academy.audit_service.service.api.IUserClientService;
+import by.it_academy.audit_service.utils.JwtTokenHandler;
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
-import by.it_academy.task_manager_common.entity.User;
-import by.it_academy.user_service.service.api.IUserService;
-import by.it_academy.user_service.utils.JwtTokenHandler;
+import by.it_academy.task_manager_common.dto.UserDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,15 +11,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.UUID;
 
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
@@ -28,13 +26,14 @@ import static org.apache.logging.log4j.util.Strings.isEmpty;
 public class JwtFilter
         extends OncePerRequestFilter {
 
-    private JwtTokenHandler jwtTokenHandler;
+    private final JwtTokenHandler jwtTokenHandler;
 
-    private IUserService userService;
+    private final ConversionService conversionService;
 
-    private ConversionService conversionService;
+    private final IUserClientService userService;
 
-    public JwtFilter(IUserService userService, JwtTokenHandler jwtTokenHandler, ConversionService conversionService) {
+
+    public JwtFilter(IUserClientService userService, JwtTokenHandler jwtTokenHandler, ConversionService conversionService) {
         this.userService = userService;
         this.jwtTokenHandler = jwtTokenHandler;
         this.conversionService = conversionService;
@@ -51,7 +50,7 @@ public class JwtFilter
         String token = header.split(" ")[1].trim();
         jwtTokenHandler.validate(token);
 
-        User user = this.userService.findByMail(jwtTokenHandler.getMail(token));
+        UserDto user = this.userService.get(header, UUID.fromString(jwtTokenHandler.getUuid(token)));
         UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
