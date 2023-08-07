@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -19,30 +20,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter filter) throws Exception {
         // Enable CORS and disable CSRF
-        http = http.cors().and().csrf().disable();
+        http = http.csrf(AbstractHttpConfigurer::disable);
 
         // Set session management to stateless
         http = http
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and();
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         // Set unauthorized requests exception handler
         http = http
-                .exceptionHandling()
-                .authenticationEntryPoint(
-                        (request, response, ex) -> {
-                            response.setStatus(
-                                    HttpServletResponse.SC_UNAUTHORIZED
-                            );
-                        }
-                )
-                .accessDeniedHandler((request, response, ex) -> {
-                    response.setStatus(
-                            HttpServletResponse.SC_FORBIDDEN
-                    );
-                })
-                .and();
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling
+                                .authenticationEntryPoint(
+                                        (request, response, ex) -> {
+                                            response.setStatus(
+                                                    HttpServletResponse.SC_UNAUTHORIZED
+                                            );
+                                        }
+                                )
+                                .accessDeniedHandler((request, response, ex) -> {
+                                    response.setStatus(
+                                            HttpServletResponse.SC_FORBIDDEN
+                                    );
+                                }));
 
         // Set permissions on endpoints
         http.authorizeHttpRequests(requests -> requests
