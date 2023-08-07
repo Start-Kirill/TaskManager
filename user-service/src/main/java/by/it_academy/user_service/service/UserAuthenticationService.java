@@ -82,6 +82,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         sendVerificationCode(dto.getMail(), code);
     }
 
+
     @Override
     public void verify(String code, String mail) {
 
@@ -107,7 +108,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         this.verificationCodeService.delete(verificationCode.getUuid(), verificationCode.getDtUpdate());
     }
 
-    //    TODO
+
     @Override
     public String login(UserLoginDto dto) {
         validate(dto);
@@ -220,7 +221,14 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     private void sendVerificationCode(String mail, String code) {
 
-        String text = verification.getUrl() + "?code=" + code + "&mail=" + mail;
+        StringBuilder text = new StringBuilder();
+
+        text.append(verification.getUrl())
+                .append("?code=")
+                .append(code)
+                .append("&mail=")
+                .append(mail);
+
 
         MimeMessage mimeMessage = emailSender.createMimeMessage();
 
@@ -228,7 +236,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
             mimeMessageHelper.setTo(mail);
             mimeMessageHelper.setSubject("Verification");
-            mimeMessageHelper.setText(text);
+            mimeMessageHelper.setText(text.toString());
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
