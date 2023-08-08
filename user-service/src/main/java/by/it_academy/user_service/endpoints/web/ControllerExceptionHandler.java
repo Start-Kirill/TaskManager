@@ -54,42 +54,59 @@ public class ControllerExceptionHandler {
 
     private static final String STATUS_DTO_FIELD_NAME = "status";
 
+    private static final String DATA_INCORRECT_OR_NOT_ENOUGH_MESSAGE = "Passed data is incorrect or not enough";
+
+    private static final String INVALID_UUID_MESSAGE = "Invalid UUID. Change the request and repeat";
+
+    private static final String INVALID_UPDATE_DATE_MESSAGE = "Invalid update date(version). Change the request and repeat";
+
+    private static final String INVALID_PAGE_MESSAGE = "Invalid page value. Change the request and repeat";
+
+    private static final String INVALID_SIZE_MESSAGE = "Invalid size value. Change the request and repeat";
+
+    private static final String SERVER_INTERNAL_ERROR_MESSAGE = "The server was unable to process the request correctly. Please contact administrator";
+
+    private static final String REQUEST_INVALID_DATA_MESSAGE = "The request contains invalid data. Change the request and send it again";
+
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<?> handlerMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         List<ErrorResponse> error = new ArrayList<>();
         if (UUID_FIELD_NAME.equals(ex.getPropertyName())) {
-            error.add(new ErrorResponse(ErrorType.ERROR, "Invalid UUID. Change the request and repeat"));
+            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_UUID_MESSAGE));
         } else if (DT_UPDATE_FIELD.equals(ex.getPropertyName())) {
-            error.add(new ErrorResponse(ErrorType.ERROR, "Invalid update date(version). Change the request and repeat"));
+            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_UPDATE_DATE_MESSAGE));
         } else if (PAGE_PARAM_NAME.equals(ex.getPropertyName())) {
-            error.add(new ErrorResponse(ErrorType.ERROR, "Invalid page value. Change the request and repeat"));
+            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_PAGE_MESSAGE));
         } else if (SIZE_PARAM_NAME.equals(ex.getPropertyName())) {
-            error.add(new ErrorResponse(ErrorType.ERROR, "Invalid size value. Change the request and repeat"));
+            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_SIZE_MESSAGE));
         } else {
-            error.add(new ErrorResponse(ErrorType.ERROR, "The request contains invalid data. Change the request and send it again"));
+            error.add(new ErrorResponse(ErrorType.ERROR, REQUEST_INVALID_DATA_MESSAGE));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handlerMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+
         BindingResult bindingResult = ex.getBindingResult();
         FieldError fieldError = bindingResult.getFieldError();
-        String field = fieldError.getField();
-        String message = fieldError.getDefaultMessage();
-        Map<String, String> errors = new HashMap<>();
-        switch (field) {
-            case FIO_DTO_FIELD_NAME -> errors.put(FIO_FIELD_NAME, message);
-            case MAIL_DTO_FIELD_NAME -> errors.put(MAIL_FIELD_NAME, message);
-            case ROLE_DTO_FIELD_NAME -> errors.put(ROLE_FIELD_NAME, message);
-            case STATUS_DTO_FIELD_NAME -> errors.put(STATUS_FIELD_NAME, message);
-            case PASSWORD_DTO_FIELD_NAME -> errors.put(PASSWORD_FIELD_NAME, message);
+        if (fieldError != null) {
+            String field = fieldError.getField();
+            String message = fieldError.getDefaultMessage();
+            switch (field) {
+                case FIO_DTO_FIELD_NAME -> errors.put(FIO_FIELD_NAME, message);
+                case MAIL_DTO_FIELD_NAME -> errors.put(MAIL_FIELD_NAME, message);
+                case ROLE_DTO_FIELD_NAME -> errors.put(ROLE_FIELD_NAME, message);
+                case STATUS_DTO_FIELD_NAME -> errors.put(STATUS_FIELD_NAME, message);
+                case PASSWORD_DTO_FIELD_NAME -> errors.put(PASSWORD_FIELD_NAME, message);
+            }
         }
 
         if (errors.isEmpty()) {
             List<ErrorResponse> errorResponses = new ArrayList<>();
-            errorResponses.add(new ErrorResponse(ErrorType.ERROR, "The request contains invalid data. Change the request and send it again"));
+            errorResponses.add(new ErrorResponse(ErrorType.ERROR, REQUEST_INVALID_DATA_MESSAGE));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponses);
         }
 
@@ -113,7 +130,7 @@ public class ControllerExceptionHandler {
         }
         if (errors.isEmpty()) {
             List<ErrorResponse> errorResponses = new ArrayList<>();
-            errorResponses.add(new ErrorResponse(ErrorType.ERROR, "The request contains invalid data. Change the request and send it again"));
+            errorResponses.add(new ErrorResponse(ErrorType.ERROR, REQUEST_INVALID_DATA_MESSAGE));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponses);
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new StructuredErrorResponse(ErrorType.STRUCTURED_ERROR, errors));
@@ -142,14 +159,14 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handlerHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         List<ErrorResponse> errors = new ArrayList<>();
-        errors.add(new ErrorResponse(ErrorType.ERROR, "Passed data is incorrect or not enough"));
+        errors.add(new ErrorResponse(ErrorType.ERROR, DATA_INCORRECT_OR_NOT_ENOUGH_MESSAGE));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> handlerNullPointerException(NullPointerException ex) {
         List<ErrorResponse> errors = new ArrayList<>();
-        errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
+        errors.add(new ErrorResponse(ErrorType.ERROR, SERVER_INTERNAL_ERROR_MESSAGE));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
     }
 

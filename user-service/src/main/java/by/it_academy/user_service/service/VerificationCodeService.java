@@ -1,7 +1,7 @@
 package by.it_academy.user_service.service;
 
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
-import by.it_academy.task_manager_common.entity.User;
+import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.user_service.core.dto.VerificationCodeCreateDto;
 import by.it_academy.user_service.dao.api.IVerificationCodeDao;

@@ -2,7 +2,7 @@ package by.it_academy.user_service.service;
 
 import by.it_academy.task_manager_common.dto.CustomPage;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
-import by.it_academy.task_manager_common.entity.User;
+import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;

@@ -1,7 +1,7 @@
 package by.it_academy.user_service.endpoints.web.controllers;
 
 import by.it_academy.task_manager_common.dto.UserDto;
-import by.it_academy.task_manager_common.entity.User;
+import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.core.dto.UserLoginDto;
 import by.it_academy.user_service.core.dto.UserRegistrationDto;
 import by.it_academy.user_service.service.api.IUserAuthenticationService;
