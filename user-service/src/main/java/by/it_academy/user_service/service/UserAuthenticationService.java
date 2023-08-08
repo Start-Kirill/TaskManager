@@ -17,6 +17,7 @@ import by.it_academy.user_service.service.api.IUserService;
 import by.it_academy.user_service.service.api.IVerificationCodeService;
 import by.it_academy.user_service.service.exceptions.common.DeactivatedUserException;
 import by.it_academy.user_service.service.exceptions.common.NotVerifyUserException;
+import by.it_academy.user_service.service.exceptions.structured.MailNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.NotCorrectPasswordException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import by.it_academy.user_service.utils.JwtTokenHandler;
@@ -129,10 +130,21 @@ public class UserAuthenticationService implements IUserAuthenticationService {
     @Override
     public String login(UserLoginDto dto) {
         validate(dto);
-        User user = this.userService.findByMail(dto.getMail());
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            Map<String, String> errors = new HashMap<>();
-            errors.put(PASSWORD_FIELD_NAME, "Not correct password");
+
+        Map<String, String> errors = new HashMap<>();
+        User user = null;
+        try {
+            user = this.userService.findByMail(dto.getMail());
+            if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+                errors.put(PASSWORD_FIELD_NAME, "Probably password is not correct");
+                errors.put(MAIL_FIELD_NAME, "Probably email is not correct");
+            }
+        } catch (MailNotExistsException ex) {
+            errors.put(PASSWORD_FIELD_NAME, "Probably password is not correct");
+            errors.put(MAIL_FIELD_NAME, "Probably email is not correct");
+        }
+
+        if (!errors.isEmpty()) {
             throw new NotCorrectPasswordException(errors);
         }
 
