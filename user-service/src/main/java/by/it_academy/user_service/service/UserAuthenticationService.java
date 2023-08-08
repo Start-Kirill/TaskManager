@@ -15,6 +15,7 @@ import by.it_academy.user_service.service.api.IUserAuditService;
 import by.it_academy.user_service.service.api.IUserAuthenticationService;
 import by.it_academy.user_service.service.api.IUserService;
 import by.it_academy.user_service.service.api.IVerificationCodeService;
+import by.it_academy.user_service.service.exceptions.common.DeactivatedUserException;
 import by.it_academy.user_service.service.exceptions.common.NotVerifyUserException;
 import by.it_academy.user_service.service.exceptions.structured.NotCorrectPasswordException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
@@ -92,7 +93,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         this.auditService.create(userDetails, user.getUuid(), "User was registered");
     }
 
-
+    @Transactional
     @Override
     public void verify(String code, String mail) {
 
@@ -131,6 +132,12 @@ public class UserAuthenticationService implements IUserAuthenticationService {
             errors.put(PASSWORD_FIELD_NAME, "Not correct password");
             throw new NotCorrectPasswordException(errors);
         }
+
+        UserStatus status = user.getStatus();
+        if (UserStatus.DEACTIVATED.equals(status)) {
+            throw new DeactivatedUserException(List.of(new ErrorResponse(ErrorType.ERROR, "Such user was blocked or deleted")));
+        }
+
         String token = this.tokenHandler.generateAccessToken(user.getUuid(), user.getMail(), user.getFio(), user.getRole());
 
         UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
@@ -218,13 +225,14 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         if (mail == null) {
             errors.put(MAIL_FIELD_NAME, "Mail is missing");
         } else if ("".equals(mail)) {
-            errors.put(MAIL_FIELD_NAME, "Mail not to be empty");
+            errors.put(MAIL_FIELD_NAME, "Mail must not to be empty");
         } else {
             EmailValidator emailValidator = EmailValidator.getInstance();
             if (!emailValidator.isValid(mail)) {
                 errors.put(MAIL_FIELD_NAME, "Invalid email format");
             }
         }
+
 
         String password = dto.getPassword();
 

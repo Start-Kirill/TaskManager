@@ -5,7 +5,9 @@ import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.UserRole;
-import by.it_academy.task_manager_common.exceptions.CommonErrorException;
+import by.it_academy.task_manager_common.exceptions.common.ExpiredTokenException;
+import by.it_academy.task_manager_common.exceptions.common.NotValidTokenException;
+import by.it_academy.task_manager_common.exceptions.common.NotValidTokenSignatureException;
 import io.jsonwebtoken.*;
 import org.springframework.stereotype.Component;
 
@@ -104,11 +106,11 @@ public class JwtTokenHandler {
         try {
             Jwts.parser().setSigningKey(jwtProperty.getSecret()).parseClaimsJws(token);
         } catch (SignatureException ex) {
-            throw new CommonErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "Token signature is not valid. Try to log in again")));
+            throw new NotValidTokenSignatureException(List.of(new ErrorResponse(ErrorType.ERROR, "Token signature is not valid. Try to log in again")));
         } catch (ExpiredJwtException ex) {
-            throw new CommonErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "Token is expired. Try to log in again")));
+            throw new ExpiredTokenException(List.of(new ErrorResponse(ErrorType.ERROR, "Token is expired. Try to log in again")));
         } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException ex) {
-            throw new CommonErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "Token is not valid. Try to log in again")));
+            throw new NotValidTokenException(List.of(new ErrorResponse(ErrorType.ERROR, "Token is not valid. Try to log in again")));
         }
     }
 

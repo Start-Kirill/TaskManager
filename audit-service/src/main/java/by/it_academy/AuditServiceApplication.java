@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @EnableTransactionManagement
 @EnableJpaRepositories
-@SpringBootApplication
 @EnableConfigurationProperties({JWTProperty.class})
 @EnableFeignClients
+@SpringBootApplication
 public class AuditServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(AuditServiceApplication.class, args);

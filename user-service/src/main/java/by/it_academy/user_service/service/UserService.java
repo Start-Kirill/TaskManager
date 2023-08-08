@@ -19,7 +19,6 @@ import by.it_academy.user_service.service.exceptions.commonInternal.UnknownConst
 import by.it_academy.user_service.service.exceptions.structured.MailNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import by.it_academy.user_service.service.support.passay.CyrillicEnglishCharacterData;
-import by.it_academy.user_service.utils.JwtTokenHandler;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.ConstraintViolationException;
 import org.passay.*;
@@ -66,16 +65,14 @@ public class UserService implements IUserService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final JwtTokenHandler tokenHandler;
-
     private final UserHolder userHolder;
 
-    public UserService(IUserDao userDao, ConversionService conversionService, IUserAuditService auditService, PasswordEncoder passwordEncoder, JwtTokenHandler tokenHandler, UserHolder userHolder) {
+
+    public UserService(IUserDao userDao, ConversionService conversionService, IUserAuditService auditService, PasswordEncoder passwordEncoder, UserHolder userHolder) {
         this.userDao = userDao;
         this.conversionService = conversionService;
         this.auditService = auditService;
         this.passwordEncoder = passwordEncoder;
-        this.tokenHandler = tokenHandler;
         this.userHolder = userHolder;
     }
 
