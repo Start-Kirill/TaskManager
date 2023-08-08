@@ -57,6 +57,8 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     private final AppProperty.Verification verification;
 
+    private final UserHolder userHolder;
+
 
     public UserAuthenticationService(IUserService userService,
                                      ConversionService conversionService,
@@ -65,7 +67,8 @@ public class UserAuthenticationService implements IUserAuthenticationService {
                                      IVerificationCodeService verificationCodeService,
                                      PasswordEncoder passwordEncoder,
                                      JwtTokenHandler tokenHandler,
-                                     IUserAuditService auditService) {
+                                     IUserAuditService auditService,
+                                     UserHolder userHolder) {
         this.userService = userService;
         this.conversionService = conversionService;
         this.emailSender = emailSender;
@@ -74,6 +77,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         this.passwordEncoder = passwordEncoder;
         this.tokenHandler = tokenHandler;
         this.auditService = auditService;
+        this.userHolder = userHolder;
     }
 
     @Transactional
@@ -148,8 +152,9 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
 
     @Override
-    public User getMe(UUID uuid) {
-        return this.userService.get(uuid);
+    public User getMe() {
+        UserDetailsImpl user = this.userHolder.getUser();
+        return this.userService.get(user.getUuid());
     }
 
     @Transactional

@@ -14,7 +14,7 @@ public interface IUserAuthenticationService {
 
     String login(UserLoginDto dto);
 
-    User getMe(UUID uuid);
+    User getMe();
 
     void sendCodeAgain(String mail);
 }
