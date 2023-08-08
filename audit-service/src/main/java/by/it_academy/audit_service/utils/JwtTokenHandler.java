@@ -9,14 +9,12 @@ import by.it_academy.task_manager_common.exceptions.common.ExpiredTokenException
 import by.it_academy.task_manager_common.exceptions.common.NotValidTokenException;
 import by.it_academy.task_manager_common.exceptions.common.NotValidTokenSignatureException;
 import io.jsonwebtoken.*;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@Component
 public class JwtTokenHandler {
 
     private static final String UUID_FIELD_NAME = "uuid";

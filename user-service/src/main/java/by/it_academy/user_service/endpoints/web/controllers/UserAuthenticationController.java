@@ -1,11 +1,9 @@
 package by.it_academy.user_service.endpoints.web.controllers;
 
 import by.it_academy.task_manager_common.dto.UserDto;
-import by.it_academy.task_manager_common.dto.UserDetailsImpl;
+import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.user_service.core.dto.UserLoginDto;
 import by.it_academy.user_service.core.dto.UserRegistrationDto;
-import by.it_academy.task_manager_common.entity.User;
-import by.it_academy.user_service.service.UserHolder;
 import by.it_academy.user_service.service.api.IUserAuthenticationService;
 import by.it_academy.user_service.utils.JwtTokenHandler;
 import org.springframework.core.convert.ConversionService;
@@ -22,17 +20,13 @@ public class UserAuthenticationController {
 
     private final JwtTokenHandler tokenHandler;
 
-    private final UserHolder userHolder;
-
     private final ConversionService conversionService;
 
     public UserAuthenticationController(IUserAuthenticationService userAuthenticationService,
                                         JwtTokenHandler tokenHandler,
-                                        UserHolder userHolder,
                                         ConversionService conversionService) {
         this.userAuthenticationService = userAuthenticationService;
         this.tokenHandler = tokenHandler;
-        this.userHolder = userHolder;
         this.conversionService = conversionService;
     }
 
@@ -59,14 +53,13 @@ public class UserAuthenticationController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.AUTHORIZATION, token);
 
-        return ResponseEntity.ok().headers(httpHeaders).build();
+        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(token);
     }
 
 
     @GetMapping("/me")
     public ResponseEntity<?> getMe() {
-        UserDetailsImpl user = this.userHolder.getUser();
-        User me = this.userAuthenticationService.getMe(user.getUuid());
+        User me = this.userAuthenticationService.getMe();
         UserDto userDto = this.conversionService.convert(me, UserDto.class);
         return ResponseEntity.status(HttpStatus.OK).body(userDto);
     }
