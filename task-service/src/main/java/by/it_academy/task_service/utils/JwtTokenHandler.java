@@ -4,7 +4,6 @@ import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.UserRole;
-import by.it_academy.task_manager_common.exceptions.CommonErrorException;
 import by.it_academy.task_manager_common.exceptions.common.ExpiredTokenException;
 import by.it_academy.task_manager_common.exceptions.common.NotValidTokenException;
 import by.it_academy.task_manager_common.exceptions.common.NotValidTokenSignatureException;
