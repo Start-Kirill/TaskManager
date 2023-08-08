@@ -2,7 +2,7 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://db:5432/task_service?ApplicationName=task-service
-    username: task-service
+    username: task_service
     password: q1w2e3r4
   jpa:
     hibernate:
@@ -17,3 +17,6 @@ server:
 jwt:
   secret: IjudckibNeWw0CzOuxn6YtQMGs3bsry2M534Fl7F/us=
   issuer: Kirill
+feign:
+  user:
+    url: http://user-service:8080/users

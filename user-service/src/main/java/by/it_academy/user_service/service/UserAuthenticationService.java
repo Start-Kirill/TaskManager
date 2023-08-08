@@ -1,6 +1,8 @@
 package by.it_academy.user_service.service;
 
+import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
+import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.user_service.config.property.AppProperty;
@@ -8,8 +10,8 @@ import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.core.dto.UserLoginDto;
 import by.it_academy.user_service.core.dto.UserRegistrationDto;
 import by.it_academy.user_service.core.dto.VerificationCodeCreateDto;
-import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.user_service.dao.entity.VerificationCode;
+import by.it_academy.user_service.service.api.IUserAuditService;
 import by.it_academy.user_service.service.api.IUserAuthenticationService;
 import by.it_academy.user_service.service.api.IUserService;
 import by.it_academy.user_service.service.api.IVerificationCodeService;
@@ -40,6 +42,8 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     private final IUserService userService;
 
+    private final IUserAuditService auditService;
+
     private final IVerificationCodeService verificationCodeService;
 
     private final ConversionService conversionService;
@@ -52,13 +56,15 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     private final AppProperty.Verification verification;
 
+
     public UserAuthenticationService(IUserService userService,
                                      ConversionService conversionService,
                                      JavaMailSender emailSender,
                                      AppProperty property,
                                      IVerificationCodeService verificationCodeService,
                                      PasswordEncoder passwordEncoder,
-                                     JwtTokenHandler tokenHandler) {
+                                     JwtTokenHandler tokenHandler,
+                                     IUserAuditService auditService) {
         this.userService = userService;
         this.conversionService = conversionService;
         this.emailSender = emailSender;
@@ -66,6 +72,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         this.verificationCodeService = verificationCodeService;
         this.passwordEncoder = passwordEncoder;
         this.tokenHandler = tokenHandler;
+        this.auditService = auditService;
     }
 
     @Transactional
@@ -80,6 +87,9 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         VerificationCodeCreateDto verificationCodeCreateDto = new VerificationCodeCreateDto(code, user);
         this.verificationCodeService.create(verificationCodeCreateDto);
         sendVerificationCode(dto.getMail(), code);
+
+        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
+        this.auditService.create(userDetails, user.getUuid(), "User was registered");
     }
 
 
@@ -106,6 +116,9 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         }
 
         this.verificationCodeService.delete(verificationCode.getUuid(), verificationCode.getDtUpdate());
+
+        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
+        this.auditService.create(userDetails, user.getUuid(), "User was activated");
     }
 
 
@@ -119,6 +132,10 @@ public class UserAuthenticationService implements IUserAuthenticationService {
             throw new NotCorrectPasswordException(errors);
         }
         String token = this.tokenHandler.generateAccessToken(user.getUuid(), user.getMail(), user.getFio(), user.getRole());
+
+        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
+        this.auditService.create(userDetails, user.getUuid(), "User was logged in");
+
         return token;
     }
 
@@ -139,6 +156,9 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         this.verificationCodeService.update(codeCreateDto, verificationCode.getUuid(), verificationCode.getDtUpdate());
 
         sendVerificationCode(mail, code);
+
+        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
+        this.auditService.create(userDetails, user.getUuid(), "Verification code was sent again");
     }
 
     private void validateMail(String mail) {

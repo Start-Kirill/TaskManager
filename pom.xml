@@ -14,6 +14,7 @@
     <modules>
         <module>user-service</module>
         <module>audit-service</module>
+        <module>task-service</module>
         <module>task-manager-common</module>
     </modules>
 

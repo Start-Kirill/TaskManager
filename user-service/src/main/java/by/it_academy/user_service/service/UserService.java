@@ -1,12 +1,9 @@
 package by.it_academy.user_service.service;
 
-import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
-import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.task_manager_common.enums.ErrorType;
-import by.it_academy.task_manager_common.enums.EssenceType;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.task_manager_common.exceptions.structured.NotCorrectPageDataException;
@@ -23,7 +20,6 @@ import by.it_academy.user_service.service.exceptions.structured.MailNotExistsExc
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import by.it_academy.user_service.service.support.passay.CyrillicEnglishCharacterData;
 import by.it_academy.user_service.utils.JwtTokenHandler;
-import jakarta.persistence.PrePersist;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.ConstraintViolationException;
 import org.passay.*;
@@ -32,7 +28,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -97,7 +92,7 @@ public class UserService implements IUserService {
             LocalDateTime now = LocalDateTime.now();
             user.setDateTimeCreate(now);
             user.setDateTimeUpdate(now);
-            User save = this.userDao.save(user);
+            User save = this.userDao.saveAndFlush(user);
 
             return save;
 
@@ -129,18 +124,12 @@ public class UserService implements IUserService {
 
     @Transactional
     @Override
-    public User auditedSave(UserCreateDto dto){
-        User save = save(dto);
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetailsImpl userDetails;
-        if ("anonymousUser".equals(principal)) {
-            userDetails = this.conversionService.convert(save, UserDetailsImpl.class);
-        } else {
-            userDetails = this.userHolder.getUser();
-        }
-        makeAudit(userDetails, save.getUuid(), "User was created");
+    public User auditedSave(UserCreateDto dto) {
+        User save = this.save(dto);
+        this.auditService.create(userHolder.getUser(), save.getUuid(), "User was created");
         return save;
     }
+
 
     @Transactional
     @Override
@@ -164,8 +153,8 @@ public class UserService implements IUserService {
         convertedUser.setDateTimeUpdate(user.getDateTimeUpdate());
 
         try {
-            User save = this.userDao.save(convertedUser);
-            makeAudit(this.userHolder.getUser(), save.getUuid(), "User was updated");
+            User save = this.userDao.saveAndFlush(convertedUser);
+            this.auditService.create(this.userHolder.getUser(), save.getUuid(), "User was updated");
             return save;
         } catch (DataIntegrityViolationException ex) {
             if (ex.contains(ConstraintViolationException.class)) {
@@ -346,22 +335,5 @@ public class UserService implements IUserService {
         }
 
     }
-
-    private void makeAudit(UserDetailsImpl userDetails, UUID createdUser, String message) {
-
-
-        String token = this.tokenHandler.generateAccessToken(userDetails);
-
-        AuditCreateDto auditCreateDto = new AuditCreateDto();
-
-        auditCreateDto.setUserToken(token);
-        auditCreateDto.setId(createdUser.toString());
-        auditCreateDto.setType(EssenceType.USER);
-        auditCreateDto.setText(message);
-
-
-        this.auditService.create("Bearer " + token, auditCreateDto);
-    }
-
 
 }
