@@ -68,7 +68,11 @@ public class UserService implements IUserService {
     private final UserHolder userHolder;
 
 
-    public UserService(IUserDao userDao, ConversionService conversionService, IUserAuditService auditService, PasswordEncoder passwordEncoder, UserHolder userHolder) {
+    public UserService(IUserDao userDao,
+                       ConversionService conversionService,
+                       IUserAuditService auditService,
+                       PasswordEncoder passwordEncoder,
+                       UserHolder userHolder) {
         this.userDao = userDao;
         this.conversionService = conversionService;
         this.auditService = auditService;

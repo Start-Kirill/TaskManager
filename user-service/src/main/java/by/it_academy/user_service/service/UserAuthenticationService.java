@@ -101,7 +101,6 @@ public class UserAuthenticationService implements IUserAuthenticationService {
     @Override
     public void verify(String code, String mail) {
 
-        validateMail(mail);
         List<ErrorResponse> errors = new ArrayList<>();
 
         User user = this.userService.findByMail(mail);
