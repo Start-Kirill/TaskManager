@@ -1,4 +1,4 @@
-package by.it_academy.audit_service.endpoints.web.support.converters;
+package by.it_academy.audit_service.endpoints.web.support.spring.converters;
 
 import by.it_academy.audit_service.core.dto.AuditDto;
 import by.it_academy.audit_service.dao.entity.Audit;

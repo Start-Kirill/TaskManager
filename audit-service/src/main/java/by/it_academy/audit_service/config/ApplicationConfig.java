@@ -2,7 +2,7 @@ package by.it_academy.audit_service.config;
 
 import by.it_academy.audit_service.config.property.JWTProperty;
 import by.it_academy.audit_service.dao.entity.Audit;
-import by.it_academy.audit_service.endpoints.web.support.converters.GenericAuditDtoConverter;
+import by.it_academy.audit_service.endpoints.web.support.spring.converters.GenericAuditDtoConverter;
 import by.it_academy.audit_service.service.support.spring.converters.GenericAuditConverter;
 import by.it_academy.audit_service.utils.JwtTokenHandler;
 import by.it_academy.task_manager_common.support.spring.converters.PageToCustomPageConverter;

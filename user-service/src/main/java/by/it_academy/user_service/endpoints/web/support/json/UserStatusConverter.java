@@ -13,11 +13,11 @@ public class UserStatusConverter extends StdConverter<String, UserStatus> {
 
     @Override
     public UserStatus convert(String status) {
-        if (UserStatus.WAITING_ACTIVATION.getName().equals(status)) {
+        if (UserStatus.WAITING_ACTIVATION.toString().equals(status)) {
             return UserStatus.WAITING_ACTIVATION;
-        } else if (UserStatus.ACTIVATED.getName().equals(status)) {
+        } else if (UserStatus.ACTIVATED.toString().equals(status)) {
             return UserStatus.ACTIVATED;
-        } else if (UserStatus.DEACTIVATED.getName().equals(status)) {
+        } else if (UserStatus.DEACTIVATED.toString().equals(status)) {
             return UserStatus.DEACTIVATED;
         } else {
             Map<String, String> errors = new HashMap<>();

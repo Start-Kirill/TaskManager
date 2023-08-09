@@ -14,13 +14,13 @@ public class UserRoleConverter extends StdConverter<String, UserRole> {
     @Override
     public UserRole convert(String s) {
 
-        if (UserRole.USER.getName().equals(s)) {
+        if (UserRole.USER.toString().equals(s)) {
             return UserRole.USER;
-        } else if (UserRole.ADMIN.getName().equals(s)) {
+        } else if (UserRole.ADMIN.toString().equals(s)) {
             return UserRole.ADMIN;
-        } else if (UserRole.MANAGER.getName().equals(s)) {
+        } else if (UserRole.MANAGER.toString().equals(s)) {
             return UserRole.MANAGER;
-        } else if (UserRole.SYSTEM.getName().equals(s)) {
+        } else if (UserRole.SYSTEM.toString().equals(s)) {
             return UserRole.SYSTEM;
         } else {
             Map<String, String> errors = new HashMap<>();

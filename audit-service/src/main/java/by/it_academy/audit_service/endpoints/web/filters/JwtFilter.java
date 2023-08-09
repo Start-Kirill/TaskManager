@@ -55,12 +55,12 @@ public class JwtFilter
         jwtTokenHandler.validate(token);
 
         UserDetailsImpl userDetails = null;
-        if (UserRole.SYSTEM.getName().equals(jwtTokenHandler.getRole(token))) {
+        if (UserRole.SYSTEM.getRoleName().equals(jwtTokenHandler.getRole(token))) {
             userDetails = new UserDetailsImpl();
             userDetails.setRole(UserRole.SYSTEM);
             userDetails.setUsername(jwtTokenHandler.getMail(token));
             userDetails.setPassword("System");
-            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + UserRole.SYSTEM.getName()));
+            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(UserRole.SYSTEM.getRoleName()));
             userDetails.setAuthorities(authorities);
         } else {
             UserDto user = this.userService.get(header, UUID.fromString(jwtTokenHandler.getUuid(token)));

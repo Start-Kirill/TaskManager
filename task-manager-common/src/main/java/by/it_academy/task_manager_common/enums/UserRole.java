@@ -1,16 +1,16 @@
 package by.it_academy.task_manager_common.enums;
 
 public enum UserRole {
-    ADMIN("ADMIN"), USER("USER"), MANAGER("MANAGER"), SYSTEM("SYSTEM");
+    ADMIN("ROLE_ADMIN"), USER("ROLE_USER"), MANAGER("ROLE_MANAGER"), SYSTEM("ROLE_SYSTEM");
 
-    private String name;
+    private String roleName;
 
     UserRole(String name) {
-        this.name = name;
+        this.roleName = name;
     }
 
-    public String getName() {
-        return name;
+    public String getRoleName() {
+        return roleName;
     }
 
 }
