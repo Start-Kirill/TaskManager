@@ -1,39 +1,44 @@
-package by.it_academy.task_service.dao.entity;
+package by.it_academy.task_service.core.dto;
 
+import by.it_academy.task_manager_common.support.json.converters.LocalDateTimeToMillisecondsConverter;
+import by.it_academy.task_manager_common.support.json.converters.MillisecondsToLocalDateTimeConverter;
 import by.it_academy.task_service.core.enums.ProjectStatus;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
-public class Project {
+public class ProjectDto {
 
-    @Id
     private UUID uuid;
 
-    @Column(name = "dt_create")
+    @JsonProperty("dt_create")
+    @JsonSerialize(converter =  LocalDateTimeToMillisecondsConverter.class)
+    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
     private LocalDateTime dtCreate;
 
-    @Column(name = "dt_update")
+    @JsonProperty("dt_update")
+    @JsonSerialize(converter =  LocalDateTimeToMillisecondsConverter.class)
+    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
     private LocalDateTime dtUpdate;
 
     private String name;
 
     private String description;
 
-    private UUID manager;
+    private UserRef manager;
 
-    private List<UUID> staff;
+    private List<UserRef> staff;
 
-    @Enumerated(EnumType.STRING)
     private ProjectStatus status;
 
-    public Project() {
+    public ProjectDto() {
     }
 
-    public Project(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, String name, String description, UUID manager, List<UUID> staff, ProjectStatus status) {
+    public ProjectDto(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, String name, String description, UserRef manager, List<UserRef> staff, ProjectStatus status) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
@@ -84,19 +89,19 @@ public class Project {
         this.description = description;
     }
 
-    public UUID getManager() {
+    public UserRef getManager() {
         return manager;
     }
 
-    public void setManager(UUID manager) {
+    public void setManager(UserRef manager) {
         this.manager = manager;
     }
 
-    public List<UUID> getStaff() {
+    public List<UserRef> getStaff() {
         return staff;
     }
 
-    public void setStaff(List<UUID> staff) {
+    public void setStaff(List<UserRef> staff) {
         this.staff = staff;
     }
 

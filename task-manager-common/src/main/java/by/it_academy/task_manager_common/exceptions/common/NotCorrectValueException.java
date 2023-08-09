@@ -1,4 +1,4 @@
-package by.it_academy.user_service.endpoints.web.exceptions;
+package by.it_academy.task_manager_common.exceptions.common;
 
 import by.it_academy.task_manager_common.exceptions.CommonErrorException;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;

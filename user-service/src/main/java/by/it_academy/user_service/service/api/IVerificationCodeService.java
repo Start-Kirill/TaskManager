@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface IVerificationCodeService {
 
-    VerificationCode create(VerificationCodeCreateDto dto);
+    VerificationCode save(VerificationCodeCreateDto dto);
 
     VerificationCode update(VerificationCodeCreateDto dto, UUID uuid, LocalDateTime dtUpdate);
 
@@ -18,5 +18,7 @@ public interface IVerificationCodeService {
     VerificationCode get(UUID uuid);
 
     VerificationCode getByUser(User user);
+
+    String generateCode();
 
 }

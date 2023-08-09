@@ -38,9 +38,9 @@ CREATE TABLE app.audit
 (
     uuid uuid,
     dt_create timestamp without time zone NOT NULL,
-    user_uuid uuid NOT NULL,
-    user_mail text NOT NULL,
-    user_fio text NOT NULL,
+    user_uuid uuid,
+    user_mail text,
+    user_fio text,
     user_role text NOT NULL,
     text text NOT NULL,
     type text NOT NULL,

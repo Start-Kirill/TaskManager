@@ -10,7 +10,6 @@ import java.util.UUID;
 
 public interface IUserDao extends
         JpaRepository<User, UUID>,
-        ListCrudRepository<User, UUID>,
         ListPagingAndSortingRepository<User, UUID> {
     Optional<User> findByMail(String mail);
 

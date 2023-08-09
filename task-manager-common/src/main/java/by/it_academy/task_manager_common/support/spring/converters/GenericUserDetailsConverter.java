@@ -39,12 +39,10 @@ public class GenericUserDetailsConverter implements GenericConverter {
         userDetails.setRole(user.getRole());
         userDetails.setStatus(user.getStatus());
 
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getRole().getRoleName()));
         userDetails.setAuthorities(authorities);
 
 
         return userDetails;
-
-
     }
 }

@@ -33,7 +33,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody UserCreateDto dto) {
-        this.userService.auditedSave(dto);
+        this.userService.saveByUser(dto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

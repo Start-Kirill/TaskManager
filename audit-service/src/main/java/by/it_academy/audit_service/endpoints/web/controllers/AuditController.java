@@ -51,7 +51,7 @@ public class AuditController {
         return ResponseEntity.status(HttpStatus.OK).body(auditDto);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER') or hasRole('ROLE_SYSTEM')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody AuditCreateDto dto) {
         this.auditService.create(dto);

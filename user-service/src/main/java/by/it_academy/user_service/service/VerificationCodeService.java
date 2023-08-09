@@ -1,10 +1,10 @@
 package by.it_academy.user_service.service;
 
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
-import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.user_service.core.dto.VerificationCodeCreateDto;
 import by.it_academy.user_service.dao.api.IVerificationCodeDao;
+import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.dao.entity.VerificationCode;
 import by.it_academy.user_service.service.api.IVerificationCodeService;
 import by.it_academy.user_service.service.exceptions.common.VerificationCodeNotExistsException;
@@ -40,7 +40,7 @@ public class VerificationCodeService implements IVerificationCodeService {
 
     @Transactional
     @Override
-    public VerificationCode create(VerificationCodeCreateDto dto) {
+    public VerificationCode save(VerificationCodeCreateDto dto) {
         try {
             VerificationCode verificationCode = this.conversionService.convert(dto, VerificationCode.class);
             return this.verificationCodeDao.save(verificationCode);
@@ -108,6 +108,12 @@ public class VerificationCodeService implements IVerificationCodeService {
         throw new VerificationCodeNotExistsException(List.of(new ErrorResponse(ErrorType.ERROR, "Code for such user not exists")));
 
     }
+
+    @Override
+    public String generateCode() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
 
     @Transactional(readOnly = true)
     @Override

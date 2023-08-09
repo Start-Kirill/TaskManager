@@ -1,8 +1,8 @@
-package by.it_academy.user_service.endpoints.web.support.converters;
+package by.it_academy.task_manager_common.support.spring.formatters;
 
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
-import by.it_academy.user_service.endpoints.web.exceptions.NotCorrectValueException;
+import by.it_academy.task_manager_common.exceptions.common.NotCorrectValueException;
 import org.springframework.format.Formatter;
 
 import java.text.ParseException;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class LocalDateTimeToMilliFormatter implements Formatter<LocalDateTime> {
+public class MilliToLocalDateTimeFormatter implements Formatter<LocalDateTime> {
 
 
     @Override

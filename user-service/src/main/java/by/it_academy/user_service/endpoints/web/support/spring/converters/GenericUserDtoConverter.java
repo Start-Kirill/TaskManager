@@ -1,4 +1,4 @@
-package by.it_academy.user_service.endpoints.web.support.converters;
+package by.it_academy.user_service.endpoints.web.support.spring.converters;
 
 import by.it_academy.task_manager_common.dto.UserDto;
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;

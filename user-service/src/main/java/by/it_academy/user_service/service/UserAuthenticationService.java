@@ -2,7 +2,6 @@ package by.it_academy.user_service.service;
 
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
-import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.user_service.config.property.AppProperty;
@@ -10,28 +9,25 @@ import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.core.dto.UserLoginDto;
 import by.it_academy.user_service.core.dto.UserRegistrationDto;
 import by.it_academy.user_service.core.dto.VerificationCodeCreateDto;
+import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.dao.entity.VerificationCode;
-import by.it_academy.user_service.service.api.IUserAuditService;
-import by.it_academy.user_service.service.api.IUserAuthenticationService;
-import by.it_academy.user_service.service.api.IUserService;
-import by.it_academy.user_service.service.api.IVerificationCodeService;
+import by.it_academy.user_service.service.api.*;
 import by.it_academy.user_service.service.exceptions.common.DeactivatedUserException;
 import by.it_academy.user_service.service.exceptions.common.NotVerifyUserException;
 import by.it_academy.user_service.service.exceptions.structured.MailNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.NotCorrectPasswordException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import by.it_academy.user_service.utils.JwtTokenHandler;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserAuthenticationService implements IUserAuthenticationService {
@@ -50,8 +46,6 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     private final ConversionService conversionService;
 
-    private final JavaMailSender emailSender;
-
     private final PasswordEncoder passwordEncoder;
 
     private final JwtTokenHandler tokenHandler;
@@ -60,25 +54,27 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     private final UserHolder userHolder;
 
+    private final INotificationService mailSenderService;
+
 
     public UserAuthenticationService(IUserService userService,
                                      ConversionService conversionService,
-                                     JavaMailSender emailSender,
                                      AppProperty property,
                                      IVerificationCodeService verificationCodeService,
                                      PasswordEncoder passwordEncoder,
                                      JwtTokenHandler tokenHandler,
                                      IUserAuditService auditService,
-                                     UserHolder userHolder) {
+                                     UserHolder userHolder,
+                                     INotificationService mailSenderService) {
         this.userService = userService;
         this.conversionService = conversionService;
-        this.emailSender = emailSender;
         this.verification = property.getVerification();
         this.verificationCodeService = verificationCodeService;
         this.passwordEncoder = passwordEncoder;
         this.tokenHandler = tokenHandler;
         this.auditService = auditService;
         this.userHolder = userHolder;
+        this.mailSenderService = mailSenderService;
     }
 
     @Transactional
@@ -88,14 +84,14 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         validate(dto);
 
         UserCreateDto userCreateDto = this.conversionService.convert(dto, UserCreateDto.class);
-        String code = UUID.randomUUID().toString().replace("-", "");
         User user = this.userService.save(userCreateDto);
-        VerificationCodeCreateDto verificationCodeCreateDto = new VerificationCodeCreateDto(code, user);
-        this.verificationCodeService.create(verificationCodeCreateDto);
-        sendVerificationCode(dto.getMail(), code);
 
-        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
-        this.auditService.create(userDetails, user.getUuid(), "User was registered");
+        String code = this.verificationCodeService.generateCode();
+        VerificationCodeCreateDto verificationCodeCreateDto = new VerificationCodeCreateDto(code, user);
+        this.verificationCodeService.save(verificationCodeCreateDto);
+        sendVerificationCode(dto.getMail());
+
+        this.auditService.saveBySystem(user.getUuid(), "User was registered");
     }
 
     @Transactional
@@ -123,7 +119,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         this.verificationCodeService.delete(verificationCode.getUuid(), verificationCode.getDtUpdate());
 
         UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
-        this.auditService.create(userDetails, user.getUuid(), "User was activated");
+        this.auditService.save(userDetails, user.getUuid(), "User was activated");
     }
 
 
@@ -156,12 +152,13 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         String token = this.tokenHandler.generateAccessToken(user.getUuid(), user.getMail(), user.getFio(), user.getRole());
 
         UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
-        this.auditService.create(userDetails, user.getUuid(), "User was logged in");
+        this.auditService.save(userDetails, user.getUuid(), "User was logged in");
 
         return token;
     }
 
 
+    @Transactional(readOnly = true)
     @Override
     public User getMe() {
         UserDetailsImpl user = this.userHolder.getUser();
@@ -171,36 +168,16 @@ public class UserAuthenticationService implements IUserAuthenticationService {
     @Transactional
     @Override
     public void sendCodeAgain(String mail) {
-        validateMail(mail);
         User user = this.userService.findByMail(mail);
-        String code = UUID.randomUUID().toString().replace("-", "");
+
+        String code = this.verificationCodeService.generateCode();
         VerificationCode verificationCode = this.verificationCodeService.getByUser(user);
         VerificationCodeCreateDto codeCreateDto = new VerificationCodeCreateDto(code, user);
         this.verificationCodeService.update(codeCreateDto, verificationCode.getUuid(), verificationCode.getDtUpdate());
 
-        sendVerificationCode(mail, code);
+        sendVerificationCode(mail);
 
-        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
-        this.auditService.create(userDetails, user.getUuid(), "Verification code was sent again");
-    }
-
-    private void validateMail(String mail) {
-        List<ErrorResponse> errors = new ArrayList<>();
-
-        if (mail == null) {
-            errors.add(new ErrorResponse(ErrorType.ERROR, "Mail is missing"));
-        } else if ("".equals(mail)) {
-            errors.add(new ErrorResponse(ErrorType.ERROR, "Mail not to be empty"));
-        } else {
-            EmailValidator emailValidator = EmailValidator.getInstance();
-            if (!emailValidator.isValid(mail)) {
-                errors.add(new ErrorResponse(ErrorType.ERROR, "Invalid email format"));
-            }
-        }
-
-        if (!errors.isEmpty()) {
-            throw new NotVerifyUserException(errors);
-        }
+        this.auditService.saveBySystem(user.getUuid(), "Verification code was sent again");
     }
 
     private void validate(UserRegistrationDto dto) {
@@ -263,28 +240,21 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         }
     }
 
-    private void sendVerificationCode(String mail, String code) {
+    private void sendVerificationCode(String mail) {
+        String text = buildVerificationUrl(mail);
+        this.mailSenderService.send(mail, text, "Verification");
+    }
+
+    private String buildVerificationUrl(String mail) {
 
         StringBuilder text = new StringBuilder();
 
         text.append(verification.getUrl())
                 .append("?code=")
-                .append(code)
+                .append(this.verificationCodeService.generateCode())
                 .append("&mail=")
                 .append(mail);
 
-
-        MimeMessage mimeMessage = emailSender.createMimeMessage();
-
-        try {
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
-            mimeMessageHelper.setTo(mail);
-            mimeMessageHelper.setSubject("Verification");
-            mimeMessageHelper.setText(text.toString());
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        }
-
-        emailSender.send(mimeMessage);
+        return text.toString();
     }
 }

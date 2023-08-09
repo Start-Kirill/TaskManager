@@ -44,17 +44,28 @@ public class GenericAuditConverter implements GenericConverter {
 
         String userToken = auditCreateDto.getUserToken();
 
-        audit.setUserUuid(UUID.fromString(tokenHandler.getUuid(userToken)));
-        audit.setUserMail(tokenHandler.getMail(userToken));
-        audit.setUserFio(tokenHandler.getFio(userToken));
+        if(UserRole.SYSTEM.getRoleName().equals(tokenHandler.getRole(userToken))){
+            audit.setUserRole(UserRole.SYSTEM);
+        }else{
+            audit.setUserUuid(UUID.fromString(tokenHandler.getUuid(userToken)));
+            audit.setUserMail(tokenHandler.getMail(userToken));
+            audit.setUserFio(tokenHandler.getFio(userToken));
 
-
-        audit.setUserRole("ADMIN".equals(tokenHandler.getRole(userToken)) ? UserRole.ADMIN : UserRole.USER);
+            UserRole role;
+            String handlerRole = tokenHandler.getRole(userToken);
+            if (UserRole.ADMIN.getRoleName().equals(handlerRole)) {
+                role = UserRole.ADMIN;
+            } else if (UserRole.USER.getRoleName().equals(handlerRole)) {
+                role = UserRole.USER;
+            } else {
+                role = UserRole.MANAGER;
+            }
+            audit.setUserRole(role);
+        }
 
         audit.setText(auditCreateDto.getText());
         audit.setType(auditCreateDto.getType());
         audit.setId(auditCreateDto.getId());
-
 
         return audit;
     }

@@ -1,11 +1,11 @@
 package by.it_academy.user_service.config;
 
-import by.it_academy.task_manager_common.support.spring.converters.CustomPageConverter;
+import by.it_academy.task_manager_common.support.spring.converters.PageToCustomPageConverter;
 import by.it_academy.task_manager_common.support.spring.converters.GenericUserDetailsConverter;
 import by.it_academy.user_service.dao.entity.User;
-import by.it_academy.user_service.endpoints.web.support.converters.GenericUserDtoConverter;
-import by.it_academy.user_service.endpoints.web.support.converters.LocalDateTimeToMilliFormatter;
-import by.it_academy.user_service.endpoints.web.support.converters.UserToUserDetailsConverter;
+import by.it_academy.user_service.endpoints.web.support.spring.converters.GenericUserDtoConverter;
+import by.it_academy.task_manager_common.support.spring.formatters.MilliToLocalDateTimeFormatter;
+import by.it_academy.user_service.endpoints.web.support.spring.converters.UserToUserDetailsConverter;
 import by.it_academy.user_service.service.support.converters.GenericUserConverter;
 import by.it_academy.user_service.service.support.converters.GenericUserCreateDtoConverter;
 import by.it_academy.user_service.service.support.converters.GenericVerificationCodeConverter;
@@ -27,15 +27,15 @@ public class ApplicationConfig implements WebMvcConfigurer {
         registry.addFormatterForFieldType(LocalDateTime.class, localDateTimeToMilliConverter());
         registry.addConverter(new GenericUserDtoConverter());
         registry.addConverter(new GenericUserCreateDtoConverter());
-        registry.addConverter(new CustomPageConverter<User>());
+        registry.addConverter(new PageToCustomPageConverter<User>());
         registry.addConverter(new GenericVerificationCodeConverter());
         registry.addConverter(new GenericUserDetailsConverter());
         registry.addConverter(new UserToUserDetailsConverter());
     }
 
     @Bean
-    public LocalDateTimeToMilliFormatter localDateTimeToMilliConverter() {
-        return new LocalDateTimeToMilliFormatter();
+    public MilliToLocalDateTimeFormatter localDateTimeToMilliConverter() {
+        return new MilliToLocalDateTimeFormatter();
     }
 
     @Bean
