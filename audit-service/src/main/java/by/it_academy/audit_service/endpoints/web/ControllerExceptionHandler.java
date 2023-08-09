@@ -26,7 +26,7 @@ public class ControllerExceptionHandler {
 
     private static final String SIZE_PARAM_NAME = "size";
 
-    private static final String DATA_INCORRECT_OR_NOT_ENOUGH_MESSAGE = "Passed data is incorrect or not enough";
+    private static final String INCORRECT_DATA_OR_NOT_ENOUGH_MESSAGE = "Passed data is incorrect or not enough";
 
     private static final String INVALID_UUID_MESSAGE = "Invalid UUID. Change the request and repeat";
 
@@ -61,7 +61,7 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handlerHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         List<ErrorResponse> errors = new ArrayList<>();
-        errors.add(new ErrorResponse(ErrorType.ERROR, DATA_INCORRECT_OR_NOT_ENOUGH_MESSAGE));
+        errors.add(new ErrorResponse(ErrorType.ERROR, INCORRECT_DATA_OR_NOT_ENOUGH_MESSAGE));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 

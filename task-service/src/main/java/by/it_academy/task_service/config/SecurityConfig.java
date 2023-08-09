@@ -3,12 +3,18 @@ package by.it_academy.task_service.config;
 import by.it_academy.task_service.endpoints.web.filters.JwtFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity(jsr250Enabled = true, securedEnabled = true)
 public class SecurityConfig {
 
     @Bean
@@ -39,19 +45,6 @@ public class SecurityConfig {
                                             HttpServletResponse.SC_FORBIDDEN
                                     );
                                 }));
-
-        // Set permissions on endpoints
-//        http.authorizeHttpRequests(requests -> requests
-//                .requestMatchers("/users/login").permitAll()
-//                .requestMatchers("users/registration").permitAll()
-//                .requestMatchers("users/verification/*").permitAll()
-//                .requestMatchers("users/verification").permitAll()
-//                .requestMatchers("/users/me").authenticated()
-//                .requestMatchers("/users").hasAnyAuthority("ROLE_ADMIN")
-//                .requestMatchers("/users/*/dt_update/*").hasAnyAuthority("ROLE_ADMIN")
-//                .requestMatchers("users/*").authenticated()
-//                .anyRequest().authenticated()
-//        );
 
         // Add JWT token filter
         http.addFilterBefore(
