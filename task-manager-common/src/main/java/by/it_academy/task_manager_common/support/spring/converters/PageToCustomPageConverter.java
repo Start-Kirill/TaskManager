@@ -5,7 +5,7 @@ import by.it_academy.task_manager_common.dto.CustomPage;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 
-public class CustomPageConverter<T> implements Converter<Page<T>, CustomPage<T>> {
+public class PageToCustomPageConverter<T> implements Converter<Page<T>, CustomPage<T>> {
     
     @Override
     public CustomPage<T> convert(Page<T> source) {

@@ -11,8 +11,6 @@ public interface ICRUDService<E, C> {
 
     E update(C c, UUID uuid, LocalDateTime dtUpdate);
 
-    CustomPage<E> get();
-
     E get(UUID uuid);
 
 }
