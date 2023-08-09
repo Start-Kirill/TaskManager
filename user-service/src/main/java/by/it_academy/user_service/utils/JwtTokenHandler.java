@@ -1,14 +1,13 @@
 package by.it_academy.user_service.utils;
 
+import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.UserRole;
-import by.it_academy.task_manager_common.exceptions.CommonErrorException;
 import by.it_academy.task_manager_common.exceptions.common.ExpiredTokenException;
 import by.it_academy.task_manager_common.exceptions.common.NotValidTokenException;
 import by.it_academy.task_manager_common.exceptions.common.NotValidTokenSignatureException;
 import by.it_academy.user_service.config.property.JWTProperty;
-import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import org.springframework.stereotype.Component;
 
@@ -40,22 +39,31 @@ public class JwtTokenHandler {
     }
 
     public String generateAccessToken(UUID uuid, String mail, String fio, UserRole role) {
-        try {
-            String compact = Jwts.builder()
-                    .setSubject(mail)
-                    .claim(UUID_FIELD_NAME, uuid)
-                    .claim(FIO_FIELD_NAME, fio)
-                    .claim(ROLE_FIELD_NAME, role)
-                    .setIssuer(jwtProperty.getIssuer())
-                    .setIssuedAt(new Date())
-                    .setExpiration(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)))
-                    .signWith(SignatureAlgorithm.HS256, jwtProperty.getSecret())
-                    .compact();
-            return compact;
-        }catch (Exception ex){
-           throw new RuntimeException(ex.getCause());
+        String compact = Jwts.builder()
+                .setSubject(mail)
+                .claim(UUID_FIELD_NAME, uuid)
+                .claim(FIO_FIELD_NAME, fio)
+                .claim(ROLE_FIELD_NAME, role)
+                .setIssuer(jwtProperty.getIssuer())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)))
+                .signWith(SignatureAlgorithm.HS256, jwtProperty.getSecret())
+                .compact();
+        return compact;
+    }
 
-        }
+    public String generateSystemAccessToken() {
+
+        String compact = Jwts.builder()
+                .setSubject("System")
+                .claim(ROLE_FIELD_NAME, UserRole.SYSTEM)
+                .setIssuer(jwtProperty.getIssuer())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)))
+                .signWith(SignatureAlgorithm.HS256, jwtProperty.getSecret())
+                .compact();
+
+        return compact;
     }
 
     public String getMail(String token) {

@@ -9,6 +9,6 @@ public interface IUserService extends ICRUDService<User, UserCreateDto> {
 
     boolean existsByMail(String mail);
 
-    User auditedSave(UserCreateDto dto);
+    User saveByUser(UserCreateDto dto);
 
 }

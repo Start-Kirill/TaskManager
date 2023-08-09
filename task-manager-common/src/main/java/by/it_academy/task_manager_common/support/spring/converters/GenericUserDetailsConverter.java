@@ -44,7 +44,5 @@ public class GenericUserDetailsConverter implements GenericConverter {
 
 
         return userDetails;
-
-
     }
 }

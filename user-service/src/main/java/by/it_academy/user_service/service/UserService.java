@@ -2,13 +2,13 @@ package by.it_academy.user_service.service;
 
 import by.it_academy.task_manager_common.dto.CustomPage;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
-import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.task_manager_common.exceptions.structured.NotCorrectPageDataException;
 import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.dao.api.IUserDao;
+import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserAuditService;
 import by.it_academy.user_service.service.api.IUserService;
 import by.it_academy.user_service.service.exceptions.common.UserNotExistsException;
@@ -29,7 +29,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -81,7 +80,7 @@ public class UserService implements IUserService {
     }
 
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Override
     public User save(UserCreateDto dto) {
         validate(dto);
@@ -125,9 +124,9 @@ public class UserService implements IUserService {
 
     @Transactional
     @Override
-    public User auditedSave(UserCreateDto dto) {
+    public User saveByUser(UserCreateDto dto) {
         User save = this.save(dto);
-        this.auditService.create(userHolder.getUser(), save.getUuid(), "User was created");
+        this.auditService.save(userHolder.getUser(), save.getUuid(), "User was created");
         return save;
     }
 
@@ -155,7 +154,7 @@ public class UserService implements IUserService {
 
         try {
             User save = this.userDao.saveAndFlush(convertedUser);
-            this.auditService.create(this.userHolder.getUser(), save.getUuid(), "User was updated");
+            this.auditService.save(this.userHolder.getUser(), save.getUuid(), "User was updated");
             return save;
         } catch (DataIntegrityViolationException ex) {
             if (ex.contains(ConstraintViolationException.class)) {

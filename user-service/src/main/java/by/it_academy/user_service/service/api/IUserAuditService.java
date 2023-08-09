@@ -7,8 +7,12 @@ import java.util.UUID;
 
 public interface IUserAuditService {
 
-    void create(String header ,AuditCreateDto dto);
+    void save(String header, AuditCreateDto dto);
 
-    void create(UserDetailsImpl userDetails, UUID createdUser, String message);
+    void save(UserDetailsImpl userDetails, UUID performedUser, String message);
+
+    void save(String token, String performedUser, String message);
+
+    void saveBySystem(UUID performedUser, String message);
 
 }

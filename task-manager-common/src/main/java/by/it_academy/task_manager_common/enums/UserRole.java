@@ -1,7 +1,7 @@
 package by.it_academy.task_manager_common.enums;
 
 public enum UserRole {
-    ADMIN("ADMIN"), USER("USER"), MANAGER("MANAGER");
+    ADMIN("ADMIN"), USER("USER"), MANAGER("MANAGER"), SYSTEM("SYSTEM");
 
     private String name;
 

@@ -45,12 +45,6 @@ public class SecurityConfig {
                                     );
                                 }));
 
-        // Set permissions on endpoints
-        http.authorizeHttpRequests(requests -> requests
-                .requestMatchers(HttpMethod.POST, "/audit").authenticated()
-                .requestMatchers("/audit").hasAnyAuthority("ROLE_ADMIN")
-                .anyRequest().authenticated()
-        );
 
         // Add JWT token filter
         http.addFilterBefore(

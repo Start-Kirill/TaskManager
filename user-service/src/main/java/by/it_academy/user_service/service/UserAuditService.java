@@ -23,25 +23,35 @@ public class UserAuditService implements IUserAuditService {
     }
 
     @Override
-    public void create(String header, AuditCreateDto dto) {
+    public void save(String header, AuditCreateDto dto) {
         this.auditClient.create(header, dto);
     }
 
     @Override
-    public void create(UserDetailsImpl userDetails, UUID performedUser, String message) {
-
-
+    public void save(UserDetailsImpl userDetails, UUID performedUser, String message) {
         String token = this.tokenHandler.generateAccessToken(userDetails);
+        save(token, performedUser.toString(), message);
+    }
+
+    @Override
+    public void saveBySystem(UUID performedUser, String message) {
+        String systemAccessToken = this.tokenHandler.generateSystemAccessToken();
+        save(systemAccessToken, performedUser.toString(), message);
+    }
+
+    @Override
+    public void save(String token, String performedUser, String message) {
 
         AuditCreateDto auditCreateDto = new AuditCreateDto();
 
         auditCreateDto.setUserToken(token);
-        auditCreateDto.setId(performedUser.toString());
+        auditCreateDto.setId(performedUser);
         auditCreateDto.setType(EssenceType.USER);
         auditCreateDto.setText(message);
 
 
-        this.create("Bearer " + token, auditCreateDto);
+        save("Bearer " + token, auditCreateDto);
     }
+
 
 }
