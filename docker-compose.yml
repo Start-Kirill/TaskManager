@@ -42,6 +42,12 @@ services:
     networks:
       - taskmanager_ntwrk
 
+  task-service:
+    build: task-service
+    image: taskmanager_task-service:1.0.0
+    networks:
+      - taskmanager_ntwrk
+
   proxy:
     build: proxy
     image: taskmanager_proxy:1.0.3

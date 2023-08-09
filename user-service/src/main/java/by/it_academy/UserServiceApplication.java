@@ -12,9 +12,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @EnableJpaRepositories
 @EnableTransactionManagement
-@SpringBootApplication
 @EnableConfigurationProperties({AppProperty.class, JWTProperty.class})
 @EnableFeignClients
+@SpringBootApplication
 public class UserServiceApplication {
 
     public static void main(String[] args) {

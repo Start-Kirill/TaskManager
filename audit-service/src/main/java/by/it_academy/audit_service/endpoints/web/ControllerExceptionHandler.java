@@ -26,6 +26,18 @@ public class ControllerExceptionHandler {
 
     private static final String SIZE_PARAM_NAME = "size";
 
+    private static final String DATA_INCORRECT_OR_NOT_ENOUGH_MESSAGE = "Passed data is incorrect or not enough";
+
+    private static final String INVALID_UUID_MESSAGE = "Invalid UUID. Change the request and repeat";
+
+    private static final String INVALID_PAGE_MESSAGE = "Invalid page value. Change the request and repeat";
+
+    private static final String INVALID_SIZE_MESSAGE = "Invalid size value. Change the request and repeat";
+
+    private static final String REQUEST_INVALID_DATA_MESSAGE = "The request contains invalid data. Change the request and send it again";
+
+    private static final String SERVER_INTERNAL_ERROR_MESSAGE = "The server was unable to process the request correctly. Please contact administrator";
+
 
     @ExceptionHandler(StructuredErrorException.class)
     public ResponseEntity<?> handlerStructuredErrorException(StructuredErrorException ex) {
@@ -49,7 +61,7 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handlerHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         List<ErrorResponse> errors = new ArrayList<>();
-        errors.add(new ErrorResponse(ErrorType.ERROR, "Passed data is incorrect or not enough"));
+        errors.add(new ErrorResponse(ErrorType.ERROR, DATA_INCORRECT_OR_NOT_ENOUGH_MESSAGE));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
@@ -57,11 +69,13 @@ public class ControllerExceptionHandler {
     public ResponseEntity<?> handlerMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         List<ErrorResponse> error = new ArrayList<>();
         if (UUID_FIELD_NAME.equals(ex.getPropertyName())) {
-            error.add(new ErrorResponse(ErrorType.ERROR, "Invalid UUID. Change the request and repeat"));
+            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_UUID_MESSAGE));
         } else if (PAGE_PARAM_NAME.equals(ex.getPropertyName())) {
-            error.add(new ErrorResponse(ErrorType.ERROR, "Invalid page value. Change the request and repeat"));
+            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_PAGE_MESSAGE));
         } else if (SIZE_PARAM_NAME.equals(ex.getPropertyName())) {
-            error.add(new ErrorResponse(ErrorType.ERROR, "Invalid size value. Change the request and repeat"));
+            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_SIZE_MESSAGE));
+        }else {
+            error.add(new ErrorResponse(ErrorType.ERROR, REQUEST_INVALID_DATA_MESSAGE));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
@@ -69,7 +83,7 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> handlerNullPointerException(NullPointerException ex) {
         List<ErrorResponse> errors = new ArrayList<>();
-        errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
+        errors.add(new ErrorResponse(ErrorType.ERROR, SERVER_INTERNAL_ERROR_MESSAGE));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
     }
 

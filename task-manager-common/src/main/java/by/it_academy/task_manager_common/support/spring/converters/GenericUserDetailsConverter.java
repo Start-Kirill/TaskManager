@@ -2,7 +2,6 @@ package by.it_academy.task_manager_common.support.spring.converters;
 
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.UserDto;
-import by.it_academy.task_manager_common.entity.User;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,7 +17,6 @@ public class GenericUserDetailsConverter implements GenericConverter {
 
         HashSet<ConvertiblePair> pairs = new HashSet<>();
 
-        pairs.add(new ConvertiblePair(User.class, UserDetailsImpl.class));
         pairs.add(new ConvertiblePair(UserDto.class, UserDetailsImpl.class));
 
         return pairs;
@@ -33,31 +31,16 @@ public class GenericUserDetailsConverter implements GenericConverter {
 
         UserDetailsImpl userDetails = new UserDetailsImpl();
 
-        if(sourceType.getType() == User.class){
-            User user = (User) source;
+        UserDto user = (UserDto) source;
 
-            userDetails.setUuid(user.getUuid());
-            userDetails.setFio(user.getFio());
-            userDetails.setUsername(user.getMail());
-            userDetails.setRole(user.getRole());
-            userDetails.setStatus(user.getStatus());
-            userDetails.setPassword(user.getPassword());
+        userDetails.setUuid(user.getUuid());
+        userDetails.setFio(user.getFio());
+        userDetails.setUsername(user.getMail());
+        userDetails.setRole(user.getRole());
+        userDetails.setStatus(user.getStatus());
 
-            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
-            userDetails.setAuthorities(authorities);
-        }else{
-            UserDto user = (UserDto) source;
-
-            userDetails.setUuid(user.getUuid());
-            userDetails.setFio(user.getFio());
-            userDetails.setUsername(user.getMail());
-            userDetails.setRole(user.getRole());
-            userDetails.setStatus(user.getStatus());
-
-            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
-            userDetails.setAuthorities(authorities);
-        }
-
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
+        userDetails.setAuthorities(authorities);
 
 
         return userDetails;

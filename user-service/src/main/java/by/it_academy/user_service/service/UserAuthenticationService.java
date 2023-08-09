@@ -1,6 +1,8 @@
 package by.it_academy.user_service.service;
 
+import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
+import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.user_service.config.property.AppProperty;
@@ -8,12 +10,14 @@ import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.core.dto.UserLoginDto;
 import by.it_academy.user_service.core.dto.UserRegistrationDto;
 import by.it_academy.user_service.core.dto.VerificationCodeCreateDto;
-import by.it_academy.task_manager_common.entity.User;
 import by.it_academy.user_service.dao.entity.VerificationCode;
+import by.it_academy.user_service.service.api.IUserAuditService;
 import by.it_academy.user_service.service.api.IUserAuthenticationService;
 import by.it_academy.user_service.service.api.IUserService;
 import by.it_academy.user_service.service.api.IVerificationCodeService;
+import by.it_academy.user_service.service.exceptions.common.DeactivatedUserException;
 import by.it_academy.user_service.service.exceptions.common.NotVerifyUserException;
+import by.it_academy.user_service.service.exceptions.structured.MailNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.NotCorrectPasswordException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import by.it_academy.user_service.utils.JwtTokenHandler;
@@ -40,6 +44,8 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     private final IUserService userService;
 
+    private final IUserAuditService auditService;
+
     private final IVerificationCodeService verificationCodeService;
 
     private final ConversionService conversionService;
@@ -52,13 +58,18 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     private final AppProperty.Verification verification;
 
+    private final UserHolder userHolder;
+
+
     public UserAuthenticationService(IUserService userService,
                                      ConversionService conversionService,
                                      JavaMailSender emailSender,
                                      AppProperty property,
                                      IVerificationCodeService verificationCodeService,
                                      PasswordEncoder passwordEncoder,
-                                     JwtTokenHandler tokenHandler) {
+                                     JwtTokenHandler tokenHandler,
+                                     IUserAuditService auditService,
+                                     UserHolder userHolder) {
         this.userService = userService;
         this.conversionService = conversionService;
         this.emailSender = emailSender;
@@ -66,6 +77,8 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         this.verificationCodeService = verificationCodeService;
         this.passwordEncoder = passwordEncoder;
         this.tokenHandler = tokenHandler;
+        this.auditService = auditService;
+        this.userHolder = userHolder;
     }
 
     @Transactional
@@ -80,12 +93,15 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         VerificationCodeCreateDto verificationCodeCreateDto = new VerificationCodeCreateDto(code, user);
         this.verificationCodeService.create(verificationCodeCreateDto);
         sendVerificationCode(dto.getMail(), code);
+
+        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
+        this.auditService.create(userDetails, user.getUuid(), "User was registered");
     }
 
+    @Transactional
     @Override
     public void verify(String code, String mail) {
 
-        validateMail(mail);
         List<ErrorResponse> errors = new ArrayList<>();
 
         User user = this.userService.findByMail(mail);
@@ -105,26 +121,51 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         }
 
         this.verificationCodeService.delete(verificationCode.getUuid(), verificationCode.getDtUpdate());
+
+        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
+        this.auditService.create(userDetails, user.getUuid(), "User was activated");
     }
 
-    //    TODO
+
     @Override
     public String login(UserLoginDto dto) {
         validate(dto);
-        User user = this.userService.findByMail(dto.getMail());
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            Map<String, String> errors = new HashMap<>();
-            errors.put(PASSWORD_FIELD_NAME, "Not correct password");
+
+        Map<String, String> errors = new HashMap<>();
+        User user = null;
+        try {
+            user = this.userService.findByMail(dto.getMail());
+            if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+                errors.put(PASSWORD_FIELD_NAME, "Probably password is not correct");
+                errors.put(MAIL_FIELD_NAME, "Probably email is not correct");
+            }
+        } catch (MailNotExistsException ex) {
+            errors.put(PASSWORD_FIELD_NAME, "Probably password is not correct");
+            errors.put(MAIL_FIELD_NAME, "Probably email is not correct");
+        }
+
+        if (!errors.isEmpty()) {
             throw new NotCorrectPasswordException(errors);
         }
+
+        UserStatus status = user.getStatus();
+        if (UserStatus.DEACTIVATED.equals(status)) {
+            throw new DeactivatedUserException(List.of(new ErrorResponse(ErrorType.ERROR, "Such user was blocked or deleted")));
+        }
+
         String token = this.tokenHandler.generateAccessToken(user.getUuid(), user.getMail(), user.getFio(), user.getRole());
+
+        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
+        this.auditService.create(userDetails, user.getUuid(), "User was logged in");
+
         return token;
     }
 
 
     @Override
-    public User getMe(UUID uuid) {
-        return this.userService.get(uuid);
+    public User getMe() {
+        UserDetailsImpl user = this.userHolder.getUser();
+        return this.userService.get(user.getUuid());
     }
 
     @Transactional
@@ -138,6 +179,9 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         this.verificationCodeService.update(codeCreateDto, verificationCode.getUuid(), verificationCode.getDtUpdate());
 
         sendVerificationCode(mail, code);
+
+        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
+        this.auditService.create(userDetails, user.getUuid(), "Verification code was sent again");
     }
 
     private void validateMail(String mail) {
@@ -197,13 +241,14 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         if (mail == null) {
             errors.put(MAIL_FIELD_NAME, "Mail is missing");
         } else if ("".equals(mail)) {
-            errors.put(MAIL_FIELD_NAME, "Mail not to be empty");
+            errors.put(MAIL_FIELD_NAME, "Mail must not to be empty");
         } else {
             EmailValidator emailValidator = EmailValidator.getInstance();
             if (!emailValidator.isValid(mail)) {
                 errors.put(MAIL_FIELD_NAME, "Invalid email format");
             }
         }
+
 
         String password = dto.getPassword();
 
@@ -220,7 +265,14 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     private void sendVerificationCode(String mail, String code) {
 
-        String text = verification.getUrl() + "?code=" + code + "&mail=" + mail;
+        StringBuilder text = new StringBuilder();
+
+        text.append(verification.getUrl())
+                .append("?code=")
+                .append(code)
+                .append("&mail=")
+                .append(mail);
+
 
         MimeMessage mimeMessage = emailSender.createMimeMessage();
 
@@ -228,7 +280,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
             mimeMessageHelper.setTo(mail);
             mimeMessageHelper.setSubject("Verification");
-            mimeMessageHelper.setText(text);
+            mimeMessageHelper.setText(text.toString());
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }

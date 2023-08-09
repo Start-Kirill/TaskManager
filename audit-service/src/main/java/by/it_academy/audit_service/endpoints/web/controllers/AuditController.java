@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +31,7 @@ public class AuditController {
         this.conversionService = conversionService;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<?> get(@RequestParam(defaultValue = "0", required = false) Integer page,
                                  @RequestParam(defaultValue = "20", required = false) Integer size) {
@@ -41,6 +43,7 @@ public class AuditController {
         return ResponseEntity.status(HttpStatus.OK).body(auditDtoCustomPage);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{uuid}")
     public ResponseEntity<?> getByUuid(@PathVariable UUID uuid) {
         Audit audit = this.auditService.get(uuid);
@@ -48,6 +51,7 @@ public class AuditController {
         return ResponseEntity.status(HttpStatus.OK).body(auditDto);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody AuditCreateDto dto) {
         this.auditService.create(dto);

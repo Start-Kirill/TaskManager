@@ -1,6 +1,6 @@
 package by.it_academy.user_service.core.dto;
 
-import by.it_academy.task_manager_common.entity.User;
+import by.it_academy.user_service.dao.entity.User;
 
 public class VerificationCodeCreateDto {
 
