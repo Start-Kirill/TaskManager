@@ -4,18 +4,20 @@ import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.enums.EssenceType;
 import by.it_academy.task_service.service.api.IAuditClient;
-import by.it_academy.task_service.service.api.ITaskAuditService;
+import by.it_academy.task_service.service.api.IAuditClientService;
 import by.it_academy.task_service.utils.JwtTokenHandler;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-public class TaskAuditService implements ITaskAuditService {
+@Service
+public class AuditClientService implements IAuditClientService {
 
     private final IAuditClient auditClient;
 
     private final JwtTokenHandler tokenHandler;
 
-    public TaskAuditService(IAuditClient auditClient, JwtTokenHandler jwtTokenHandler) {
+    public AuditClientService(IAuditClient auditClient, JwtTokenHandler jwtTokenHandler) {
         this.auditClient = auditClient;
         this.tokenHandler = jwtTokenHandler;
     }

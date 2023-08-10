@@ -6,7 +6,7 @@ import by.it_academy.task_manager_common.enums.EssenceType;
 
 import java.util.UUID;
 
-public interface ITaskAuditService {
+public interface IAuditClientService {
 
     void save(String header, AuditCreateDto dto);
 
