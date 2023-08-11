@@ -10,8 +10,8 @@ public interface IAuditClientService {
 
     void save(String header, AuditCreateDto dto);
 
-    void save(UserDetailsImpl userDetails, UUID performedTask, String message, EssenceType type);
+    void save(UserDetailsImpl userDetails, UUID performedEssence, String message, EssenceType type);
 
-    void save(String token, String performedTask, String message, EssenceType type);
+    void save(String token, String performedEssence, String message, EssenceType type);
 
 }

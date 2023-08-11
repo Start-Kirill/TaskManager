@@ -55,7 +55,7 @@ public class JwtFilter
         jwtTokenHandler.validate(token);
 
         UserDetailsImpl userDetails = null;
-        if (UserRole.SYSTEM.getRoleName().equals(jwtTokenHandler.getRole(token))) {
+        if (UserRole.SYSTEM.toString().equals(jwtTokenHandler.getRole(token))) {
             userDetails = new UserDetailsImpl();
             userDetails.setRole(UserRole.SYSTEM);
             userDetails.setUsername(jwtTokenHandler.getMail(token));
