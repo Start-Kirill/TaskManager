@@ -8,6 +8,8 @@ import by.it_academy.task_service.service.api.IUserClientService;
 import by.it_academy.task_service.utils.JwtTokenHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -31,6 +33,17 @@ public class UserClientService implements IUserClientService {
     public UserDto get(UserDetailsImpl userDetails, UUID uuid) {
         String token = this.tokenHandler.generateAccessToken(userDetails);
         return get("Bearer " + token, uuid);
+    }
+
+    @Override
+    public List<UserDto> get(UserDetailsImpl userDetails, Set<UUID> uuid) {
+        String token = this.tokenHandler.generateAccessToken(userDetails);
+        return get("Bearer " + token, uuid);
+    }
+
+    @Override
+    public List<UserDto> get(String token, Set<UUID> users) {
+        return this.userClient.findAllByUuid(token, users);
     }
 
 

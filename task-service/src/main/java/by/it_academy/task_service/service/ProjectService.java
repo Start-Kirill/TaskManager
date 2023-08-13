@@ -237,24 +237,20 @@ public class ProjectService implements IProjectService {
 
         List<UserRef> staff = dto.getStaff();
         if (staff != null) {
-//            TODO fix to internal url
-            staff.forEach(s -> {
-                if (s.getUuid() == null) {
-                    errors.put(STAFF_FIELD_NAME, "Not enough data to add staff");
-                } else {
-                    try {
-                        this.userClientService.get(this.userHolder.getUser(), s.getUuid());
-                    } catch (FeignException ex) {
-                        String message = ex.getMessage();
-                        if (message != null && message.contains(USER_NOT_EXISTS_MESSAGE)) {
-                            throw new StaffNotExistsException(Map.of(STAFF_FIELD_NAME, USER_NOT_EXISTS_MESSAGE));
-                        } else {
-                            throw new FeignErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
-                        }
-                    }
-                }
-            });
+            Set<UUID> users = staff.stream().map(UserRef::getUuid).collect(Collectors.toSet());
+            List<UserDto> userDtos = null;
+            try {
+                userDtos = this.userClientService.get(this.userHolder.getUser(), users);
+            } catch (FeignException ex) {
+                throw new FeignErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
+            }
+
+
+            if (userDtos.size() != users.size()) {
+                throw new StaffNotExistsException(Map.of(STAFF_FIELD_NAME, "One or more participants not exist"));
+            }
         }
+
 
         if (!errors.isEmpty()) {
             throw new NotValidProjectBodyException(errors);

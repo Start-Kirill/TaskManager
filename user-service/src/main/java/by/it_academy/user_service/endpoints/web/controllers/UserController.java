@@ -2,9 +2,11 @@ package by.it_academy.user_service.endpoints.web.controllers;
 
 import by.it_academy.task_manager_common.dto.CustomPage;
 import by.it_academy.task_manager_common.dto.UserDto;
-import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.core.dto.UserCreateDto;
+import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserService;
+import feign.Feign;
+import feign.httpclient.ApacheHttpClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -60,6 +63,13 @@ public class UserController {
         User user = this.userService.get(uuid);
         UserDto userDto = this.conversionService.convert(user, UserDto.class);
         return ResponseEntity.status(HttpStatus.OK).body(userDto);
+    }
+
+    @PatchMapping
+    public ResponseEntity<?> getUsers(@RequestBody Set<UUID> users) {
+        List<User> userList = this.userService.findAllByUuid(users);
+        List<UserDto> userDtos = userList.stream().map(u -> this.conversionService.convert(u, UserDto.class)).toList();
+        return ResponseEntity.status(HttpStatus.OK).body(userDtos);
     }
 
 }

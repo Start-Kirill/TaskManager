@@ -192,6 +192,11 @@ public class UserService implements IUserService {
         return this.userDao.findById(uuid).orElseThrow();
     }
 
+    @Override
+    public List<User> findAllByUuid(Collection<UUID> users) {
+        return this.userDao.findAllByUuidIn(users);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public User findByMail(String mail) {

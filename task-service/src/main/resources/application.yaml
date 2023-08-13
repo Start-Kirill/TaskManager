@@ -22,3 +22,5 @@ feign:
     url: http://user-service:8080/users
   audit:
     url: http://audit-service:8080/audit
+  okhttp:
+    enabled: true
