@@ -3,9 +3,13 @@ package by.it_academy.task_service.service;
 
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.UserDto;
+import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
+import by.it_academy.task_manager_common.enums.ErrorType;
+import by.it_academy.task_manager_common.exceptions.commonInternal.FeignErrorException;
 import by.it_academy.task_service.service.api.IUserClient;
 import by.it_academy.task_service.service.api.IUserClientService;
 import by.it_academy.task_service.utils.JwtTokenHandler;
+import feign.FeignException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,7 +31,11 @@ public class UserClientService implements IUserClientService {
 
     @Override
     public UserDto get(String tokenHeader, UUID uuid) {
-        return this.userClient.get(tokenHeader, uuid);
+        try {
+            return this.userClient.get(tokenHeader, uuid);
+        } catch (FeignException ex) {
+            throw new FeignErrorException(ex, List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
+        }
     }
 
     @Override
@@ -44,7 +52,11 @@ public class UserClientService implements IUserClientService {
 
     @Override
     public List<UserDto> get(String token, Set<UUID> users) {
-        return this.userClient.findAllByUuid(token, users);
+        try {
+            return this.userClient.findAllByUuid(token, users);
+        } catch (FeignException ex) {
+            throw new FeignErrorException(ex, List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
+        }
     }
 
 

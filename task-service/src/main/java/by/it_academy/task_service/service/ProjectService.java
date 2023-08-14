@@ -18,7 +18,6 @@ import by.it_academy.task_service.core.dto.UserRef;
 import by.it_academy.task_service.core.enums.ProjectStatus;
 import by.it_academy.task_service.dao.api.IProjectDao;
 import by.it_academy.task_service.dao.entity.Project;
-import by.it_academy.task_service.service.exceptions.structured.NotValidProjectBodyException;
 import by.it_academy.task_service.service.api.IAuditClientService;
 import by.it_academy.task_service.service.api.IProjectService;
 import by.it_academy.task_service.service.api.IUserClientService;
@@ -27,6 +26,7 @@ import by.it_academy.task_service.service.exceptions.security.ManagerAccessDenie
 import by.it_academy.task_service.service.exceptions.security.UserAccessDeniedException;
 import by.it_academy.task_service.service.exceptions.structured.ManagerNotExistsException;
 import by.it_academy.task_service.service.exceptions.structured.NotUniqueProjectNameException;
+import by.it_academy.task_service.service.exceptions.structured.NotValidProjectBodyException;
 import by.it_academy.task_service.service.exceptions.structured.StaffNotExistsException;
 import feign.FeignException;
 import org.hibernate.exception.ConstraintViolationException;
@@ -227,13 +227,13 @@ public class ProjectService implements IProjectService {
                 UserDto userDto = null;
                 try {
                     userDto = this.userClientService.get(userHolder.getUser(), manager.getUuid());
-                } catch (FeignException ex) {
-                    String message = ex.getMessage();
+                } catch (FeignErrorException ex) {
+                    FeignException cause = (FeignException) ex.getCause();
+                    String message = cause.getMessage();
                     if (message != null && message.contains(USER_NOT_EXISTS_MESSAGE)) {
                         throw new ManagerNotExistsException(Map.of(MANAGER_FIELD_NAME, "Such manager does not exist"));
-                    } else {
-                        throw new FeignErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
                     }
+                    throw ex;
                 }
 
                 if (!UserRole.MANAGER.equals(userDto.getRole())) {
@@ -246,12 +246,8 @@ public class ProjectService implements IProjectService {
         if (staff != null) {
             Set<UUID> users = staff.stream().map(UserRef::getUuid).collect(Collectors.toSet());
             List<UserDto> userDtos = null;
-            try {
-                userDtos = this.userClientService.get(this.userHolder.getUser(), users);
-            } catch (FeignException ex) {
-                throw new FeignErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
-            }
 
+            userDtos = this.userClientService.get(this.userHolder.getUser(), users);
 
             if (userDtos.size() != users.size()) {
                 throw new StaffNotExistsException(Map.of(STAFF_FIELD_NAME, "One or more participants not exist"));
