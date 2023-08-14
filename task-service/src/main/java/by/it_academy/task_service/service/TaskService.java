@@ -147,15 +147,8 @@ public class TaskService implements ITaskService {
             throw new SuchTaskNotExistsException(List.of(new ErrorResponse(ErrorType.ERROR, "Such task does not exist")));
         }
         Task task = this.taskDao.findById(uuid).orElseThrow();
-        UserDetailsImpl user = this.userHolder.getUser();
-        if (!UserRole.ADMIN.equals(user.getRole())) {
-            Project project = this.projectService.get(task.getProject().getUuid());
-            Set<UUID> staff = project.getStaff();
-            staff.add(project.getManager());
-            if (!staff.contains(user.getUuid())) {
-                throw new UserAccessDeniedException();
-            }
-        }
+
+        checkAccessibility(task.getProject().getUuid());
 
         return task;
     }
@@ -165,6 +158,8 @@ public class TaskService implements ITaskService {
     public Task update(UUID uuid, LocalDateTime dtUpdate, TaskStatus status) {
 
         Task task = get(uuid);
+
+        checkAccessibility(task.getProject().getUuid());
 
         if (!task.getDtUpdate().truncatedTo(ChronoUnit.MILLIS).equals(dtUpdate)) {
             throw new VersionsNotMatchException(List.of(new ErrorResponse(ErrorType.ERROR, "Task date updates (versions) don't match. Get up-to-date task")));
@@ -314,15 +309,7 @@ public class TaskService implements ITaskService {
             throw new NotValidTaskBodyException(errors);
         }
 
-
-        Project project = this.projectService.get(projectRef.getUuid());
-        Set<UUID> staff = project.getStaff();
-        staff.add(project.getManager());
-
-        UserDetailsImpl user = this.userHolder.getUser();
-        if (!UserRole.ADMIN.equals(user.getRole()) && !staff.contains(user.getUuid())) {
-            throw new UserAccessDeniedException();
-        }
+        checkAccessibility(projectRef.getUuid());
 
         UserRef implementer = dto.getImplementer();
         if (implementer != null && implementer.getUuid() == null) {
@@ -330,6 +317,9 @@ public class TaskService implements ITaskService {
         }
         try {
             if (dto.getImplementer() != null) {
+                Project project = this.projectService.get(dto.getProject().getUuid());
+                Set<UUID> staff = project.getStaff();
+                staff.add(project.getManager());
                 if (!staff.contains(dto.getImplementer().getUuid())) {
                     errors.put(IMPLEMENTER_PARAM_NAME, "Such user does not participate in this project");
                 }
@@ -364,6 +354,17 @@ public class TaskService implements ITaskService {
 
         if (!errors.isEmpty()) {
             throw new NotCorrectPageDataException(errors);
+        }
+    }
+
+    private void checkAccessibility(UUID projectRef) {
+        Project project = this.projectService.get(projectRef);
+        Set<UUID> staff = project.getStaff();
+        staff.add(project.getManager());
+
+        UserDetailsImpl user = this.userHolder.getUser();
+        if (!UserRole.ADMIN.equals(user.getRole()) && !staff.contains(user.getUuid())) {
+            throw new UserAccessDeniedException();
         }
     }
 }
