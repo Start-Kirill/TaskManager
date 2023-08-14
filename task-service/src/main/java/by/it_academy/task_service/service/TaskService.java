@@ -302,6 +302,19 @@ public class TaskService implements ITaskService {
         } else if (projectRef.getUuid() == null) {
             errors.put(PROJECT_PARAM_NAME, "Not enough data to add task");
         }
+
+        String title = dto.getTitle();
+        if (title == null) {
+            errors.put(TITLE_PARAM_NAME, "Title is missing");
+        } else if ("".equals(title)) {
+            errors.put(TITLE_PARAM_NAME, "Title not must to be empty");
+        }
+
+        if (!errors.isEmpty()) {
+            throw new NotValidTaskBodyException(errors);
+        }
+
+
         Project project = this.projectService.get(projectRef.getUuid());
         Set<UUID> staff = project.getStaff();
         staff.add(project.getManager());
@@ -309,13 +322,6 @@ public class TaskService implements ITaskService {
         UserDetailsImpl user = this.userHolder.getUser();
         if (!UserRole.ADMIN.equals(user.getRole()) && !staff.contains(user.getUuid())) {
             throw new UserAccessDeniedException();
-        }
-
-        String title = dto.getTitle();
-        if (title == null) {
-            errors.put(TITLE_PARAM_NAME, "Title is missing");
-        } else if ("".equals(title)) {
-            errors.put(TITLE_PARAM_NAME, "Title not must to be empty");
         }
 
         UserRef implementer = dto.getImplementer();
