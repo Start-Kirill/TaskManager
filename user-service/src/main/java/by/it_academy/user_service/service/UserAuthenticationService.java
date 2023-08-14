@@ -19,7 +19,6 @@ import by.it_academy.user_service.service.exceptions.structured.NotCorrectPasswo
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import by.it_academy.user_service.utils.JwtTokenHandler;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.aspectj.apache.bcel.classfile.Code;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -9,6 +9,7 @@ import by.it_academy.task_service.endpoints.web.support.spring.converters.Generi
 import by.it_academy.task_service.endpoints.web.support.spring.converters.GenericTaskDtoConverter;
 import by.it_academy.task_service.endpoints.web.support.spring.formatters.StringToTaskStatusFormatter;
 import by.it_academy.task_service.service.support.spring.converters.GenericProjectConverter;
+import by.it_academy.task_service.service.support.spring.converters.GenericTaskConverter;
 import feign.Feign;
 import feign.httpclient.ApacheHttpClient;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +31,7 @@ public class ApplicationConfig implements WebMvcConfigurer {
         registry.addConverter(new GenericProjectConverter());
         registry.addConverter(new PageToCustomPageConverter<Project>());
         registry.addConverter(new GenericUserDetailsConverter());
+        registry.addConverter(new GenericTaskConverter());
     }
 
     @Bean

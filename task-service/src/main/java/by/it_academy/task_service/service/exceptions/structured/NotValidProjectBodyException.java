@@ -1,4 +1,4 @@
-package by.it_academy.task_service.endpoints.web.exceptions.structured;
+package by.it_academy.task_service.service.exceptions.structured;
 
 import by.it_academy.task_manager_common.exceptions.StructuredErrorException;
 

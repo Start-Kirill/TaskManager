@@ -18,7 +18,7 @@ import by.it_academy.task_service.core.dto.UserRef;
 import by.it_academy.task_service.core.enums.ProjectStatus;
 import by.it_academy.task_service.dao.api.IProjectDao;
 import by.it_academy.task_service.dao.entity.Project;
-import by.it_academy.task_service.endpoints.web.exceptions.structured.NotValidProjectBodyException;
+import by.it_academy.task_service.service.exceptions.structured.NotValidProjectBodyException;
 import by.it_academy.task_service.service.api.IAuditClientService;
 import by.it_academy.task_service.service.api.IProjectService;
 import by.it_academy.task_service.service.api.IUserClientService;
@@ -112,6 +112,8 @@ public class ProjectService implements IProjectService {
                 }
                 throw new UnknownConstraintException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
             }
+            throw new InternalServerErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
+        } catch (OptimisticLockingFailureException ex) {
             throw new InternalServerErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
         }
     }
@@ -207,6 +209,11 @@ public class ProjectService implements IProjectService {
         customPage.setNumber(page);
 
         return customPage;
+    }
+
+    @Override
+    public List<Project> findAllByIdIn(Collection<UUID> projects) {
+        return this.projectDao.findAllById(projects);
     }
 
 

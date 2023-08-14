@@ -16,9 +16,9 @@ public interface IProjectDao extends
 
     Page<Project> findAllByStatus(Pageable pageable, ProjectStatus status);
 
-    @Query(value = "SELECT * FROM app.project p WHERE ?1 = ANY(p.staff) OR ?1 = p.manager", nativeQuery = true)
+    @Query(value = "SELECT uuid, dt_create, dt_update, name, description, manager, staff, status  FROM app.project p WHERE ?1 = ANY(p.staff) OR ?1 = p.manager", nativeQuery = true)
     Page<Project> findAllByParticipant(Pageable pageable, UUID uuid);
 
-    @Query(value = "SELECT * FROM app.project p WHERE (?1 = ANY(p.staff) OR ?1 = p.manager) AND ?2 = p.status", nativeQuery = true)
+    @Query(value = "SELECT uuid, dt_create, dt_update, name, description, manager, staff, status FROM app.project p WHERE (?1 = ANY(p.staff) OR ?1 = p.manager) AND ?2 = p.status", nativeQuery = true)
     Page<Project> findAllByParticipantAndStatus(Pageable pageable, UUID uuid, String status);
 }

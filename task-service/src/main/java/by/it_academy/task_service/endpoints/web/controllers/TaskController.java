@@ -40,8 +40,8 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<?> get(@RequestParam Integer page,
-                                 @RequestParam Integer size,
+    public ResponseEntity<?> get(@RequestParam(required = false, defaultValue = "0") Integer page,
+                                 @RequestParam(required = false, defaultValue = "20") Integer size,
                                  @RequestParam(required = false) List<UUID> project,
                                  @RequestParam(required = false) List<UUID> implementer,
                                  @RequestParam(required = false) List<TaskStatus> status) {
@@ -73,7 +73,7 @@ public class TaskController {
     public ResponseEntity<?> update(@PathVariable UUID uuid,
                                     @PathVariable LocalDateTime dtUpdate,
                                     @PathVariable TaskStatus status) {
-        this.update(uuid, dtUpdate, status);
+        this.taskService.update(uuid, dtUpdate, status);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
