@@ -3,6 +3,7 @@ package by.it_academy.task_service.endpoints;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.dto.errors.StructuredErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
+import by.it_academy.task_manager_common.exceptions.AccessForbiddenException;
 import by.it_academy.task_manager_common.exceptions.CommonErrorException;
 import by.it_academy.task_manager_common.exceptions.CommonInternalErrorException;
 import by.it_academy.task_manager_common.exceptions.StructuredErrorException;
@@ -54,6 +55,11 @@ public class ControllerExceptionHandler {
     public ResponseEntity<?> handlerCommonInternalErrorException(CommonInternalErrorException ex) {
         List<ErrorResponse> errors = ex.getErrors();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
+    }
+
+    @ExceptionHandler(AccessForbiddenException.class)
+    public ResponseEntity<?> handlerCommonInternalErrorException(AccessForbiddenException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

@@ -1,4 +1,4 @@
-package by.it_academy.user_service.service.exceptions.commonInternal;
+package by.it_academy.task_manager_common.exceptions.commonInternal;
 
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.exceptions.CommonInternalErrorException;

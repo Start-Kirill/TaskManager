@@ -5,6 +5,6 @@ server:
   port: 93
 feign:
   user:
-    url: http://user-service:91/users
+    url: http://localhost:91/users
   audit:
-    url: http://audit-service:92/audit
+    url: http://localhost:92/audit

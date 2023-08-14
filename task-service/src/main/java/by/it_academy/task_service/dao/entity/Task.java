@@ -2,12 +2,14 @@ package by.it_academy.task_service.dao.entity;
 
 import by.it_academy.task_service.core.enums.TaskStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 
 @Entity
+@DynamicUpdate
 public class Task {
 
     @Id
@@ -16,6 +18,7 @@ public class Task {
     @Column(name = "dt_create")
     private LocalDateTime dtCreate;
 
+    @Version
     @Column(name = "dt_update")
     private LocalDateTime dtUpdate;
 
@@ -28,6 +31,7 @@ public class Task {
     private String description;
 
 
+    @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
     private UUID implementer;

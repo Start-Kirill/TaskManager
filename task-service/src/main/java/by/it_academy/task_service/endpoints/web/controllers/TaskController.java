@@ -40,8 +40,8 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<?> get(@RequestParam Integer page,
-                                 @RequestParam Integer size,
+    public ResponseEntity<?> get(@RequestParam(required = false, defaultValue = "0") Integer page,
+                                 @RequestParam(required = false, defaultValue = "20") Integer size,
                                  @RequestParam(required = false) List<UUID> project,
                                  @RequestParam(required = false) List<UUID> implementer,
                                  @RequestParam(required = false) List<TaskStatus> status) {
@@ -63,7 +63,7 @@ public class TaskController {
 
     @PutMapping("/{uuid}/dt_update/{dt_update}")
     public ResponseEntity<?> update(@PathVariable UUID uuid,
-                                    @PathVariable LocalDateTime dtUpdate,
+                                    @PathVariable(name = "dt_update") LocalDateTime dtUpdate,
                                     @RequestBody TaskCreateDto dto) {
         this.taskService.update(dto, uuid, dtUpdate);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -71,9 +71,9 @@ public class TaskController {
 
     @PatchMapping("/{uuid}/dt_update/{dt_update}/status/{status}")
     public ResponseEntity<?> update(@PathVariable UUID uuid,
-                                    @PathVariable LocalDateTime dtUpdate,
+                                    @PathVariable(name = "dt_update") LocalDateTime dtUpdate,
                                     @PathVariable TaskStatus status) {
-        this.update(uuid, dtUpdate, status);
+        this.taskService.update(uuid, dtUpdate, status);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

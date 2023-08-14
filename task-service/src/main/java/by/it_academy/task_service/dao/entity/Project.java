@@ -2,12 +2,16 @@ package by.it_academy.task_service.dao.entity;
 
 import by.it_academy.task_service.core.enums.ProjectStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
+@DynamicUpdate
 public class Project {
 
     @Id
@@ -16,6 +20,7 @@ public class Project {
     @Column(name = "dt_create")
     private LocalDateTime dtCreate;
 
+    @Version
     @Column(name = "dt_update")
     private LocalDateTime dtUpdate;
 
@@ -25,7 +30,7 @@ public class Project {
 
     private UUID manager;
 
-    private List<UUID> staff;
+    private Set<UUID> staff;
 
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
@@ -33,7 +38,7 @@ public class Project {
     public Project() {
     }
 
-    public Project(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, String name, String description, UUID manager, List<UUID> staff, ProjectStatus status) {
+    public Project(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, String name, String description, UUID manager, Set<UUID> staff, ProjectStatus status) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
@@ -92,11 +97,11 @@ public class Project {
         this.manager = manager;
     }
 
-    public List<UUID> getStaff() {
+    public Set<UUID> getStaff() {
         return staff;
     }
 
-    public void setStaff(List<UUID> staff) {
+    public void setStaff(Set<UUID> staff) {
         this.staff = staff;
     }
 

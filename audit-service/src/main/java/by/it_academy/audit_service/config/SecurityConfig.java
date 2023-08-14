@@ -45,6 +45,11 @@ public class SecurityConfig {
                                     );
                                 }));
 
+        // Set permissions on endpoints
+        http.authorizeHttpRequests(requests -> requests
+                .anyRequest().authenticated()
+        );
+
 
         // Add JWT token filter
         http.addFilterBefore(

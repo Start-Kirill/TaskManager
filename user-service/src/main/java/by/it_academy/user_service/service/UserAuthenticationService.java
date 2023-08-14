@@ -89,7 +89,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         String code = this.verificationCodeService.generateCode();
         VerificationCodeCreateDto verificationCodeCreateDto = new VerificationCodeCreateDto(code, user);
         this.verificationCodeService.save(verificationCodeCreateDto);
-        sendVerificationCode(dto.getMail());
+        sendVerificationCode(dto.getMail(), code);
 
         this.auditService.saveBySystem(user.getUuid(), "User was registered");
     }
@@ -175,7 +175,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         VerificationCodeCreateDto codeCreateDto = new VerificationCodeCreateDto(code, user);
         this.verificationCodeService.update(codeCreateDto, verificationCode.getUuid(), verificationCode.getDtUpdate());
 
-        sendVerificationCode(mail);
+        sendVerificationCode(mail, code);
 
         this.auditService.saveBySystem(user.getUuid(), "Verification code was sent again");
     }
@@ -240,18 +240,18 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         }
     }
 
-    private void sendVerificationCode(String mail) {
-        String text = buildVerificationUrl(mail);
-        this.mailSenderService.send(mail, text, "Verification");
+    private void sendVerificationCode(String mail, String code) {
+        String text = buildVerificationUrl(mail, code);
+        this.mailSenderService.send(mail, "Verification", text);
     }
 
-    private String buildVerificationUrl(String mail) {
+    private String buildVerificationUrl(String mail, String code) {
 
         StringBuilder text = new StringBuilder();
 
         text.append(verification.getUrl())
                 .append("?code=")
-                .append(this.verificationCodeService.generateCode())
+                .append(code)
                 .append("&mail=")
                 .append(mail);
 

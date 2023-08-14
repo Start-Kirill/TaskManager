@@ -9,7 +9,7 @@ public class PageTasksCreateDto {
 
     private Integer page;
     private Integer size;
-    private List<UUID> project;
+    private List<UUID> projects;
     private List<UUID> implementers;
     private List<TaskStatus> statuses;
 
@@ -19,7 +19,7 @@ public class PageTasksCreateDto {
     public PageTasksCreateDto(Integer page, Integer size, List<UUID> project, List<UUID> implementers, List<TaskStatus> statuses) {
         this.page = page;
         this.size = size;
-        this.project = project;
+        this.projects = project;
         this.implementers = implementers;
         this.statuses = statuses;
     }
@@ -40,12 +40,12 @@ public class PageTasksCreateDto {
         this.size = size;
     }
 
-    public List<UUID> getProject() {
-        return project;
+    public List<UUID> getProjects() {
+        return projects;
     }
 
-    public void setProject(List<UUID> project) {
-        this.project = project;
+    public void setProjects(List<UUID> projects) {
+        this.projects = projects;
     }
 
     public List<UUID> getImplementers() {

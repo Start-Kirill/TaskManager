@@ -5,6 +5,10 @@ import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;
+import by.it_academy.task_manager_common.exceptions.common.VersionsNotMatchException;
+import by.it_academy.task_manager_common.exceptions.commonInternal.GeneratedDataNotCorrectException;
+import by.it_academy.task_manager_common.exceptions.commonInternal.InternalServerErrorException;
+import by.it_academy.task_manager_common.exceptions.commonInternal.UnknownConstraintException;
 import by.it_academy.task_manager_common.exceptions.structured.NotCorrectPageDataException;
 import by.it_academy.user_service.core.dto.UserCreateDto;
 import by.it_academy.user_service.dao.api.IUserDao;
@@ -12,10 +16,6 @@ import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserAuditService;
 import by.it_academy.user_service.service.api.IUserService;
 import by.it_academy.user_service.service.exceptions.common.UserNotExistsException;
-import by.it_academy.user_service.service.exceptions.common.VersionsNotMatchException;
-import by.it_academy.user_service.service.exceptions.commonInternal.GeneratedDataNotCorrectException;
-import by.it_academy.user_service.service.exceptions.commonInternal.InternalServerErrorException;
-import by.it_academy.user_service.service.exceptions.commonInternal.UnknownConstraintException;
 import by.it_academy.user_service.service.exceptions.structured.MailNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
 import by.it_academy.user_service.service.support.passay.CyrillicEnglishCharacterData;
@@ -101,24 +101,14 @@ public class UserService implements IUserService {
                 String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
 
                 if (UNIQUE_MAIL_CONSTRAINT_NAME.equals(constraintName)) {
-                    Map<String, String> errors = new HashMap<>();
-                    errors.put(MAIL_FIELD_NAME, "User with such email already exists");
-                    throw new NotValidUserBodyException(errors);
+                    throw new NotValidUserBodyException(Map.of(MAIL_FIELD_NAME, "User with such email already exists"));
                 } else if (UNIQUE_UUID_CONSTRAINT_NAME.equals(constraintName)) {
-                    List<ErrorResponse> errors = new ArrayList<>();
-                    errors.add(new ErrorResponse(ErrorType.ERROR, "Internal failure of server. Duplicate uuid was generated. Repeat request or contact administrator"));
-                    throw new GeneratedDataNotCorrectException(errors);
+                    throw new GeneratedDataNotCorrectException(List.of(new ErrorResponse(ErrorType.ERROR, "Internal failure of server. Duplicate uuid was generated. Repeat request or contact administrator")));
                 } else {
-                    List<ErrorResponse> errors = new ArrayList<>();
-                    errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
-                    throw new UnknownConstraintException(errors);
+                    throw new UnknownConstraintException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
                 }
-            } else {
-                List<ErrorResponse> errors = new ArrayList<>();
-                errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
-                throw new InternalServerErrorException(errors);
             }
-
+            throw new InternalServerErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
         }
     }
 
@@ -142,43 +132,31 @@ public class UserService implements IUserService {
         LocalDateTime realVersion = user.getDateTimeUpdate().truncatedTo(ChronoUnit.MILLIS);
 
         if (!realVersion.equals(version)) {
-            List<ErrorResponse> errors = new ArrayList<>();
-            errors.add(new ErrorResponse(ErrorType.ERROR, "User date updates (versions) don't match. Get up-to-date user"));
-            throw new VersionsNotMatchException(errors);
+            throw new VersionsNotMatchException(List.of(new ErrorResponse(ErrorType.ERROR, "User date updates (versions) don't match. Get up-to-date user")));
         }
 
-        User convertedUser = conversionService.convert(dto, User.class);
-        convertedUser.setUuid(uuid);
-        convertedUser.setDateTimeCreate(user.getDateTimeCreate());
-        convertedUser.setDateTimeUpdate(user.getDateTimeUpdate());
+        user.setMail(dto.getMail());
+        user.setStatus(dto.getStatus());
+        user.setRole(dto.getRole());
+        user.setFio(dto.getFio());
+        user.setPassword(this.passwordEncoder.encode(dto.getPassword()));
 
         try {
-            User save = this.userDao.saveAndFlush(convertedUser);
+            User save = this.userDao.saveAndFlush(user);
             this.auditService.save(this.userHolder.getUser(), save.getUuid(), "User was updated");
             return save;
         } catch (DataIntegrityViolationException ex) {
             if (ex.contains(ConstraintViolationException.class)) {
                 String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
-
                 if (UNIQUE_MAIL_CONSTRAINT_NAME.equals(constraintName)) {
-                    Map<String, String> errors = new HashMap<>();
-                    errors.put(MAIL_FIELD_NAME, "User with such email already exists");
-                    throw new NotValidUserBodyException(errors);
-                } else {
-                    List<ErrorResponse> errors = new ArrayList<>();
-                    errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
-                    throw new UnknownConstraintException(errors);
+                    throw new NotValidUserBodyException(Map.of(MAIL_FIELD_NAME, "User with such email already exists"));
                 }
+                throw new UnknownConstraintException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
             } else {
-                List<ErrorResponse> errors = new ArrayList<>();
-                errors.add(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator"));
-                throw new InternalServerErrorException(errors);
+                throw new InternalServerErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
             }
-
         } catch (OptimisticLockingFailureException ex) {
-            List<ErrorResponse> errors = new ArrayList<>();
-            errors.add(new ErrorResponse(ErrorType.ERROR, "User date updates (versions) don't match. Get up-to-date user"));
-            throw new VersionsNotMatchException(errors);
+            throw new VersionsNotMatchException(List.of(new ErrorResponse(ErrorType.ERROR, "User date updates (versions) don't match. Get up-to-date user")));
         }
 
     }
@@ -212,6 +190,11 @@ public class UserService implements IUserService {
         }
 
         return this.userDao.findById(uuid).orElseThrow();
+    }
+
+    @Override
+    public List<User> findAllByUuid(Collection<UUID> users) {
+        return this.userDao.findAllByUuidIn(users);
     }
 
     @Transactional(readOnly = true)

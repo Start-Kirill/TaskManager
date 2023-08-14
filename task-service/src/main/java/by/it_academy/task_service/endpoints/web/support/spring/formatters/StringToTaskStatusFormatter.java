@@ -1,7 +1,7 @@
 package by.it_academy.task_service.endpoints.web.support.spring.formatters;
 
 import by.it_academy.task_service.core.enums.TaskStatus;
-import by.it_academy.task_service.endpoints.web.exceptions.NotValidTaskStatusException;
+import by.it_academy.task_service.endpoints.web.exceptions.structured.NotValidTaskStatusException;
 import org.springframework.format.Formatter;
 
 import java.text.ParseException;
