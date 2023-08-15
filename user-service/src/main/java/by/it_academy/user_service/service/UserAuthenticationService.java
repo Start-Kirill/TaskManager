@@ -89,7 +89,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         String code = this.verificationCodeService.generateCode();
         VerificationCodeCreateDto verificationCodeCreateDto = new VerificationCodeCreateDto(code, user);
         this.verificationCodeService.save(verificationCodeCreateDto);
-        sendVerificationCode(dto.getMail(), code);
+        sendVerificationUrl(dto.getMail(), code, dto.getFio());
 
         this.auditService.saveBySystem(user.getUuid(), "User was registered");
     }
@@ -123,6 +123,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
     }
 
 
+    @Transactional(readOnly = true)
     @Override
     public String login(UserLoginDto dto) {
         validate(dto);
@@ -175,7 +176,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         VerificationCodeCreateDto codeCreateDto = new VerificationCodeCreateDto(code, user);
         this.verificationCodeService.update(codeCreateDto, verificationCode.getUuid(), verificationCode.getDtUpdate());
 
-        sendVerificationCode(mail, code);
+        sendVerificationUrl(mail, code, user.getFio());
 
         this.auditService.saveBySystem(user.getUuid(), "Verification code was sent again");
     }
@@ -240,9 +241,9 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         }
     }
 
-    private void sendVerificationCode(String mail, String code) {
+    private void sendVerificationUrl(String mail, String code, String recipient) {
         String text = buildVerificationUrl(mail, code);
-        this.mailSenderService.send(mail, "Verification", text);
+        this.mailSenderService.sendVerificationUrl(mail, "Verification", recipient, text);
     }
 
     private String buildVerificationUrl(String mail, String code) {
