@@ -27,7 +27,7 @@ server:
   port: 8080
 app:
   verification:
-    url: http://user-service:${server.port}/users/verification
+    url: http://localhost/api/v1/users/verification
 feign:
   audit:
     url: http://audit-service:8080/audit

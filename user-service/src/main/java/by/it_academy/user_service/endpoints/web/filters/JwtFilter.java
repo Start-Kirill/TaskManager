@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
@@ -48,7 +49,7 @@ public class JwtFilter
         String token = header.split(" ")[1].trim();
         jwtTokenHandler.validate(token);
 
-        User user = this.userService.findByMail(jwtTokenHandler.getMail(token));
+        User user = this.userService.get(UUID.fromString(jwtTokenHandler.getUuid(token)));
         UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
