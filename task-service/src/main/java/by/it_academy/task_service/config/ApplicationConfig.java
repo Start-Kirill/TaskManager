@@ -1,15 +1,15 @@
 package by.it_academy.task_service.config;
 
-import by.it_academy.task_manager_common.support.spring.converters.GenericUserDetailsConverter;
+import by.it_academy.task_manager_common.support.spring.converters.UserDtoToUserDetailsConverter;
 import by.it_academy.task_manager_common.support.spring.converters.PageToCustomPageConverter;
 import by.it_academy.task_manager_common.support.spring.formatters.MilliToLocalDateTimeFormatter;
 import by.it_academy.task_service.core.enums.TaskStatus;
 import by.it_academy.task_service.dao.entity.Project;
-import by.it_academy.task_service.endpoints.web.support.spring.converters.GenericProjectDtoConverter;
-import by.it_academy.task_service.endpoints.web.support.spring.converters.GenericTaskDtoConverter;
+import by.it_academy.task_service.endpoints.web.support.spring.converters.ProjectToProjectDtoConverter;
+import by.it_academy.task_service.endpoints.web.support.spring.converters.TaskToTaskDtoConverter;
 import by.it_academy.task_service.endpoints.web.support.spring.formatters.StringToTaskStatusFormatter;
-import by.it_academy.task_service.service.support.spring.converters.GenericProjectConverter;
-import by.it_academy.task_service.service.support.spring.converters.GenericTaskConverter;
+import by.it_academy.task_service.service.support.spring.converters.ProjectCreateDtoToProjectConverter;
+import by.it_academy.task_service.service.support.spring.converters.TaskCreateDtoToTaskConverter;
 import feign.Feign;
 import feign.httpclient.ApacheHttpClient;
 import org.springframework.context.annotation.Bean;
@@ -24,14 +24,14 @@ public class ApplicationConfig implements WebMvcConfigurer {
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
-        registry.addConverter(new GenericProjectDtoConverter());
+        registry.addConverter(new ProjectToProjectDtoConverter());
         registry.addFormatterForFieldType(LocalDateTime.class, new MilliToLocalDateTimeFormatter());
-        registry.addConverter(new GenericTaskDtoConverter());
+        registry.addConverter(new TaskToTaskDtoConverter());
         registry.addFormatterForFieldType(TaskStatus.class, new StringToTaskStatusFormatter());
-        registry.addConverter(new GenericProjectConverter());
+        registry.addConverter(new ProjectCreateDtoToProjectConverter());
         registry.addConverter(new PageToCustomPageConverter<Project>());
-        registry.addConverter(new GenericUserDetailsConverter());
-        registry.addConverter(new GenericTaskConverter());
+        registry.addConverter(new UserDtoToUserDetailsConverter());
+        registry.addConverter(new TaskCreateDtoToTaskConverter());
     }
 
     @Bean

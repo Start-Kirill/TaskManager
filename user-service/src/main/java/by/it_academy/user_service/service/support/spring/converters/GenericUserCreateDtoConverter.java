@@ -1,4 +1,4 @@
-package by.it_academy.user_service.service.support.converters;
+package by.it_academy.user_service.service.support.spring.converters;
 
 import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.enums.UserStatus;

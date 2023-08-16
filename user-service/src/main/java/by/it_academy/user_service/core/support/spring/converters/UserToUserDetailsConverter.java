@@ -1,4 +1,4 @@
-package by.it_academy.user_service.endpoints.web.support.spring.converters;
+package by.it_academy.user_service.core.support.spring.converters;
 
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.user_service.dao.entity.User;

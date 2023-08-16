@@ -1,14 +1,14 @@
 package by.it_academy.user_service.config;
 
-import by.it_academy.task_manager_common.support.spring.converters.GenericUserDetailsConverter;
+import by.it_academy.task_manager_common.support.spring.converters.UserDtoToUserDetailsConverter;
 import by.it_academy.task_manager_common.support.spring.converters.PageToCustomPageConverter;
 import by.it_academy.task_manager_common.support.spring.formatters.MilliToLocalDateTimeFormatter;
 import by.it_academy.user_service.dao.entity.User;
-import by.it_academy.user_service.endpoints.web.support.spring.converters.GenericUserDtoConverter;
-import by.it_academy.user_service.endpoints.web.support.spring.converters.UserToUserDetailsConverter;
-import by.it_academy.user_service.service.support.converters.GenericUserConverter;
-import by.it_academy.user_service.service.support.converters.GenericUserCreateDtoConverter;
-import by.it_academy.user_service.service.support.converters.GenericVerificationConverter;
+import by.it_academy.user_service.endpoints.web.support.spring.converters.UserToUserDtoConverter;
+import by.it_academy.user_service.core.support.spring.converters.UserToUserDetailsConverter;
+import by.it_academy.user_service.service.support.spring.converters.UserCreateDtoToUserConverter;
+import by.it_academy.user_service.service.support.spring.converters.GenericUserCreateDtoConverter;
+import by.it_academy.user_service.service.support.spring.converters.VerificationCreateDtoToVerificationConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -26,13 +26,13 @@ public class ApplicationConfig implements WebMvcConfigurer {
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
-        registry.addConverter(new GenericUserConverter());
+        registry.addConverter(new UserCreateDtoToUserConverter());
         registry.addFormatterForFieldType(LocalDateTime.class, localDateTimeToMilliConverter());
-        registry.addConverter(new GenericUserDtoConverter());
+        registry.addConverter(new UserToUserDtoConverter());
         registry.addConverter(new GenericUserCreateDtoConverter());
         registry.addConverter(new PageToCustomPageConverter<User>());
-        registry.addConverter(new GenericVerificationConverter());
-        registry.addConverter(new GenericUserDetailsConverter());
+        registry.addConverter(new VerificationCreateDtoToVerificationConverter());
+        registry.addConverter(new UserDtoToUserDetailsConverter());
         registry.addConverter(new UserToUserDetailsConverter());
     }
 
