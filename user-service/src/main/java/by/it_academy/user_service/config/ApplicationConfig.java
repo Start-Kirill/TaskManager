@@ -8,21 +8,20 @@ import by.it_academy.user_service.endpoints.web.support.spring.converters.Generi
 import by.it_academy.user_service.endpoints.web.support.spring.converters.UserToUserDetailsConverter;
 import by.it_academy.user_service.service.support.converters.GenericUserConverter;
 import by.it_academy.user_service.service.support.converters.GenericUserCreateDtoConverter;
-import by.it_academy.user_service.service.support.converters.GenericVerificationCodeConverter;
+import by.it_academy.user_service.service.support.converters.GenericVerificationConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.thymeleaf.spring6.SpringTemplateEngine;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
-import org.thymeleaf.templateresolver.ITemplateResolver;
 
 import java.time.LocalDateTime;
 
 @Configuration
+@EnableScheduling
 public class ApplicationConfig implements WebMvcConfigurer {
 
     @Override
@@ -32,7 +31,7 @@ public class ApplicationConfig implements WebMvcConfigurer {
         registry.addConverter(new GenericUserDtoConverter());
         registry.addConverter(new GenericUserCreateDtoConverter());
         registry.addConverter(new PageToCustomPageConverter<User>());
-        registry.addConverter(new GenericVerificationCodeConverter());
+        registry.addConverter(new GenericVerificationConverter());
         registry.addConverter(new GenericUserDetailsConverter());
         registry.addConverter(new UserToUserDetailsConverter());
     }
