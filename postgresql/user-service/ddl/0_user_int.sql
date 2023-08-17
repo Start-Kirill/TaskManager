@@ -62,6 +62,7 @@ CREATE TABLE app.verification
     dt_create timestamp without time zone NOT NULL,
     dt_update timestamp without time zone NOT NULL,
     PRIMARY KEY (uuid),
+    UNIQUE (user_uuid),
     FOREIGN KEY (user_uuid)
         REFERENCES app.users (uuid) MATCH SIMPLE
         ON UPDATE NO ACTION

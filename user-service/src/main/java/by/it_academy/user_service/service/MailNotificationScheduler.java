@@ -9,7 +9,6 @@ import by.it_academy.user_service.service.api.IVerificationService;
 import by.it_academy.user_service.service.exceptions.commonInternal.FailedSendingMailException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,25 +25,22 @@ public class MailNotificationScheduler implements IMailNotificationScheduler {
     }
 
     @Scheduled(fixedDelay = 10000)
-    @Transactional
     @Override
     public void execute() {
         List<Verification> verifications = this.verificationService.get(VerificationStatus.WAIT);
         if (verifications != null && !verifications.isEmpty()) {
             for (Verification v : verifications) {
+                VerificationUpdateDto verificationUpdateDto = new VerificationUpdateDto(v.getUser(), v.getUrl(), v.getCode(), VerificationStatus.SENT, v.getAttempt() + 1);
                 try {
                     String verificationUrl = buildVerificationUrl(v.getUrl(), v.getUser().getMail(), v.getCode());
                     this.notificationService.sendVerificationUrl(v.getUser().getMail(), "Verification", v.getUser().getFio(), verificationUrl);
-                    VerificationUpdateDto verificationUpdateDto = new VerificationUpdateDto(v.getUser(), v.getUrl(), v.getCode(), VerificationStatus.SENT, v.getAttempt() + 1);
-                    this.verificationService.update(verificationUpdateDto, v.getUuid(), v.getDtUpdate());
                 } catch (FailedSendingMailException ex) {
-                    Long attempt = v.getAttempt();
-                    VerificationUpdateDto verificationUpdateDto;
-                    if (attempt >= 2) {
-                        verificationUpdateDto = new VerificationUpdateDto(v.getUser(), v.getUrl(), v.getCode(), VerificationStatus.ERROR, v.getAttempt() + 1);
+                    if (v.getAttempt() >= 2) {
+                        verificationUpdateDto.setStatus(VerificationStatus.ERROR);
                     } else {
-                        verificationUpdateDto = new VerificationUpdateDto(v.getUser(), v.getUrl(), v.getCode(), VerificationStatus.WAIT, v.getAttempt() + 1);
+                        verificationUpdateDto.setStatus(VerificationStatus.WAIT);
                     }
+                } finally {
                     this.verificationService.update(verificationUpdateDto, v.getUuid(), v.getDtUpdate());
                 }
             }

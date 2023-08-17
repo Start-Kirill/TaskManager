@@ -32,7 +32,7 @@ services:
 
   user-service:
     build: user-service
-    image: taskmanager_user-service:1.0.19
+    image: taskmanager_user-service:1.0.20
     networks:
       - taskmanager_ntwrk
 

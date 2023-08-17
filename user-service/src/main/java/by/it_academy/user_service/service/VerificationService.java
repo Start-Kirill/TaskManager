@@ -14,6 +14,7 @@ import by.it_academy.user_service.dao.api.IVerificationDao;
 import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.dao.entity.Verification;
 import by.it_academy.user_service.service.api.IVerificationService;
+import by.it_academy.user_service.service.exceptions.common.CodeForUserExistsException;
 import by.it_academy.user_service.service.exceptions.common.VerificationCodeNotExistsException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.core.convert.ConversionService;
@@ -31,6 +32,8 @@ import java.util.UUID;
 public class VerificationService implements IVerificationService {
 
     private static final String UNIQUE_UUID_CONSTRAINT_NAME = "verification_code_pkey";
+
+    private static final String UNIQUE_USER_CONSTRAINT_NAME = "verification_user_uuid_key";
 
     private final IVerificationDao verificationDao;
 
@@ -62,6 +65,8 @@ public class VerificationService implements IVerificationService {
                 String constraintName = ((ConstraintViolationException) ex.getCause()).getConstraintName();
                 if (UNIQUE_UUID_CONSTRAINT_NAME.equals(constraintName)) {
                     throw new GeneratedDataNotCorrectException(List.of(new ErrorResponse(ErrorType.ERROR, "Internal failure of server. Duplicate uuid was generated. Repeat request or contact administrator")));
+                } else if (UNIQUE_USER_CONSTRAINT_NAME.equals(constraintName)) {
+                    throw new CodeForUserExistsException(List.of(new ErrorResponse(ErrorType.ERROR, "Verification data for such user already exist")));
                 }
             }
             throw new InternalServerErrorException(List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));

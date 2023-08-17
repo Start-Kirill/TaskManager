@@ -4,11 +4,8 @@ import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.UserStatus;
-import by.it_academy.user_service.config.property.AppProperty;
-import by.it_academy.user_service.core.dto.UserCreateDto;
-import by.it_academy.user_service.core.dto.UserLoginDto;
-import by.it_academy.user_service.core.dto.UserRegistrationDto;
-import by.it_academy.user_service.core.dto.VerificationCreateDto;
+import by.it_academy.user_service.core.dto.*;
+import by.it_academy.user_service.core.enums.VerificationStatus;
 import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.dao.entity.Verification;
 import by.it_academy.user_service.service.api.*;
@@ -164,10 +161,18 @@ public class UserAuthenticationService implements IUserAuthenticationService {
     @Transactional
     @Override
     public void sendCodeAgain(String mail) {
+
         User user = this.userService.findByMail(mail);
 
-        VerificationCreateDto codeCreateDto = new VerificationCreateDto(user);
-        this.verificationCodeService.save(codeCreateDto);
+        Verification verification = this.verificationCodeService.get(user);
+
+        VerificationUpdateDto verificationUpdateDto = new VerificationUpdateDto(
+                user,
+                verification.getUrl(),
+                this.verificationCodeService.generateCode(),
+                VerificationStatus.WAIT, 0L);
+
+        this.verificationCodeService.update(verificationUpdateDto, verification.getUuid(), verification.getDtUpdate());
 
         this.auditService.saveBySystem(user.getUuid(), "Verification data were created again");
     }
