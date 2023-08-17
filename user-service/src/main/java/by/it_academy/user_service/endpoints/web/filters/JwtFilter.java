@@ -52,6 +52,12 @@ public class JwtFilter
         User user = this.userService.get(UUID.fromString(jwtTokenHandler.getUuid(token)));
         UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
 
+        if (!userDetails.isAccountNonLocked()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
