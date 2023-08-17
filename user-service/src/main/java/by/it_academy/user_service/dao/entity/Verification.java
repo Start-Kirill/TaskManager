@@ -14,7 +14,7 @@ public class Verification {
     @Id
     private UUID uuid;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "user_uuid")
     private User user;
 
