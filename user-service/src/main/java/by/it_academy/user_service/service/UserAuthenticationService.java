@@ -10,6 +10,7 @@ import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.dao.entity.Verification;
 import by.it_academy.user_service.service.api.*;
 import by.it_academy.user_service.service.exceptions.common.DeactivatedUserException;
+import by.it_academy.user_service.service.exceptions.common.MailMissingException;
 import by.it_academy.user_service.service.exceptions.common.NotActivatedUserException;
 import by.it_academy.user_service.service.exceptions.common.NotVerifyUserException;
 import by.it_academy.user_service.service.exceptions.structured.MailNotExistsException;
@@ -91,6 +92,10 @@ public class UserAuthenticationService implements IUserAuthenticationService {
     public void verify(String code, String mail) {
 
         List<ErrorResponse> errors = new ArrayList<>();
+
+        if (mail == null || "".equals(mail)) {
+            throw new MailMissingException(List.of(new ErrorResponse(ErrorType.ERROR, "Mail is missing")));
+        }
 
         User user = this.userService.findByMail(mail);
         Verification verification = this.verificationCodeService.get(user);
