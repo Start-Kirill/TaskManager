@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,10 @@ public class ControllerExceptionHandler {
 
     private static final String SIZE_PARAM_NAME = "size";
 
+    private static final String TASK_STATUS_PARAM_NAME = "status";
+
+    private static final String DT_UPDATE_FIELD = "dt_update";
+
     private static final String INCORRECT_DATA_OR_NOT_ENOUGH_MESSAGE = "Passed data is incorrect or not enough";
 
     private static final String INVALID_UUID_MESSAGE = "Invalid UUID. Change the request and repeat";
@@ -35,8 +40,13 @@ public class ControllerExceptionHandler {
 
     private static final String INVALID_SIZE_MESSAGE = "Invalid size value. Change the request and repeat";
 
+    private static final String INVALID_STATUS_MESSAGE = "Invalid status value. Change the request and repeat";
+
     private static final String SERVER_INTERNAL_ERROR_MESSAGE = "The server was unable to process the request correctly. Please contact administrator";
 
+    private static final String REQUEST_INVALID_DATA_MESSAGE = "The request contains invalid data. Change the request and send it again";
+
+    private static final String INVALID_UPDATE_DATE_MESSAGE = "Invalid update date(version). Change the request and repeat";
 
     @ExceptionHandler(StructuredErrorException.class)
     public ResponseEntity<?> handlerStructuredErrorException(StructuredErrorException ex) {
@@ -72,14 +82,22 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<?> handlerMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         List<ErrorResponse> error = new ArrayList<>();
+        Map<String, String> mapErrors = new HashMap<>();
         if (UUID_FIELD_NAME.equals(ex.getPropertyName())) {
             error.add(new ErrorResponse(ErrorType.ERROR, INVALID_UUID_MESSAGE));
         } else if (PAGE_PARAM_NAME.equals(ex.getPropertyName())) {
-            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_PAGE_MESSAGE));
+            mapErrors.put(PAGE_PARAM_NAME, INVALID_PAGE_MESSAGE);
         } else if (SIZE_PARAM_NAME.equals(ex.getPropertyName())) {
-            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_SIZE_MESSAGE));
+            mapErrors.put(SIZE_PARAM_NAME, INVALID_SIZE_MESSAGE);
+        } else if (TASK_STATUS_PARAM_NAME.equals(ex.getPropertyName())) {
+            mapErrors.put(TASK_STATUS_PARAM_NAME, INVALID_STATUS_MESSAGE);
+        } else if (DT_UPDATE_FIELD.equals(ex.getPropertyName())) {
+            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_UPDATE_DATE_MESSAGE));
+        } else {
+            error.add(new ErrorResponse(ErrorType.ERROR, REQUEST_INVALID_DATA_MESSAGE));
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(mapErrors.isEmpty() ? error : new StructuredErrorResponse(ErrorType.STRUCTURED_ERROR, mapErrors));
     }
 
     @ExceptionHandler(NullPointerException.class)

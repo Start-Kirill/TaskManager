@@ -60,11 +60,17 @@ public class JwtFilter
             userDetails.setRole(UserRole.SYSTEM);
             userDetails.setUsername(jwtTokenHandler.getMail(token));
             userDetails.setPassword("System");
+            userDetails.setAccountNonLocked(true);
             List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(UserRole.SYSTEM.getRoleName()));
             userDetails.setAuthorities(authorities);
         } else {
             UserDto user = this.userService.get(header, UUID.fromString(jwtTokenHandler.getUuid(token)));
             userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
+        }
+
+        if (!userDetails.isAccountNonLocked()) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

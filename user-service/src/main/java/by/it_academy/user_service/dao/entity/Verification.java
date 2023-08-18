@@ -1,5 +1,6 @@
 package by.it_academy.user_service.dao.entity;
 
+import by.it_academy.user_service.core.enums.VerificationStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -7,9 +8,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "verification_code")
 @DynamicUpdate
-public class VerificationCode {
+public class Verification {
 
     @Id
     private UUID uuid;
@@ -18,7 +18,14 @@ public class VerificationCode {
     @JoinColumn(name = "user_uuid")
     private User user;
 
+    private String url;
+
     private String code;
+
+    @Enumerated(EnumType.STRING)
+    private VerificationStatus status;
+
+    private Long attempt;
 
     @Column(name = "dt_create")
     private LocalDateTime dtCreate;
@@ -27,13 +34,16 @@ public class VerificationCode {
     @Column(name = "dt_update")
     private LocalDateTime dtUpdate;
 
-    public VerificationCode() {
+    public Verification() {
     }
 
-    public VerificationCode(UUID uuid, User user, String code, LocalDateTime dtCreate, LocalDateTime dtUpdate) {
+    public Verification(UUID uuid, User user, String url, String code, VerificationStatus status, Long attempt, LocalDateTime dtCreate, LocalDateTime dtUpdate) {
         this.uuid = uuid;
         this.user = user;
+        this.url = url;
         this.code = code;
+        this.status = status;
+        this.attempt = attempt;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
     }
@@ -54,12 +64,36 @@ public class VerificationCode {
         this.user = user;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public String getCode() {
         return code;
     }
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public VerificationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(VerificationStatus status) {
+        this.status = status;
+    }
+
+    public Long getAttempt() {
+        return attempt;
+    }
+
+    public void setAttempt(Long attempt) {
+        this.attempt = attempt;
     }
 
     public LocalDateTime getDtCreate() {

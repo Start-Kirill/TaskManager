@@ -4,6 +4,7 @@ import by.it_academy.user_service.endpoints.web.filters.JwtFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -51,6 +52,7 @@ public class SecurityConfig {
                 .requestMatchers("users/verification/*").permitAll()
                 .requestMatchers("users/verification").permitAll()
                 .requestMatchers("/users/me").authenticated()
+                .requestMatchers(HttpMethod.PATCH,"/users").hasAnyAuthority("ROLE_ADMIN", "ROLE_MANAGER")
                 .requestMatchers("/users").hasAnyAuthority("ROLE_ADMIN")
                 .requestMatchers("/users/*/dt_update/*").hasAnyAuthority("ROLE_ADMIN")
                 .requestMatchers("users/*").authenticated()

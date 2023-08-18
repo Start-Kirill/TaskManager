@@ -1,3 +1,5 @@
+\c user_service user_service;
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 INSERT INTO app.users(

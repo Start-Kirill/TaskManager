@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -65,6 +66,8 @@ public class AuditService implements IAuditService {
     public void create(AuditCreateDto dto) {
         try {
             Audit audit = this.conversionService.convert(dto, Audit.class);
+            audit.setDtCreate(LocalDateTime.now());
+            audit.setUuid(UUID.randomUUID());
             this.auditDao.save(audit);
         } catch (Exception ex) {
             List<ErrorResponse> errors = new ArrayList<>();

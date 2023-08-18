@@ -1,6 +1,7 @@
-package by.it_academy.user_service.endpoints.web.support.spring.converters;
+package by.it_academy.user_service.core.support.spring.converters;
 
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
+import by.it_academy.task_manager_common.enums.UserStatus;
 import by.it_academy.user_service.dao.entity.User;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +20,8 @@ public class UserToUserDetailsConverter implements Converter<User, UserDetailsIm
         userDetails.setRole(source.getRole());
         userDetails.setStatus(source.getStatus());
         userDetails.setPassword(source.getPassword());
+
+        userDetails.setAccountNonLocked(source.getStatus().equals(UserStatus.ACTIVATED));
 
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(source.getRole().getRoleName()));
         userDetails.setAuthorities(authorities);
