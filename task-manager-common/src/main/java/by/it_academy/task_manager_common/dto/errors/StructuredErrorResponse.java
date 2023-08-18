@@ -9,6 +9,7 @@ import java.util.Map;
 
 public class StructuredErrorResponse {
 
+
     private ErrorType logref;
 
     @JsonSerialize(converter = StructuredErrorConverter.class)
