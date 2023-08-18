@@ -109,7 +109,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         }
 
         UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
-        this.auditService.save(userDetails, user.getUuid(), "User was activated");
+        this.auditService.saveBySystem(user.getUuid(), "User was activated");
     }
 
 

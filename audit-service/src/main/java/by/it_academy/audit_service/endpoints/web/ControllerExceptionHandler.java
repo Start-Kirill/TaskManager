@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,16 +69,18 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<?> handlerMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         List<ErrorResponse> error = new ArrayList<>();
+        Map<String, String> mapErrors = new HashMap<>();
         if (UUID_FIELD_NAME.equals(ex.getPropertyName())) {
             error.add(new ErrorResponse(ErrorType.ERROR, INVALID_UUID_MESSAGE));
         } else if (PAGE_PARAM_NAME.equals(ex.getPropertyName())) {
-            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_PAGE_MESSAGE));
+            mapErrors.put(PAGE_PARAM_NAME, INVALID_PAGE_MESSAGE);
         } else if (SIZE_PARAM_NAME.equals(ex.getPropertyName())) {
-            error.add(new ErrorResponse(ErrorType.ERROR, INVALID_SIZE_MESSAGE));
-        }else {
+            mapErrors.put(SIZE_PARAM_NAME, INVALID_SIZE_MESSAGE);
+        } else {
             error.add(new ErrorResponse(ErrorType.ERROR, REQUEST_INVALID_DATA_MESSAGE));
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(mapErrors.isEmpty() ? error : new StructuredErrorResponse(ErrorType.STRUCTURED_ERROR, mapErrors));
     }
 
     @ExceptionHandler(NullPointerException.class)
