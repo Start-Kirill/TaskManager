@@ -12,10 +12,10 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>task-manager-common</module>
         <module>user-service</module>
         <module>audit-service</module>
         <module>task-service</module>
-        <module>task-manager-common</module>
     </modules>
 
 
