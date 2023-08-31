@@ -52,6 +52,20 @@ CREATE TABLE app.project
 ALTER TABLE IF EXISTS app.project
     OWNER to task_service;
 
+CREATE TABLE app.project_staff
+(
+    project_id uuid NOT NULL,
+    staff uuid NOT NULL,
+    FOREIGN KEY (project_id)
+        REFERENCES app.project (uuid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
+
+ALTER TABLE IF EXISTS app.project_staff
+    OWNER to task_service;
+
 CREATE TABLE app.task
 (
     uuid uuid,
