@@ -30,6 +30,8 @@ public class Project {
 
     private UUID manager;
 
+    @ElementCollection
+    @CollectionTable(name = "project_staff", joinColumns = @JoinColumn(name = "project_id"))
     private Set<UUID> staff;
 
     @Enumerated(EnumType.STRING)

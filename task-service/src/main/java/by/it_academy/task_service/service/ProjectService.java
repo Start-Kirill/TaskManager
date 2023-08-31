@@ -199,9 +199,9 @@ public class ProjectService implements IProjectService {
             }
         } else {
             if (archived) {
-                projectPage = this.projectDao.findAllByParticipant(pageRequest, user.getUuid());
+                projectPage = this.projectDao.findAllByManagerOrStaff(pageRequest, user.getUuid(), user.getUuid());
             } else {
-                projectPage = this.projectDao.findAllByParticipantAndStatus(pageRequest, user.getUuid(), ProjectStatus.ACTIVE.toString());
+                projectPage = this.projectDao.findAllByManagerOrStaffAndStatus(pageRequest, user.getUuid(), user.getUuid(), ProjectStatus.ACTIVE);
             }
         }
         customPage = this.conversionService.convert(projectPage, CustomPage.class);
