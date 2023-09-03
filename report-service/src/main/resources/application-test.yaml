@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/report_service?ApplicationName=report-service
+server:
+  port: 94
+feign:
+  user:
+    url: http://localhost:91/users
+  audit:
+    url: http://localhost:92/audit
