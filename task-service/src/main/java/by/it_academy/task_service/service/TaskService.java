@@ -32,6 +32,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -187,97 +188,33 @@ public class TaskService implements ITaskService {
 
         validate(dto);
 
-        PageRequest pageRequest = PageRequest.of(dto.getPage(), dto.getSize());
-        Page<Task> taskPage = null;
         UserDetailsImpl user = this.userHolder.getUser();
-        if (UserRole.ADMIN.equals(user.getRole())) {
-            if (dto.getProjects() == null && dto.getImplementers() == null && dto.getStatuses() == null) {
-                taskPage = this.taskDao.findAll(pageRequest);
-            } else if (dto.getProjects() != null && dto.getImplementers() == null && dto.getStatuses() == null) {
-                List<Project> projects = this.projectService.findAllByIdIn(dto.getProjects());
-                taskPage = this.taskDao.findAllByProjectIn(
-                        pageRequest,
-                        projects);
-            } else if (dto.getProjects() != null && dto.getImplementers() != null && dto.getStatuses() == null) {
-                List<Project> projects = this.projectService.findAllByIdIn(dto.getProjects());
-                taskPage = this.taskDao.findAllByProjectInAndImplementerIn(
-                        pageRequest,
-                        projects,
-                        dto.getImplementers());
-            } else if (dto.getProjects() != null && dto.getImplementers() == null && dto.getStatuses() != null) {
-                List<Project> projects = this.projectService.findAllByIdIn(dto.getProjects());
-                taskPage = this.taskDao.findAllByProjectInAndStatusIn(
-                        pageRequest,
-                        projects,
-                        dto.getStatuses());
-            } else if (dto.getProjects() == null && dto.getImplementers() != null && dto.getStatuses() == null) {
-                taskPage = this.taskDao.findAllByImplementerIn(
-                        pageRequest,
-                        dto.getImplementers());
-            } else if (dto.getProjects() == null && dto.getImplementers() != null && dto.getStatuses() != null) {
-                taskPage = this.taskDao.findAllByImplementerInAndStatusIn(
-                        pageRequest,
-                        dto.getImplementers(),
-                        dto.getStatuses());
-            } else if (dto.getProjects() == null && dto.getImplementers() == null && dto.getStatuses() != null) {
-                taskPage = this.taskDao.findAllByStatusIn(
-                        pageRequest,
-                        dto.getStatuses());
-            } else {
-                List<Project> projects = this.projectService.findAllByIdIn(dto.getProjects());
-                taskPage = this.taskDao.findAllByProjectInAndImplementerInAndStatusIn(
-                        pageRequest,
-                        projects,
-                        dto.getImplementers(),
-                        dto.getStatuses());
-            }
-        } else {
-            if (dto.getProjects() == null && dto.getImplementers() == null && dto.getStatuses() == null) {
-                taskPage = this.taskDao.findAllByParticipant(
-                        pageRequest,
-                        user.getUuid());
-            } else if (dto.getProjects() != null && dto.getImplementers() == null && dto.getStatuses() == null) {
-                taskPage = this.taskDao.findAllByProjectInAndByParticipant(
-                        pageRequest,
-                        dto.getProjects(),
-                        user.getUuid());
-            } else if (dto.getProjects() != null && dto.getImplementers() != null && dto.getStatuses() == null) {
-                taskPage = this.taskDao.findAllByProjectInAndImplementerInAndByParticipant(
-                        pageRequest,
-                        dto.getProjects(),
-                        dto.getImplementers(),
-                        user.getUuid());
-            } else if (dto.getProjects() != null && dto.getImplementers() == null && dto.getStatuses() != null) {
-                taskPage = this.taskDao.findAllByProjectInAndStatusInAndByByParticipant(
-                        pageRequest,
-                        dto.getProjects(),
-                        dto.getStatuses().stream().map(Enum::toString).toList(),
-                        user.getUuid());
-            } else if (dto.getProjects() == null && dto.getImplementers() != null && dto.getStatuses() == null) {
-                taskPage = this.taskDao.findAllByImplementerInAndByParticipant(
-                        pageRequest,
-                        dto.getImplementers(),
-                        user.getUuid());
-            } else if (dto.getProjects() == null && dto.getImplementers() != null && dto.getStatuses() != null) {
-                taskPage = this.taskDao.findAllByImplementerInAndStatusInAndByParticipant(
-                        pageRequest,
-                        dto.getImplementers(),
-                        dto.getStatuses().stream().map(Enum::toString).toList(),
-                        user.getUuid());
-            } else if (dto.getProjects() == null && dto.getImplementers() == null && dto.getStatuses() != null) {
-                taskPage = this.taskDao.findAllByStatusInAndByParticipant(
-                        pageRequest,
-                        dto.getStatuses().stream().map(Enum::toString).toList(),
-                        user.getUuid());
-            } else {
-                taskPage = this.taskDao.findAllByProjectInAndImplementerInAndStatusInAndByParticipant(
-                        pageRequest,
-                        dto.getProjects(),
-                        dto.getImplementers(),
-                        dto.getStatuses().stream().map(Enum::toString).toList(),
-                        user.getUuid());
-            }
+
+        Specification<Task> specification = Specification.where(null);
+
+        if (!UserRole.ADMIN.equals(user.getRole())) {
+            specification = specification.and(TaskSpecifications.findByManager(user.getUuid()))
+                    .or(TaskSpecifications.findByStaff(user.getUuid()));
         }
+
+        List<UUID> implementers = dto.getImplementers();
+        if (implementers != null && !implementers.isEmpty()) {
+            specification = specification.and(TaskSpecifications.findByImplementerIn(implementers));
+        }
+
+        List<UUID> projects = dto.getProjects();
+        if (projects != null && !projects.isEmpty()) {
+            specification = specification.and(TaskSpecifications.findByProjectIn(this.projectService.findAllByIdIn(projects)));
+        }
+
+        List<TaskStatus> statuses = dto.getStatuses();
+        if (statuses != null && !statuses.isEmpty()) {
+            specification = specification.and(TaskSpecifications.findByStatusIn(statuses));
+        }
+
+        PageRequest pageRequest = PageRequest.of(dto.getPage(), dto.getSize());
+        Page<Task> taskPage = taskPage = this.taskDao.findAll(specification, pageRequest);
+
 
         CustomPage<Task> customPage = this.conversionService.convert(taskPage, CustomPage.class);
         customPage.setSize(dto.getSize());
