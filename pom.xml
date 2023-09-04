@@ -16,6 +16,7 @@
         <module>user-service</module>
         <module>audit-service</module>
         <module>task-service</module>
+        <module>report-service</module>
     </modules>
 
 

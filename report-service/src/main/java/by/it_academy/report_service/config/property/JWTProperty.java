@@ -1,4 +1,4 @@
-package by.it_academy.audit_service.config.property;
+package by.it_academy.report_service.config.property;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,6 +1,6 @@
-package by.it_academy.audit_service.utils;
+package by.it_academy.report_service.utils;
 
-import by.it_academy.audit_service.config.property.JWTProperty;
+import by.it_academy.report_service.config.property.JWTProperty;
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-
+@Component
 public class JwtTokenHandler {
 
     private static final String UUID_FIELD_NAME = "uuid";

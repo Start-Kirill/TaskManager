@@ -14,7 +14,6 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-
 public class ApplicationConfig implements WebMvcConfigurer {
 
 
@@ -36,6 +35,4 @@ public class ApplicationConfig implements WebMvcConfigurer {
     public JWTProperty jwtProperty() {
         return new JWTProperty();
     }
-
-
 }
