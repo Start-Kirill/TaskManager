@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@Component
+
 public class JwtTokenHandler {
 
     private static final String UUID_FIELD_NAME = "uuid";
