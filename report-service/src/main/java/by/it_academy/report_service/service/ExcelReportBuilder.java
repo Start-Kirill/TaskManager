@@ -3,6 +3,7 @@ package by.it_academy.report_service.service;
 import by.it_academy.report_service.core.enums.ReportType;
 import by.it_academy.report_service.dao.entity.Report;
 import by.it_academy.report_service.service.api.IReportBuilder;
+import by.it_academy.report_service.utils.JwtTokenHandler;
 import by.it_academy.task_manager_common.dto.AuditDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
@@ -11,6 +12,7 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -39,21 +41,20 @@ public class ExcelReportBuilder implements IReportBuilder {
     private static final String AUDIT_SIXTH_COLUMN_NAME = "Id";
 
 
-    private final UserHolder userHolder;
+    private final JwtTokenHandler tokenHandler;
 
     private final AuditClientService auditClientService;
 
-    public ExcelReportBuilder(UserHolder userHolder, AuditClientService auditClientService) {
-        this.userHolder = userHolder;
+    public ExcelReportBuilder(JwtTokenHandler tokenHandler, AuditClientService auditClientService) {
+        this.tokenHandler = tokenHandler;
         this.auditClientService = auditClientService;
     }
 
     @Override
-    public String build(Report report) {
-        UserDetailsImpl user = userHolder.getUser();
-        String reportFile = null;
+    public byte[] build(Report report) {
+        byte[] reportFile = null;
         if (report.getType().equals(ReportType.JOURNAL_AUDIT)) {
-            CustomPage<AuditDto> auditDtoCustomPage = this.auditClientService.get(user);
+            CustomPage<AuditDto> auditDtoCustomPage = this.auditClientService.get(tokenHandler.generateSystemAccessToken());
             List<AuditDto> content = auditDtoCustomPage.getContent();
             reportFile = buildAuditReport(content);
         }
@@ -62,7 +63,7 @@ public class ExcelReportBuilder implements IReportBuilder {
         return reportFile;
     }
 
-    private String buildAuditReport(List<AuditDto> content) {
+    private byte[] buildAuditReport(List<AuditDto> content) {
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet();
@@ -169,16 +170,15 @@ public class ExcelReportBuilder implements IReportBuilder {
         }
     }
 
-    private String convert(Workbook workbook) {
-        String data = new String();
-        try (FileOutputStream outputStream = new FileOutputStream(data)) {
+    private byte[] convert(Workbook workbook) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             workbook.write(outputStream);
+            return outputStream.toByteArray();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return data;
     }
 
 

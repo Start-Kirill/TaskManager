@@ -30,7 +30,7 @@ public class MinioDao implements IFileSystemDao {
     }
 
     @Override
-    public String save(String data, String fileName, String bucketName) {
+    public void save(byte[] data, String fileName, String bucketName) {
         BucketExistsArgs bucket = BucketExistsArgs.builder().bucket(bucketName).build();
         try {
             if (!minioClient.bucketExists(bucket)) {
@@ -41,7 +41,7 @@ public class MinioDao implements IFileSystemDao {
                     PutObjectArgs.builder()
                             .bucket(bucketName)
                             .object(fileName)
-                            .stream(new ByteArrayInputStream(data.getBytes()), data.getBytes().length, -1)
+                            .stream(new ByteArrayInputStream(data), data.length, -1)
                             .build()
             );
         } catch (ErrorResponseException e) {
@@ -63,7 +63,6 @@ public class MinioDao implements IFileSystemDao {
         } catch (XmlParserException e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override

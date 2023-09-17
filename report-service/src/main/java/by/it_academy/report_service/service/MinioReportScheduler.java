@@ -49,7 +49,7 @@ public class MinioReportScheduler implements IReportScheduler {
 
                 r = this.reportService.update(reportUpdateDto, r.getUuid(), r.getDtUpdate());
 
-                String reportFile = this.reportBuilder.build(r);
+                byte[] reportFile = this.reportBuilder.build(r);
                 String fileName;
                 String bucketName;
                 if (this.minioReportLocationService.existsByReport(r.getUuid())) {

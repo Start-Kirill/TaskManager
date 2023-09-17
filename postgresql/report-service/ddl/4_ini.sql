@@ -42,6 +42,7 @@ CREATE TABLE app.report
     status text NOT NULL,
     type text NOT NULL,
     description text NOT NULL,
+    params json NOT NULL,
     attempt integer,
     PRIMARY KEY (uuid)
 );
@@ -49,27 +50,10 @@ CREATE TABLE app.report
 ALTER TABLE IF EXISTS app.report
     OWNER to report_service;
 
-CREATE TABLE app.report_param_audit
-(
-    report_id uuid NOT NULL,
-    "user" uuid,
-    "from" timestamp without time zone,
-    "to" timestamp without time zone,
-    FOREIGN KEY (report_id)
-        REFERENCES app.report (uuid) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-        NOT VALID
-);
-
-ALTER TABLE IF EXISTS app.report_param_audit
-    OWNER to report_service;
 
 CREATE TABLE app.minio_report_location
     (
         uuid uuid,
-        dt_create timestamp without time zone NOT NULL,
-        dt_update timestamp without time zone NOT NULL,
         report_id uuid NOT NULL,
         file_name text NOT NULL,
         bucket_name text NOT NULL,

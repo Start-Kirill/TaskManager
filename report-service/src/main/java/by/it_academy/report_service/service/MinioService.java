@@ -25,7 +25,7 @@ public class MinioService implements IMinioService {
     }
 
     @Override
-    public void save(String data, String fileName, String bucketName) {
+    public void save(byte[] data, String fileName, String bucketName) {
         this.minioDao.save(data, fileName, bucketName);
     }
 

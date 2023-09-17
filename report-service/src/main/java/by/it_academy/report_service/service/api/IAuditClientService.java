@@ -18,4 +18,6 @@ public interface IAuditClientService {
 
     CustomPage<AuditDto> get(UserDetailsImpl userDetails);
 
+    CustomPage<AuditDto> get(String token);
+
 }

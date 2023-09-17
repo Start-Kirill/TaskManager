@@ -88,7 +88,7 @@ public class ReportService implements IReportService {
 
         LocalDateTime realVersion = report.getDtUpdate().truncatedTo(ChronoUnit.MILLIS);
 
-        if (!realVersion.equals(dtUpdate)) {
+        if (!realVersion.equals(dtUpdate.truncatedTo(ChronoUnit.MILLIS))) {
             throw new VersionsNotMatchException(List.of(new ErrorResponse(ErrorType.ERROR, "Reports date updates (versions) don't match. Get up-to-date report")));
         }
 

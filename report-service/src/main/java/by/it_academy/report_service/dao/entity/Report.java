@@ -2,7 +2,9 @@ package by.it_academy.report_service.dao.entity;
 
 import by.it_academy.report_service.core.enums.ReportStatus;
 import by.it_academy.report_service.core.enums.ReportType;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -30,23 +32,22 @@ public class Report {
     @Column(updatable = false)
     private String description;
 
-    @ElementCollection
-    @CollectionTable(name = "report_param_audit", joinColumns = @JoinColumn(name = "report_id"))
-    private Map<String, Object> auditParams;
+    @Type(JsonType.class)
+    private Map<String, Object> params;
 
     private Integer attempt;
 
     public Report() {
     }
 
-    public Report(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, ReportStatus status, ReportType type, String description, Map<String, Object> auditParams, Integer attempt) {
+    public Report(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, ReportStatus status, ReportType type, String description, Map<String, Object> params, Integer attempt) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
         this.status = status;
         this.type = type;
         this.description = description;
-        this.auditParams = auditParams;
+        this.params = params;
         this.attempt = attempt;
     }
 
@@ -98,12 +99,12 @@ public class Report {
         this.description = description;
     }
 
-    public Map<String, Object> getAuditParams() {
-        return auditParams;
+    public Map<String, Object> getParams() {
+        return params;
     }
 
-    public void setAuditParams(Map<String, Object> auditParams) {
-        this.auditParams = auditParams;
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
     }
 
     public Integer getAttempt() {

@@ -6,7 +6,9 @@ import by.it_academy.report_service.core.enums.ReportType;
 import by.it_academy.report_service.dao.entity.Report;
 import org.springframework.core.convert.converter.Converter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +29,7 @@ public class ReportCreateDtoToReportConverter implements Converter<ReportCreateD
     public Report convert(ReportCreateDto source) {
         Report report = new Report();
         report.setAttempt(0);
-        report.setAuditParams(convert(source.getParams(), source.getType()));
+        report.setParams(convert(source.getParams(), source.getType()));
         report.setStatus(ReportStatus.LOADED);
         report.setType(ReportType.JOURNAL_AUDIT);
         report.setDescription(ReportType.JOURNAL_AUDIT.buildDescription(source.getParams()));
@@ -45,11 +47,11 @@ public class ReportCreateDtoToReportConverter implements Converter<ReportCreateD
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
 
             String fromRaw = source.get(FROM_FIELD_PARAM_NAME);
-            LocalDateTime from = LocalDateTime.parse(fromRaw, formatter);
+            LocalDateTime from = LocalDateTime.of(LocalDate.parse(fromRaw, formatter), LocalTime.MIN);
             target.put(FROM_FIELD_PARAM_NAME, from);
 
             String toRaw = source.get(TO_FIELD_PARAM_NAME);
-            LocalDateTime to = LocalDateTime.parse(toRaw, formatter);
+            LocalDateTime to = LocalDateTime.of(LocalDate.parse(toRaw, formatter), LocalTime.MIN);
             target.put(TO_FIELD_PARAM_NAME, to);
         }
 

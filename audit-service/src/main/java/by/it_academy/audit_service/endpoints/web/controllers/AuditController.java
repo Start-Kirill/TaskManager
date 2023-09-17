@@ -30,7 +30,7 @@ public class AuditController {
         this.conversionService = conversionService;
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_SYSTEM')")
     @GetMapping
     public ResponseEntity<?> get(@RequestParam(defaultValue = "0", required = false) Integer page,
                                  @RequestParam(defaultValue = "20", required = false) Integer size) {
@@ -42,7 +42,7 @@ public class AuditController {
         return ResponseEntity.status(HttpStatus.OK).body(auditDtoCustomPage);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_SYSTEM')")
     @GetMapping("/{uuid}")
     public ResponseEntity<?> getByUuid(@PathVariable UUID uuid) {
         Audit audit = this.auditService.get(uuid);

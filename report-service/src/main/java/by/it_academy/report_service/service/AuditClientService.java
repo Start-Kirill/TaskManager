@@ -64,4 +64,9 @@ public class AuditClientService implements IAuditClientService {
         return this.auditClient.get("Bearer " + token);
     }
 
+    @Override
+    public CustomPage<AuditDto> get(String token) {
+        return this.auditClient.get("Bearer " + token);
+    }
+
 }

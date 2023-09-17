@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public interface IMinioService {
 
-    void save(String data, String fileName, String bucketName);
+    void save(byte[] data, String fileName, String bucketName);
 
     String getUrl(UUID report);
 
