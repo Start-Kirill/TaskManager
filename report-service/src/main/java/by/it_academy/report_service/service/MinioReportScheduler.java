@@ -1,5 +1,6 @@
 package by.it_academy.report_service.service;
 
+import by.it_academy.report_service.core.dto.MinioReportLocationCreateDto;
 import by.it_academy.report_service.core.dto.ReportUpdateDto;
 import by.it_academy.report_service.core.enums.ReportStatus;
 import by.it_academy.report_service.core.enums.ReportType;
@@ -22,13 +23,17 @@ public class MinioReportScheduler implements IReportScheduler {
 
     private final IReportBuilder reportBuilder;
 
+    private final IMinioReportLocationService minioReportLocationService;
+
 
     public MinioReportScheduler(IReportService reportService,
                                 IMinioService minioService,
-                                IReportBuilder reportBuilder) {
+                                IReportBuilder reportBuilder,
+                                IMinioReportLocationService minioReportLocationService) {
         this.reportService = reportService;
         this.minioService = minioService;
         this.reportBuilder = reportBuilder;
+        this.minioReportLocationService = minioReportLocationService;
     }
 
     @Scheduled(fixedDelay = 10000)
@@ -45,10 +50,15 @@ public class MinioReportScheduler implements IReportScheduler {
 
                 String reportFile = this.reportBuilder.build(r);
 
-                this.minioService.save(reportFile, generateFileName(r), generateBucketName(r));
+                String fileName = generateFileName(r);
+                String bucketName = generateBucketName(r);
+
+                this.minioService.save(reportFile, fileName, bucketName);
 
                 reportUpdateDto.setStatus(ReportStatus.DONE);
                 this.reportService.update(reportUpdateDto, r.getUuid(), r.getDtUpdate());
+
+                saveReportLocation(r.getUuid(), fileName, bucketName);
             } catch (Exception ex) {
                 if (r.getAttempt().equals(2)) {
                     reportUpdateDto.setStatus(ReportStatus.ERROR);
@@ -71,5 +81,10 @@ public class MinioReportScheduler implements IReportScheduler {
     private String generateBucketName(Report report) {
         ReportType type = report.getType();
         return type.toString().replaceAll("_", "-").toLowerCase();
+    }
+
+    private void saveReportLocation(UUID report, String fileName, String bucketName) {
+        MinioReportLocationCreateDto minioReportLocationCreateDto = new MinioReportLocationCreateDto(report, fileName, bucketName);
+        this.minioReportLocationService.save(minioReportLocationCreateDto);
     }
 }

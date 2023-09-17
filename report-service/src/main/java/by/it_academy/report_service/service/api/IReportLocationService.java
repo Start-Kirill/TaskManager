@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public interface IReportLocationService<E, C> {
 
-    E save(C c);
+    E save(C report);
 
     E get(UUID uuid);
 
