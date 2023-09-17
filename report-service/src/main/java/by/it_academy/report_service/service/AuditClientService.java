@@ -4,6 +4,8 @@ import by.it_academy.report_service.service.api.IAuditClient;
 import by.it_academy.report_service.service.api.IAuditClientService;
 import by.it_academy.report_service.utils.JwtTokenHandler;
 import by.it_academy.task_manager_common.dto.AuditCreateDto;
+import by.it_academy.task_manager_common.dto.AuditDto;
+import by.it_academy.task_manager_common.dto.CustomPage;
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
@@ -55,4 +57,11 @@ public class AuditClientService implements IAuditClientService {
 
         save("Bearer " + token, auditCreateDto);
     }
+
+    @Override
+    public CustomPage<AuditDto> get(UserDetailsImpl userDetails) {
+        String token = this.tokenHandler.generateAccessToken(userDetails);
+        return this.auditClient.get("Bearer " + token);
+    }
+
 }

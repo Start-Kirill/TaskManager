@@ -9,6 +9,12 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import java.io.BufferedReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 @EnableJpaRepositories
 @EnableTransactionManagement
@@ -19,5 +25,7 @@ public class UserServiceApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(UserServiceApplication.class, args);
+
+        ArrayList<Object> objects = new ArrayList<>();
     }
 }

@@ -27,18 +27,19 @@ public class Report {
     @Enumerated(EnumType.STRING)
     private ReportType type;
 
+    @Column(updatable = false)
     private String description;
 
     @ElementCollection
     @CollectionTable(name = "report_param_audit", joinColumns = @JoinColumn(name = "report_id"))
     private Map<String, Object> auditParams;
 
-    private String location;
+    private Integer attempt;
 
     public Report() {
     }
 
-    public Report(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, ReportStatus status, ReportType type, String description, Map<String, Object> auditParams, String location) {
+    public Report(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, ReportStatus status, ReportType type, String description, Map<String, Object> auditParams, Integer attempt) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
@@ -46,7 +47,7 @@ public class Report {
         this.type = type;
         this.description = description;
         this.auditParams = auditParams;
-        this.location = location;
+        this.attempt = attempt;
     }
 
     public UUID getUuid() {
@@ -105,11 +106,11 @@ public class Report {
         this.auditParams = auditParams;
     }
 
-    public String getLocation() {
-        return location;
+    public Integer getAttempt() {
+        return attempt;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setAttempt(Integer attempt) {
+        this.attempt = attempt;
     }
 }

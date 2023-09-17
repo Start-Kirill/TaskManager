@@ -42,7 +42,7 @@ CREATE TABLE app.report
     status text NOT NULL,
     type text NOT NULL,
     description text NOT NULL,
-    location text,
+    attempt integer,
     PRIMARY KEY (uuid)
 );
 
@@ -63,4 +63,21 @@ CREATE TABLE app.report_param_audit
 );
 
 ALTER TABLE IF EXISTS app.report_param_audit
+    OWNER to report_service;
+
+CREATE TABLE app.minio_report_location
+    (
+        uuid uuid,
+        report_id uuid NOT NULL,
+        file_name text NOT NULL,
+        bucket_name text NOT NULL,
+        PRIMARY KEY (uuid),
+        FOREIGN KEY (report_id)
+            REFERENCES app.report (uuid) MATCH SIMPLE
+            ON UPDATE NO ACTION
+            ON DELETE NO ACTION
+            NOT VALID
+    );
+
+ALTER TABLE IF EXISTS app.report_location
     OWNER to report_service;

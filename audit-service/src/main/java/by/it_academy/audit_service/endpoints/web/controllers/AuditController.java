@@ -1,11 +1,10 @@
 package by.it_academy.audit_service.endpoints.web.controllers;
 
-import by.it_academy.audit_service.core.dto.AuditDto;
+import by.it_academy.task_manager_common.dto.AuditDto;
 import by.it_academy.audit_service.dao.entity.Audit;
 import by.it_academy.audit_service.service.api.IAuditService;
 import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
-import jakarta.validation.constraints.Min;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;

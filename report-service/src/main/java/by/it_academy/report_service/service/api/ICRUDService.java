@@ -5,11 +5,11 @@ import by.it_academy.task_manager_common.dto.CustomPage;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public interface ICRUDService<C, D> {
+public interface ICRUDService<C, U, D> {
 
     D save(C c);
 
-    D update(C c, UUID uuid, LocalDateTime dtUpdate);
+    D update(U u, UUID uuid, LocalDateTime dtUpdate);
 
     D get(UUID uuid);
 

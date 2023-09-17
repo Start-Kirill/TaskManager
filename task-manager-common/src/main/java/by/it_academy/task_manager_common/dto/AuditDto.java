@@ -1,4 +1,4 @@
-package by.it_academy.audit_service.core.dto;
+package by.it_academy.task_manager_common.dto;
 
 import by.it_academy.task_manager_common.dto.UserDto;
 import by.it_academy.task_manager_common.enums.EssenceType;

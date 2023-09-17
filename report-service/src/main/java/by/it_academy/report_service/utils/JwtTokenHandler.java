@@ -104,7 +104,9 @@ public class JwtTokenHandler {
 
     public void validate(String token) {
         try {
-            Jwts.parser().setSigningKey(jwtProperty.getSecret()).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(
+                    jwtProperty.getSecret()).parseClaimsJws(token
+            );
         } catch (SignatureException ex) {
             throw new NotValidTokenSignatureException(List.of(new ErrorResponse(ErrorType.ERROR, "Token signature is not valid. Try to log in again")));
         } catch (ExpiredJwtException ex) {
