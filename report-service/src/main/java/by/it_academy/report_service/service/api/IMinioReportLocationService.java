@@ -8,5 +8,7 @@ import java.util.UUID;
 
 public interface IMinioReportLocationService extends IReportLocationService<MinioReportLocation, MinioReportLocationCreateDto> {
 
-    MinioReportLocation findByReport(UUID report);
+    MinioReportLocation findByReport(UUID reportUuid);
+
+    void deleteByReport(UUID reportUuid);
 }

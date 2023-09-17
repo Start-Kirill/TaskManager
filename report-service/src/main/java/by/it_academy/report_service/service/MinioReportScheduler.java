@@ -53,12 +53,12 @@ public class MinioReportScheduler implements IReportScheduler {
                 String fileName = generateFileName(r);
                 String bucketName = generateBucketName(r);
 
-                this.minioService.save(reportFile, fileName, bucketName);
+                saveReportLocation(r.getUuid(), fileName, bucketName);
 
                 reportUpdateDto.setStatus(ReportStatus.DONE);
                 this.reportService.update(reportUpdateDto, r.getUuid(), r.getDtUpdate());
 
-                saveReportLocation(r.getUuid(), fileName, bucketName);
+                this.minioService.save(reportFile, fileName, bucketName);
             } catch (Exception ex) {
                 if (r.getAttempt().equals(2)) {
                     reportUpdateDto.setStatus(ReportStatus.ERROR);

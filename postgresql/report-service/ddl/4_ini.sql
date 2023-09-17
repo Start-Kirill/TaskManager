@@ -68,6 +68,8 @@ ALTER TABLE IF EXISTS app.report_param_audit
 CREATE TABLE app.minio_report_location
     (
         uuid uuid,
+        dt_create timestamp without time zone NOT NULL,
+        dt_update timestamp without time zone NOT NULL,
         report_id uuid NOT NULL,
         file_name text NOT NULL,
         bucket_name text NOT NULL,

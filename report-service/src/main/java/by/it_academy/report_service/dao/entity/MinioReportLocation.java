@@ -2,6 +2,7 @@ package by.it_academy.report_service.dao.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -21,14 +22,23 @@ public class MinioReportLocation {
     @Column(name = "bucket_name")
     private String bucketName;
 
+    @Column(name = "dt_create")
+    private LocalDateTime dtCreate;
+
+    @Version
+    @Column(name = "dt_update")
+    private LocalDateTime dtUpdate;
+
     public MinioReportLocation() {
     }
 
-    public MinioReportLocation(UUID uuid, Report report, String fileName, String bucketName) {
+    public MinioReportLocation(UUID uuid, Report report, String fileName, String bucketName, LocalDateTime dtCreate, LocalDateTime dtUpdate) {
         this.uuid = uuid;
         this.report = report;
         this.fileName = fileName;
         this.bucketName = bucketName;
+        this.dtCreate = dtCreate;
+        this.dtUpdate = dtUpdate;
     }
 
     public UUID getUuid() {
@@ -61,5 +71,21 @@ public class MinioReportLocation {
 
     public void setBucketName(String bucketName) {
         this.bucketName = bucketName;
+    }
+
+    public LocalDateTime getDtCreate() {
+        return dtCreate;
+    }
+
+    public void setDtCreate(LocalDateTime dtCreate) {
+        this.dtCreate = dtCreate;
+    }
+
+    public LocalDateTime getDtUpdate() {
+        return dtUpdate;
+    }
+
+    public void setDtUpdate(LocalDateTime dtUpdate) {
+        this.dtUpdate = dtUpdate;
     }
 }
