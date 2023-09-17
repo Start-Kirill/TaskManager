@@ -4,6 +4,7 @@ import by.it_academy.report_service.core.dto.MinioReportLocationCreateDto;
 import by.it_academy.report_service.core.dto.ReportUpdateDto;
 import by.it_academy.report_service.core.enums.ReportStatus;
 import by.it_academy.report_service.core.enums.ReportType;
+import by.it_academy.report_service.dao.entity.MinioReportLocation;
 import by.it_academy.report_service.dao.entity.Report;
 import by.it_academy.report_service.service.api.*;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -41,7 +42,7 @@ public class MinioReportScheduler implements IReportScheduler {
     public void execute() {
         List<Report> loadedReports = this.reportService.getByStatus(ReportStatus.LOADED);
         ReportUpdateDto reportUpdateDto = new ReportUpdateDto();
-        loadedReports.forEach(r -> {
+        for (Report r : loadedReports) {
             try {
                 reportUpdateDto.setStatus(ReportStatus.PROGRESS);
                 reportUpdateDto.setAttempt(r.getAttempt());
@@ -49,14 +50,19 @@ public class MinioReportScheduler implements IReportScheduler {
                 r = this.reportService.update(reportUpdateDto, r.getUuid(), r.getDtUpdate());
 
                 String reportFile = this.reportBuilder.build(r);
-
-                String fileName = generateFileName(r);
-                String bucketName = generateBucketName(r);
-
-                saveReportLocation(r.getUuid(), fileName, bucketName);
+                String fileName;
+                String bucketName;
+                if (this.minioReportLocationService.existsByReport(r.getUuid())) {
+                    MinioReportLocation byReport = this.minioReportLocationService.findByReport(r.getUuid());
+                    fileName = byReport.getFileName();
+                    bucketName = byReport.getBucketName();
+                } else {
+                    fileName = generateFileName(r);
+                    bucketName = generateBucketName(r);
+                    saveReportLocation(r.getUuid(), fileName, bucketName);
+                }
 
                 reportUpdateDto.setStatus(ReportStatus.DONE);
-                this.reportService.update(reportUpdateDto, r.getUuid(), r.getDtUpdate());
 
                 this.minioService.save(reportFile, fileName, bucketName);
             } catch (Exception ex) {
@@ -67,9 +73,11 @@ public class MinioReportScheduler implements IReportScheduler {
                     reportUpdateDto.setStatus(ReportStatus.LOADED);
                     reportUpdateDto.setAttempt(r.getAttempt() + 1);
                 }
+
+            } finally {
                 this.reportService.update(reportUpdateDto, r.getUuid(), r.getDtUpdate());
             }
-        });
+        }
 
     }
 
@@ -83,8 +91,8 @@ public class MinioReportScheduler implements IReportScheduler {
         return type.toString().replaceAll("_", "-").toLowerCase();
     }
 
-    private void saveReportLocation(UUID report, String fileName, String bucketName) {
+    private MinioReportLocation saveReportLocation(UUID report, String fileName, String bucketName) {
         MinioReportLocationCreateDto minioReportLocationCreateDto = new MinioReportLocationCreateDto(report, fileName, bucketName);
-        this.minioReportLocationService.save(minioReportLocationCreateDto);
+        return this.minioReportLocationService.save(minioReportLocationCreateDto);
     }
 }

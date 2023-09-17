@@ -9,7 +9,6 @@ import by.it_academy.report_service.service.api.IReportService;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,8 +32,8 @@ public class MinioReportLocationService implements IMinioReportLocationService {
         validate(dto);
 
         MinioReportLocation minioReportLocation = this.conversionService.convert(dto, MinioReportLocation.class);
+        minioReportLocation.setUuid(UUID.randomUUID());
         minioReportLocation.setReport(this.reportService.get(dto.getReport()));
-        generateData(minioReportLocation);
 
         return this.minioReportLocationDao.save(minioReportLocation);
     }
@@ -50,6 +49,7 @@ public class MinioReportLocationService implements IMinioReportLocationService {
         return this.minioReportLocationDao.findAll();
     }
 
+
     @Override
     public MinioReportLocation findByReport(UUID reportUuid) {
         Report report = this.reportService.get(reportUuid);
@@ -57,9 +57,9 @@ public class MinioReportLocationService implements IMinioReportLocationService {
     }
 
     @Override
-    public void deleteByReport(UUID reportUuid) {
+    public boolean existsByReport(UUID reportUuid) {
         Report report = this.reportService.get(reportUuid);
-        this.minioReportLocationDao.deleteAllByReport(report);
+        return this.minioReportLocationDao.existsByReport(report);
     }
 
 
@@ -68,11 +68,4 @@ public class MinioReportLocationService implements IMinioReportLocationService {
 
     }
 
-    private void generateData(MinioReportLocation minioReportLocation) {
-        LocalDateTime now = LocalDateTime.now();
-        UUID uuid = UUID.randomUUID();
-        minioReportLocation.setUuid(uuid);
-        minioReportLocation.setDtCreate(now);
-        minioReportLocation.setDtUpdate(now);
-    }
 }

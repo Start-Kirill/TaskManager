@@ -6,6 +6,7 @@ import by.it_academy.report_service.service.api.IMinioReportLocationService;
 import by.it_academy.report_service.service.api.IMinioService;
 import io.minio.MinioClient;
 import jakarta.annotation.PostConstruct;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class MinioService implements IMinioService {
 
     private final IFileSystemDao minioDao;
 
-    public MinioService(IMinioReportLocationService reportLocationService, IFileSystemDao minioDao) {
+    public MinioService(@Lazy IMinioReportLocationService reportLocationService, IFileSystemDao minioDao) {
         this.reportLocationService = reportLocationService;
         this.minioDao = minioDao;
     }

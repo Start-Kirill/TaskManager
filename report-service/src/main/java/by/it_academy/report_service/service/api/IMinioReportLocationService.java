@@ -10,5 +10,6 @@ public interface IMinioReportLocationService extends IReportLocationService<Mini
 
     MinioReportLocation findByReport(UUID reportUuid);
 
-    void deleteByReport(UUID reportUuid);
+    boolean existsByReport(UUID reportUuid);
+
 }

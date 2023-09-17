@@ -14,5 +14,6 @@ public interface IMinioReportLocationDao extends
 
     Optional<MinioReportLocation> findByReport(Report report);
 
-    void deleteAllByReport(Report report);
+    boolean existsByReport(Report report);
+
 }
