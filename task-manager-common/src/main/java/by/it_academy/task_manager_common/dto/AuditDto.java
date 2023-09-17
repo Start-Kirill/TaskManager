@@ -3,8 +3,10 @@ package by.it_academy.task_manager_common.dto;
 import by.it_academy.task_manager_common.dto.UserDto;
 import by.it_academy.task_manager_common.enums.EssenceType;
 import by.it_academy.task_manager_common.support.json.converters.LocalDateTimeToMillisecondsConverter;
+import by.it_academy.task_manager_common.support.json.converters.MillisecondsToLocalDateTimeConverter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.time.LocalDateTime;
@@ -18,6 +20,7 @@ public class AuditDto {
 
     @JsonProperty("dt_create")
     @JsonSerialize(converter = LocalDateTimeToMillisecondsConverter.class)
+    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
     private LocalDateTime dtCreate;
 
     private UserDto user;
