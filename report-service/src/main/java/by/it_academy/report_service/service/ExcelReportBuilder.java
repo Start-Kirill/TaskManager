@@ -6,7 +6,6 @@ import by.it_academy.report_service.service.api.IReportBuilder;
 import by.it_academy.report_service.utils.JwtTokenHandler;
 import by.it_academy.task_manager_common.dto.AuditDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
-import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -93,10 +91,10 @@ public class ExcelReportBuilder implements IReportBuilder {
     }
 
     private <T> void initSheet(Sheet sheet, Collection<T> content, Integer width) {
-        initColumn(sheet, content.size(), width);
+        initColumns(sheet, content.size(), width);
     }
 
-    private void initColumn(Sheet sheet, int quantity, int width) {
+    private void initColumns(Sheet sheet, int quantity, int width) {
         for (int i = 0; i < quantity; i++) {
             sheet.setColumnWidth(i, width);
         }
