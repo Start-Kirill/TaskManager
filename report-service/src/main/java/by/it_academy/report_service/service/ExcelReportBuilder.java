@@ -1,5 +1,6 @@
 package by.it_academy.report_service.service;
 
+import by.it_academy.report_service.core.dto.ReportParamAudit;
 import by.it_academy.report_service.core.enums.ReportType;
 import by.it_academy.report_service.dao.entity.Report;
 import by.it_academy.report_service.service.api.IReportBuilder;
@@ -9,6 +10,7 @@ import by.it_academy.task_manager_common.dto.CustomPage;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -16,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ExcelReportBuilder implements IReportBuilder {
@@ -38,23 +41,28 @@ public class ExcelReportBuilder implements IReportBuilder {
 
     private static final String AUDIT_SIXTH_COLUMN_NAME = "Id";
 
-
     private final JwtTokenHandler tokenHandler;
 
     private final AuditClientService auditClientService;
 
-    public ExcelReportBuilder(JwtTokenHandler tokenHandler, AuditClientService auditClientService) {
+    private final ConversionService conversionService;
+
+    public ExcelReportBuilder(JwtTokenHandler tokenHandler,
+                              AuditClientService auditClientService,
+                              ConversionService conversionService) {
         this.tokenHandler = tokenHandler;
         this.auditClientService = auditClientService;
+        this.conversionService = conversionService;
     }
 
     @Override
     public byte[] build(Report report) {
         byte[] reportFile = null;
         if (report.getType().equals(ReportType.JOURNAL_AUDIT)) {
-            CustomPage<AuditDto> auditDtoCustomPage = this.auditClientService.get(tokenHandler.generateSystemAccessToken());
-            List<AuditDto> content = auditDtoCustomPage.getContent();
-            reportFile = buildAuditReport(content);
+            Map<String, Object> params = report.getParams();
+            ReportParamAudit reportParamAudit = this.conversionService.convert(params, ReportParamAudit.class);
+            List<AuditDto> auditDtoList = this.auditClientService.get(tokenHandler.generateSystemAccessToken(), reportParamAudit);
+            reportFile = buildAuditReport(auditDtoList);
         }
 
 

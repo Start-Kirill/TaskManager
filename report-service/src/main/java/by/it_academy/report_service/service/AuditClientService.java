@@ -1,5 +1,6 @@
 package by.it_academy.report_service.service;
 
+import by.it_academy.report_service.core.dto.ReportParamAudit;
 import by.it_academy.report_service.service.api.IAuditClient;
 import by.it_academy.report_service.service.api.IAuditClientService;
 import by.it_academy.report_service.utils.JwtTokenHandler;
@@ -67,6 +68,11 @@ public class AuditClientService implements IAuditClientService {
     @Override
     public CustomPage<AuditDto> get(String token) {
         return this.auditClient.get("Bearer " + token);
+    }
+
+    @Override
+    public List<AuditDto> get(String token, ReportParamAudit paramAudit) {
+        return this.auditClient.get("Bearer " + token, paramAudit);
     }
 
 }
