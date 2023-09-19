@@ -6,6 +6,7 @@ import by.it_academy.audit_service.service.api.IAuditService;
 import by.it_academy.audit_service.service.exceptions.AuditNotExistsException;
 import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
+import by.it_academy.task_manager_common.dto.ReportParamAudit;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.exceptions.CommonInternalErrorException;
@@ -77,6 +78,17 @@ public class AuditService implements IAuditService {
 
     }
 
+    @Override
+    public List<Audit> getForReport(ReportParamAudit reportParamAudit) {
+        validate(reportParamAudit);
+
+        UUID user = reportParamAudit.getUser();
+        LocalDateTime from = reportParamAudit.getFrom();
+        LocalDateTime to = reportParamAudit.getTo();
+
+        return this.auditDao.findByUserUuidAndDtCreateBetween(user, from, to);
+    }
+
     private void validate(Integer page, Integer size) {
         Map<String, String> errors = new HashMap<>();
 
@@ -95,6 +107,11 @@ public class AuditService implements IAuditService {
         if (!errors.isEmpty()) {
             throw new NotCorrectPageDataException(errors);
         }
+
+    }
+
+    //    TODO
+    private void validate(ReportParamAudit reportParamAudit) {
 
     }
 }

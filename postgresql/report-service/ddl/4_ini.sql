@@ -42,7 +42,6 @@ CREATE TABLE app.report
     status text NOT NULL,
     type text NOT NULL,
     description text NOT NULL,
-    params json NOT NULL,
     attempt integer,
     PRIMARY KEY (uuid)
 );
@@ -50,6 +49,20 @@ CREATE TABLE app.report
 ALTER TABLE IF EXISTS app.report
     OWNER to report_service;
 
+CREATE TABLE app.report_param
+(
+    report_id uuid NOT NULL,
+    params_key text NOT NULL,
+    params text NOT NULL,
+    FOREIGN KEY (report_id)
+        REFERENCES app.report (uuid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
+
+ALTER TABLE IF EXISTS app.report_param
+    OWNER to report_service;
 
 CREATE TABLE app.minio_report_location
     (

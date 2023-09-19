@@ -32,15 +32,16 @@ public class Report {
     @Column(updatable = false)
     private String description;
 
-    @Type(JsonType.class)
-    private Map<String, Object> params;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "report_param",joinColumns = @JoinColumn(name = "report_id"))
+    private Map<String, String> params;
 
     private Integer attempt;
 
     public Report() {
     }
 
-    public Report(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, ReportStatus status, ReportType type, String description, Map<String, Object> params, Integer attempt) {
+    public Report(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, ReportStatus status, ReportType type, String description, Map<String, String> params, Integer attempt) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
@@ -99,11 +100,11 @@ public class Report {
         this.description = description;
     }
 
-    public Map<String, Object> getParams() {
+    public Map<String, String> getParams() {
         return params;
     }
 
-    public void setParams(Map<String, Object> params) {
+    public void setParams(Map<String, String> params) {
         this.params = params;
     }
 

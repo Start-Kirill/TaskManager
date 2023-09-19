@@ -73,6 +73,7 @@ public class MinioReportScheduler implements IReportScheduler {
                     reportUpdateDto.setStatus(ReportStatus.LOADED);
                     reportUpdateDto.setAttempt(r.getAttempt() + 1);
                 }
+                ex.printStackTrace();
 
             } finally {
                 this.reportService.update(reportUpdateDto, r.getUuid(), r.getDtUpdate());

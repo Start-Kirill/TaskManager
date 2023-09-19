@@ -1,4 +1,4 @@
-package by.it_academy.report_service.core.dto;
+package by.it_academy.task_manager_common.dto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

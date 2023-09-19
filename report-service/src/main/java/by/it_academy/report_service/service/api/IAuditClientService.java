@@ -1,6 +1,6 @@
 package by.it_academy.report_service.service.api;
 
-import by.it_academy.report_service.core.dto.ReportParamAudit;
+import by.it_academy.task_manager_common.dto.ReportParamAudit;
 import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.AuditDto;
 import by.it_academy.task_manager_common.dto.CustomPage;

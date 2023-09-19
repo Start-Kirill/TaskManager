@@ -5,7 +5,7 @@ import java.util.Map;
 
 public enum ReportType {
 
-    JOURNAL_AUDIT("Audit report fro the period from %s to %s");
+    JOURNAL_AUDIT("Audit report for the period from %s to %s were performed by user of %s");
 
     private final String descriptionPattern;
 
@@ -16,7 +16,8 @@ public enum ReportType {
     public String buildDescription(Map<String, String> params) {
         String from = params.get("from");
         String to = params.get("to");
-        return this.descriptionPattern.formatted(from, to);
+        String user = params.get("user");
+        return this.descriptionPattern.formatted(from, to, user);
     }
 
 }

@@ -1,28 +1,43 @@
 package by.it_academy.report_service.service.support.spring.converters;
 
-import by.it_academy.report_service.core.dto.ReportParamAudit;
+import by.it_academy.task_manager_common.dto.ReportParamAudit;
 import org.springframework.core.convert.converter.Converter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
 
-public class MapToReportParamAuditConverter implements Converter<Map<String, Object>, ReportParamAudit> {
+public class MapToReportParamAuditConverter implements Converter<Map<String, String>, ReportParamAudit> {
 
-    private static final String REPORT_AUDIT_USER_PARAM_NAME = "user";
+    private final static String USER_FIELD_PARAM_NAME = "user";
 
-    private static final String REPORT_AUDIT_FROM_PARAM_NAME = "from";
+    private final static String FROM_FIELD_PARAM_NAME = "from";
 
-    private static final String REPORT_AUDIT_TO_PARAM_NAME = "to";
+    private final static String TO_FIELD_PARAM_NAME = "to";
+
+    private final static String pattern = "yyyy-MM-dd";
 
 
     @Override
-    public ReportParamAudit convert(Map<String, Object> source) {
+    public ReportParamAudit convert(Map<String, String> source) {
 
-        UUID user = (UUID) source.get("user");
-        LocalDateTime from = (LocalDateTime) source.get("from");
-        LocalDateTime to = (LocalDateTime) source.get("to");
+        String user = source.get(USER_FIELD_PARAM_NAME);
+        UUID uuid = UUID.fromString(user);
 
-        return new ReportParamAudit(user, from, to);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+
+        String fromRaw = source.get(FROM_FIELD_PARAM_NAME);
+        LocalDateTime from = LocalDateTime.of(LocalDate.parse(fromRaw, formatter), LocalTime.MIN);
+
+
+        String toRaw = source.get(TO_FIELD_PARAM_NAME);
+        LocalDateTime to = LocalDateTime.of(LocalDate.parse(toRaw, formatter), LocalTime.MAX);
+
+
+        return new ReportParamAudit(uuid, from, to);
     }
 }

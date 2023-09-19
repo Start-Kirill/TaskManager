@@ -1,12 +1,11 @@
 package by.it_academy.report_service.service;
 
-import by.it_academy.report_service.core.dto.ReportParamAudit;
 import by.it_academy.report_service.core.enums.ReportType;
 import by.it_academy.report_service.dao.entity.Report;
 import by.it_academy.report_service.service.api.IReportBuilder;
 import by.it_academy.report_service.utils.JwtTokenHandler;
 import by.it_academy.task_manager_common.dto.AuditDto;
-import by.it_academy.task_manager_common.dto.CustomPage;
+import by.it_academy.task_manager_common.dto.ReportParamAudit;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -16,14 +15,13 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class ExcelReportBuilder implements IReportBuilder {
 
-    private static final Integer DEFAULT_COLUMN_WIDTH = 6000;
+    private static final Integer DEFAULT_COLUMN_WIDTH = 9000;
 
     private static final Short DEFAULT_HEADER_HEIGHT_FONT_IN_POINTS = 16;
 
@@ -40,6 +38,8 @@ public class ExcelReportBuilder implements IReportBuilder {
     private static final String AUDIT_FIFTH_COLUMN_NAME = "Performed essence";
 
     private static final String AUDIT_SIXTH_COLUMN_NAME = "Id";
+
+    private static final String PARAM_KEY_NAME = "params";
 
     private final JwtTokenHandler tokenHandler;
 
@@ -59,8 +59,9 @@ public class ExcelReportBuilder implements IReportBuilder {
     public byte[] build(Report report) {
         byte[] reportFile = null;
         if (report.getType().equals(ReportType.JOURNAL_AUDIT)) {
-            Map<String, Object> params = report.getParams();
+            Map<String, String> params = report.getParams();
             ReportParamAudit reportParamAudit = this.conversionService.convert(params, ReportParamAudit.class);
+
             List<AuditDto> auditDtoList = this.auditClientService.get(tokenHandler.generateSystemAccessToken(), reportParamAudit);
             reportFile = buildAuditReport(auditDtoList);
         }
@@ -74,7 +75,7 @@ public class ExcelReportBuilder implements IReportBuilder {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet();
 
-            initSheet(sheet, content);
+            initSheet(sheet, 6);
 
             Row header = sheet.createRow(0);
 
@@ -94,13 +95,10 @@ public class ExcelReportBuilder implements IReportBuilder {
 
     }
 
-    private <T> void initSheet(Sheet sheet, Collection<T> content) {
-        initSheet(sheet, content, DEFAULT_COLUMN_WIDTH);
+    private <T> void initSheet(Sheet sheet, Integer quantity) {
+        initColumns(sheet, quantity, DEFAULT_COLUMN_WIDTH);
     }
 
-    private <T> void initSheet(Sheet sheet, Collection<T> content, Integer width) {
-        initColumns(sheet, content.size(), width);
-    }
 
     private void initColumns(Sheet sheet, int quantity, int width) {
         for (int i = 0; i < quantity; i++) {
@@ -151,7 +149,7 @@ public class ExcelReportBuilder implements IReportBuilder {
             Row row = sheet.createRow(i + 1);
 
             Cell cell = row.createCell(0);
-            cell.setCellValue(content.get(i).getDtCreate());
+            cell.setCellValue(content.get(i).getDtCreate().toString());
             cell.setCellStyle(style);
 
             cell = row.createCell(1);
