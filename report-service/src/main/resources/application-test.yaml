@@ -8,3 +8,5 @@ feign:
     url: http://localhost:91/users
   audit:
     url: http://localhost:92/audit
+minio:
+  url: http://localhost:9000

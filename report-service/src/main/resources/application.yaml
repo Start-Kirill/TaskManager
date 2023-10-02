@@ -25,4 +25,9 @@ feign:
     url: http://user-service:8080/users
   audit:
     url: http://audit-service:8080/audit
+minio:
+  url: http://minio:9000
+  credentials:
+    user: minioadmin
+    password: minioadmin
 

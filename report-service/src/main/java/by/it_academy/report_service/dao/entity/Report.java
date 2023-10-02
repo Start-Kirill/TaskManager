@@ -2,7 +2,9 @@ package by.it_academy.report_service.dao.entity;
 
 import by.it_academy.report_service.core.enums.ReportStatus;
 import by.it_academy.report_service.core.enums.ReportType;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -27,26 +29,27 @@ public class Report {
     @Enumerated(EnumType.STRING)
     private ReportType type;
 
+    @Column(updatable = false)
     private String description;
 
-    @ElementCollection
-    @CollectionTable(name = "report_param_audit", joinColumns = @JoinColumn(name = "report_id"))
-    private Map<String, Object> auditParams;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "report_param",joinColumns = @JoinColumn(name = "report_id"))
+    private Map<String, String> params;
 
-    private String location;
+    private Integer attempt;
 
     public Report() {
     }
 
-    public Report(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, ReportStatus status, ReportType type, String description, Map<String, Object> auditParams, String location) {
+    public Report(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, ReportStatus status, ReportType type, String description, Map<String, String> params, Integer attempt) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
         this.status = status;
         this.type = type;
         this.description = description;
-        this.auditParams = auditParams;
-        this.location = location;
+        this.params = params;
+        this.attempt = attempt;
     }
 
     public UUID getUuid() {
@@ -97,19 +100,19 @@ public class Report {
         this.description = description;
     }
 
-    public Map<String, Object> getAuditParams() {
-        return auditParams;
+    public Map<String, String> getParams() {
+        return params;
     }
 
-    public void setAuditParams(Map<String, Object> auditParams) {
-        this.auditParams = auditParams;
+    public void setParams(Map<String, String> params) {
+        this.params = params;
     }
 
-    public String getLocation() {
-        return location;
+    public Integer getAttempt() {
+        return attempt;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setAttempt(Integer attempt) {
+        this.attempt = attempt;
     }
 }

@@ -57,6 +57,20 @@ public class JwtTokenHandler {
         }
     }
 
+    public String generateSystemAccessToken() {
+
+        String compact = Jwts.builder()
+                .setSubject("System")
+                .claim(ROLE_FIELD_NAME, UserRole.SYSTEM)
+                .setIssuer(jwtProperty.getIssuer())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)))
+                .signWith(SignatureAlgorithm.HS256, jwtProperty.getSecret())
+                .compact();
+
+        return compact;
+    }
+
     public String getMail(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtProperty.getSecret())
@@ -104,7 +118,9 @@ public class JwtTokenHandler {
 
     public void validate(String token) {
         try {
-            Jwts.parser().setSigningKey(jwtProperty.getSecret()).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(
+                    jwtProperty.getSecret()).parseClaimsJws(token
+            );
         } catch (SignatureException ex) {
             throw new NotValidTokenSignatureException(List.of(new ErrorResponse(ErrorType.ERROR, "Token signature is not valid. Try to log in again")));
         } catch (ExpiredJwtException ex) {

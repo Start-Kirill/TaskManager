@@ -12,8 +12,10 @@ import by.it_academy.task_service.service.support.spring.converters.ProjectCreat
 import by.it_academy.task_service.service.support.spring.converters.TaskCreateDtoToTaskConverter;
 import feign.Feign;
 import feign.httpclient.ApacheHttpClient;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 

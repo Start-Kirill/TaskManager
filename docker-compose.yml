@@ -48,6 +48,12 @@ services:
     networks:
       - taskmanager_ntwrk
 
+  report-service:
+    build: report-service
+    image: taskmanager_report-service:1.0.0
+    networks:
+      - taskmanager_ntwrk
+
   proxy:
     build: proxy
     image: taskmanager_proxy:1.0.0
@@ -55,6 +61,18 @@ services:
       - "80:80"
     networks:
       - taskmanager_ntwrk
+
+  minio:
+    image: 'bitnami/minio:latest'
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    networks:
+      - taskmanager_ntwrk
+
 networks:
   taskmanager_ntwrk:
     name: taskmanager_ntwrk
