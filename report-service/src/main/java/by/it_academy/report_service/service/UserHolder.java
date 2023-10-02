@@ -11,4 +11,8 @@ public class UserHolder {
         return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    public boolean isAuthenticated() {
+        return SecurityContextHolder.getContext().getAuthentication() != null;
+    }
+
 }
