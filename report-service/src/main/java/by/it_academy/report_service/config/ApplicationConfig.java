@@ -2,6 +2,7 @@ package by.it_academy.report_service.config;
 
 
 import by.it_academy.report_service.dao.entity.Report;
+import by.it_academy.report_service.endpoints.web.support.ReportToReportDtoConverter;
 import by.it_academy.report_service.service.support.spring.converters.MapToReportParamAuditConverter;
 import by.it_academy.report_service.service.support.spring.converters.MinioReportLocationCreateDtoToMinioReportLocationConverter;
 import by.it_academy.report_service.service.support.spring.converters.ReportCreateDtoToReportConverter;
@@ -22,6 +23,7 @@ public class ApplicationConfig implements WebMvcConfigurer {
         registry.addConverter(new PageToCustomPageConverter<Report>());
         registry.addConverter(new MinioReportLocationCreateDtoToMinioReportLocationConverter());
         registry.addConverter(new MapToReportParamAuditConverter());
+        registry.addConverter(new ReportToReportDtoConverter());
     }
 
 

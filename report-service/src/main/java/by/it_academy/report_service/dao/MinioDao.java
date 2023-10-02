@@ -8,7 +8,9 @@ import by.it_academy.task_manager_common.enums.ErrorType;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MimeType;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -20,6 +22,9 @@ import java.util.List;
 public class MinioDao implements IFileSystemDao {
 
     private final MinioClient minioClient;
+
+    private static final String EXCEL_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
 
     public MinioDao(MinioProperty minioProperty) {
         minioClient = MinioClient.builder()
@@ -41,6 +46,7 @@ public class MinioDao implements IFileSystemDao {
                     PutObjectArgs.builder()
                             .bucket(bucketName)
                             .object(fileName)
+                            .contentType(EXCEL_CONTENT_TYPE)
                             .stream(new ByteArrayInputStream(data), data.length, -1)
                             .build()
             );
@@ -92,6 +98,7 @@ public class MinioDao implements IFileSystemDao {
 
             return presignedObjectUrl;
 
+//            TODO
         } catch (ErrorResponseException e) {
             throw new RuntimeException(e);
         } catch (InsufficientDataException e) {

@@ -17,13 +17,13 @@ public class ReportDto {
     private UUID uuid;
 
     @JsonProperty(namespace = "dt_create")
-    @JsonDeserialize(converter = LocalDateTimeToMillisecondsConverter.class)
-    @JsonSerialize(converter = MillisecondsToLocalDateTimeConverter.class)
+    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
+    @JsonSerialize(converter = LocalDateTimeToMillisecondsConverter.class)
     private LocalDateTime dtCreate;
 
     @JsonProperty(namespace = "dt_update")
-    @JsonDeserialize(converter = LocalDateTimeToMillisecondsConverter.class)
-    @JsonSerialize(converter = MillisecondsToLocalDateTimeConverter.class)
+    @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
+    @JsonSerialize(converter = LocalDateTimeToMillisecondsConverter.class)
     private LocalDateTime dtUpdate;
 
     private ReportStatus status;
@@ -32,12 +32,12 @@ public class ReportDto {
 
     private String description;
 
-    private Map<String, Object> params;
+    private Map<String, String> params;
 
     public ReportDto() {
     }
 
-    public ReportDto(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, ReportStatus status, ReportType type, String description, Map<String, Object> params) {
+    public ReportDto(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, ReportStatus status, ReportType type, String description, Map<String, String> params) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
@@ -95,11 +95,11 @@ public class ReportDto {
         this.description = description;
     }
 
-    public Map<String, Object> getParams() {
+    public Map<String, String> getParams() {
         return params;
     }
 
-    public void setParams(Map<String, Object> params) {
+    public void setParams(Map<String, String> params) {
         this.params = params;
     }
 }

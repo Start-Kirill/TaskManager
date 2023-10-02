@@ -174,6 +174,7 @@ public class ExcelReportBuilder implements IReportBuilder {
         }
     }
 
+//    TODO Exeptions
     private byte[] convert(Workbook workbook) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             workbook.write(outputStream);
