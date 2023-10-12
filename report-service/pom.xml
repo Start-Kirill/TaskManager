@@ -4,15 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>report-service</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <name>report-service</name>
 
     <parent>
         <groupId>by.it_academy</groupId>
         <artifactId>task-manager</artifactId>
         <version>1.0.0</version>
     </parent>
+
+    <artifactId>report-service</artifactId>
+    <name>report-service</name>
+    <version>1.0-SNAPSHOT</version>
 
 
     <dependencyManagement>
@@ -139,6 +140,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.1.4</version>
                 <configuration>
                     <excludes>
                         <exclude>
@@ -146,12 +148,6 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
                     <mainClass>by.it_academy.ReportServiceApplication</mainClass>
                     <layout>JAR</layout>
                 </configuration>

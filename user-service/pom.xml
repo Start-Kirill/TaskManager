@@ -10,11 +10,9 @@
         <version>1.0.0</version>
     </parent>
 
-    <groupId>by.it_academy</groupId>
     <artifactId>user-service</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <name>user-service</name>
-
+    <version>1.0-SNAPSHOT</version>
 
     <dependencyManagement>
         <dependencies>
@@ -70,7 +68,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
-            <version>3.1.2</version>
         </dependency>
 
 
@@ -84,16 +81,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
-            <version>3.1.2</version>
         </dependency>
-
 
 
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-configuration-processor -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
-            <version>3.1.2</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign -->
@@ -111,7 +105,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <version>3.1.2</version>
         </dependency>
 
 
@@ -159,6 +152,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.1.4</version>
                 <configuration>
                     <excludes>
                         <exclude>
@@ -166,12 +160,6 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
                     <mainClass>by.it_academy.UserServiceApplication</mainClass>
                     <layout>JAR</layout>
                 </configuration>

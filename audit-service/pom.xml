@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>audit-service</artifactId>
+    <name>audit-service</name>
     <version>1.0-SNAPSHOT</version>
 
     <dependencyManagement>
@@ -108,6 +109,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.1.4</version>
                 <configuration>
                     <excludes>
                         <exclude>
@@ -115,12 +117,6 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
                     <mainClass>by.it_academy.AuditServiceApplication</mainClass>
                     <layout>JAR</layout>
                 </configuration>
