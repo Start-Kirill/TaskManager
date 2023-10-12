@@ -1,6 +1,7 @@
 package by.it_academy.report_service.config;
 
 import by.it_academy.report_service.endpoints.web.filters.JwtFilter;
+import by.it_academy.task_manager_common.exceptions.CommonErrorException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,8 +36,14 @@ public class SecurityConfig {
                         exceptionHandling
                                 .authenticationEntryPoint(
                                         (request, response, ex) -> {
+                                            Integer status = null;
+                                            if (response.getStatus() == 200) {
+                                                status = HttpServletResponse.SC_UNAUTHORIZED;
+                                            } else {
+                                                status = response.getStatus();
+                                            }
                                             response.setStatus(
-                                                    HttpServletResponse.SC_UNAUTHORIZED
+                                                    status
                                             );
                                         }
                                 )

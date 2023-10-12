@@ -4,13 +4,17 @@ import by.it_academy.audit_service.service.api.IUserClientService;
 import by.it_academy.audit_service.utils.JwtTokenHandler;
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.UserDto;
+import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.UserRole;
+import by.it_academy.task_manager_common.exceptions.CommonErrorException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -52,7 +56,18 @@ public class JwtFilter
         }
 
         String token = header.split(" ")[1].trim();
-        jwtTokenHandler.validate(token);
+        try {
+            jwtTokenHandler.validate(token);
+        } catch (CommonErrorException ex) {
+            List<ErrorResponse> errors = ex.getErrors();
+            ObjectMapper objectMapper = new ObjectMapper();
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            response.getWriter().write(objectMapper.writeValueAsString(errors));
+            response.setContentType("application/json");
+            filterChain.doFilter(request, response);
+            return;
+        }
+
 
         UserDetailsImpl userDetails = null;
         if (UserRole.SYSTEM.toString().equals(jwtTokenHandler.getRole(token))) {

@@ -1,15 +1,19 @@
 package by.it_academy.user_service.endpoints.web.filters;
 
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
+import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
+import by.it_academy.task_manager_common.exceptions.CommonErrorException;
 import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserService;
 import by.it_academy.user_service.utils.JwtTokenHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 import static org.apache.logging.log4j.util.Strings.isEmpty;
@@ -47,7 +52,17 @@ public class JwtFilter
         }
 
         String token = header.split(" ")[1].trim();
-        jwtTokenHandler.validate(token);
+        try {
+            jwtTokenHandler.validate(token);
+        } catch (CommonErrorException ex) {
+            List<ErrorResponse> errors = ex.getErrors();
+            ObjectMapper objectMapper = new ObjectMapper();
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            response.getWriter().write(objectMapper.writeValueAsString(errors));
+            response.setContentType("application/json");
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         User user = this.userService.get(UUID.fromString(jwtTokenHandler.getUuid(token)));
         UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);

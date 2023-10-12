@@ -6,6 +6,7 @@ import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.exceptions.CommonErrorException;
 import by.it_academy.task_manager_common.exceptions.CommonInternalErrorException;
 import by.it_academy.task_manager_common.exceptions.StructuredErrorException;
+import by.it_academy.task_manager_common.exceptions.common.ExpiredTokenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
