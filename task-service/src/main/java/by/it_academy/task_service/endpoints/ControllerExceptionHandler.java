@@ -7,6 +7,7 @@ import by.it_academy.task_manager_common.exceptions.AccessForbiddenException;
 import by.it_academy.task_manager_common.exceptions.CommonErrorException;
 import by.it_academy.task_manager_common.exceptions.CommonInternalErrorException;
 import by.it_academy.task_manager_common.exceptions.StructuredErrorException;
+import by.it_academy.task_manager_common.exceptions.common.ExpiredTokenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -47,6 +48,7 @@ public class ControllerExceptionHandler {
     private static final String REQUEST_INVALID_DATA_MESSAGE = "The request contains invalid data. Change the request and send it again";
 
     private static final String INVALID_UPDATE_DATE_MESSAGE = "Invalid update date(version). Change the request and repeat";
+
 
     @ExceptionHandler(StructuredErrorException.class)
     public ResponseEntity<?> handlerStructuredErrorException(StructuredErrorException ex) {

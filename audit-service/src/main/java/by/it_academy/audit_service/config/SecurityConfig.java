@@ -34,8 +34,14 @@ public class SecurityConfig {
                         exceptionHandling
                                 .authenticationEntryPoint(
                                         (request, response, ex) -> {
+                                            Integer status = null;
+                                            if (response.getStatus() == 200) {
+                                                status = HttpServletResponse.SC_UNAUTHORIZED;
+                                            } else {
+                                                status = response.getStatus();
+                                            }
                                             response.setStatus(
-                                                    HttpServletResponse.SC_UNAUTHORIZED
+                                                    status
                                             );
                                         }
                                 )

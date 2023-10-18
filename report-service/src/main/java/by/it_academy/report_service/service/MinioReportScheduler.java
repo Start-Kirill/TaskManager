@@ -7,6 +7,7 @@ import by.it_academy.report_service.core.enums.ReportType;
 import by.it_academy.report_service.dao.entity.MinioReportLocation;
 import by.it_academy.report_service.dao.entity.Report;
 import by.it_academy.report_service.service.api.*;
+import by.it_academy.report_service.utils.JwtTokenHandler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +27,20 @@ public class MinioReportScheduler implements IReportScheduler {
 
     private final IMinioReportLocationService minioReportLocationService;
 
+    private final IAuditClientService auditClientService;
+
 
     public MinioReportScheduler(IReportService reportService,
                                 IMinioService minioService,
                                 IReportBuilder reportBuilder,
-                                IMinioReportLocationService minioReportLocationService) {
+                                IMinioReportLocationService minioReportLocationService,
+                                IAuditClientService auditClientService,
+                                JwtTokenHandler tokenHandler) {
         this.reportService = reportService;
         this.minioService = minioService;
         this.reportBuilder = reportBuilder;
         this.minioReportLocationService = minioReportLocationService;
+        this.auditClientService = auditClientService;
     }
 
     @Scheduled(fixedDelay = 10000)
@@ -73,8 +79,6 @@ public class MinioReportScheduler implements IReportScheduler {
                     reportUpdateDto.setStatus(ReportStatus.LOADED);
                     reportUpdateDto.setAttempt(r.getAttempt() + 1);
                 }
-                ex.printStackTrace();
-
             } finally {
                 this.reportService.update(reportUpdateDto, r.getUuid(), r.getDtUpdate());
             }

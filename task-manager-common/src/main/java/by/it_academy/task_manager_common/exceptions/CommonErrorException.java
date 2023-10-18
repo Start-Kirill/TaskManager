@@ -2,6 +2,7 @@ package by.it_academy.task_manager_common.exceptions;
 
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 public class CommonErrorException extends RuntimeException {
