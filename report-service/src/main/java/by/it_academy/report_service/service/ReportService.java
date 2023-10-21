@@ -3,6 +3,7 @@ package by.it_academy.report_service.service;
 import by.it_academy.report_service.core.dto.ReportCreateDto;
 import by.it_academy.report_service.core.dto.ReportUpdateDto;
 import by.it_academy.report_service.core.enums.ReportStatus;
+import by.it_academy.report_service.core.enums.ReportType;
 import by.it_academy.report_service.dao.api.IReportDao;
 import by.it_academy.report_service.dao.entity.Report;
 import by.it_academy.report_service.service.api.IAuditClientService;
@@ -12,7 +13,6 @@ import by.it_academy.report_service.service.exceptions.ReportNotDoneException;
 import by.it_academy.report_service.service.exceptions.ReportNotExistsException;
 import by.it_academy.report_service.utils.JwtTokenHandler;
 import by.it_academy.task_manager_common.dto.CustomPage;
-import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.EssenceType;
@@ -189,6 +189,10 @@ public class ReportService implements IReportService {
 
     //    TODO
     private void validate(ReportCreateDto dto) {
+
+        ReportType type = dto.getType();
+        Map<String, String> params = dto.getParams();
+
 
     }
 
