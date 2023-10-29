@@ -23,6 +23,7 @@ import by.it_academy.task_manager_common.exceptions.common.VersionsNotMatchExcep
 import by.it_academy.task_manager_common.exceptions.commonInternal.GeneratedDataNotCorrectException;
 import by.it_academy.task_manager_common.exceptions.commonInternal.InternalServerErrorException;
 import by.it_academy.task_manager_common.exceptions.commonInternal.UnknownConstraintException;
+import by.it_academy.task_manager_common.exceptions.structured.NotCorrectPageDataException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -49,6 +50,10 @@ public class ReportService implements IReportService {
     private static final String FROM_FIELD_PARAM_NAME = "from";
 
     private static final String TO_FIELD_PARAM_NAME = "to";
+
+    private static final String PAGE_FIELD_NAME = "page";
+
+    private static final String SIZE_FIELD_NAME = "size";
 
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd";
 
@@ -152,6 +157,8 @@ public class ReportService implements IReportService {
     @Override
     public CustomPage<Report> get(Integer page, Integer size) {
 
+        validate(page, size);
+
         PageRequest pageRequest = PageRequest.of(page, size);
 
         Page<Report> reportPage = this.reportDao.findAll(pageRequest);
@@ -238,10 +245,27 @@ public class ReportService implements IReportService {
 
     }
 
-    //    TODO
-    private void validate(Integer page, Integer size) {
 
+    private void validate(Integer page, Integer size) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (page == null) {
+            errors.put(PAGE_FIELD_NAME, "Page is missing");
+        } else if (page < 0) {
+            errors.put(PAGE_FIELD_NAME, "Page must not to be negative value");
+        }
+
+        if (size == null) {
+            errors.put(SIZE_FIELD_NAME, "Size is missing");
+        } else if (size < 1) {
+            errors.put(SIZE_FIELD_NAME, "Size must not to be less than 1");
+        }
+
+        if (!errors.isEmpty()) {
+            throw new NotCorrectPageDataException(errors);
+        }
     }
+
 
     private void validateUser(String uuid, Map<String, String> errors) {
         UUID userUuid = null;
