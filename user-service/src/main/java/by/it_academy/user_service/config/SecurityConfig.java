@@ -1,5 +1,6 @@
 package by.it_academy.user_service.config;
 
+import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.user_service.endpoints.web.filters.JwtFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
@@ -58,9 +59,9 @@ public class SecurityConfig {
                 .requestMatchers("users/verification/*").permitAll()
                 .requestMatchers("users/verification").permitAll()
                 .requestMatchers("/users/me").authenticated()
-                .requestMatchers(HttpMethod.PATCH,"/users").hasAnyAuthority("ROLE_ADMIN", "ROLE_MANAGER")
-                .requestMatchers("/users").hasAnyAuthority("ROLE_ADMIN")
-                .requestMatchers("/users/*/dt_update/*").hasAnyAuthority("ROLE_ADMIN")
+                .requestMatchers(HttpMethod.PATCH,"/users").hasAnyAuthority(UserRole.ADMIN.getRoleName(), UserRole.MANAGER.getRoleName(), UserRole.SYSTEM.getRoleName())
+                .requestMatchers("/users").hasAnyAuthority(UserRole.ADMIN.getRoleName())
+                .requestMatchers("/users/*/dt_update/*").hasAnyAuthority(UserRole.ADMIN.getRoleName())
                 .requestMatchers("users/*").authenticated()
                 .anyRequest().authenticated()
         );

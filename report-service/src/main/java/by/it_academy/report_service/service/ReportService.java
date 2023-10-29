@@ -9,10 +9,13 @@ import by.it_academy.report_service.dao.entity.Report;
 import by.it_academy.report_service.service.api.IAuditClientService;
 import by.it_academy.report_service.service.api.IMinioService;
 import by.it_academy.report_service.service.api.IReportService;
+import by.it_academy.report_service.service.api.IUserClientService;
+import by.it_academy.report_service.service.exceptions.InvalidReportParamsException;
 import by.it_academy.report_service.service.exceptions.ReportNotDoneException;
 import by.it_academy.report_service.service.exceptions.ReportNotExistsException;
 import by.it_academy.report_service.utils.JwtTokenHandler;
 import by.it_academy.task_manager_common.dto.CustomPage;
+import by.it_academy.task_manager_common.dto.UserDto;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.EssenceType;
@@ -29,16 +32,25 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ReportService implements IReportService {
 
     private static final String UNIQUE_UUID_CONSTRAINT_NAME = "report_pkey";
+
+    private static final String USER_FIELD_PARAM_NAME = "user";
+
+    private static final String FROM_FIELD_PARAM_NAME = "from";
+
+    private static final String TO_FIELD_PARAM_NAME = "to";
+
+    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd";
 
     private final IReportDao reportDao;
 
@@ -52,18 +64,22 @@ public class ReportService implements IReportService {
 
     private final JwtTokenHandler tokenHandler;
 
+    private final IUserClientService userClientService;
+
     public ReportService(IReportDao reportDao,
                          UserHolder userHolder,
                          ConversionService conversionService,
                          IMinioService minioService,
                          IAuditClientService auditClientService,
-                         JwtTokenHandler tokenHandler) {
+                         JwtTokenHandler tokenHandler,
+                         IUserClientService userClientService) {
         this.reportDao = reportDao;
         this.userHolder = userHolder;
         this.conversionService = conversionService;
         this.minioService = minioService;
         this.auditClientService = auditClientService;
         this.tokenHandler = tokenHandler;
+        this.userClientService = userClientService;
     }
 
 
@@ -187,11 +203,32 @@ public class ReportService implements IReportService {
         );
     }
 
-    //    TODO
+
     private void validate(ReportCreateDto dto) {
 
         ReportType type = dto.getType();
         Map<String, String> params = dto.getParams();
+
+        Map<String, String> errors = new HashMap<>();
+
+        if (ReportType.JOURNAL_AUDIT.equals(type)) {
+            String userUuidRaw = params.get(USER_FIELD_PARAM_NAME);
+            validateUser(userUuidRaw, errors);
+
+            String fromRaw = params.get(FROM_FIELD_PARAM_NAME);
+            LocalDate from = validateDate(fromRaw, FROM_FIELD_PARAM_NAME, errors);
+
+            String toRaw = params.get(TO_FIELD_PARAM_NAME);
+            LocalDate to = validateDate(toRaw, TO_FIELD_PARAM_NAME, errors);
+            if (from != null && to != null) {
+                if (to.isBefore(from)) {
+                    errors.put(TO_FIELD_PARAM_NAME, "This date must be after 'From' ");
+                }
+            }
+            if (!errors.isEmpty()) {
+                throw new InvalidReportParamsException(errors);
+            }
+        }
 
 
     }
@@ -204,6 +241,39 @@ public class ReportService implements IReportService {
     //    TODO
     private void validate(Integer page, Integer size) {
 
+    }
+
+    private void validateUser(String uuid, Map<String, String> errors) {
+        UUID userUuid = null;
+        if (uuid == null || uuid.isEmpty()) {
+            errors.put(USER_FIELD_PARAM_NAME, "User field is required");
+        } else {
+            try {
+                userUuid = UUID.fromString(uuid);
+                List<UserDto> userDtos = this.userClientService.get("Bearer " + tokenHandler.generateSystemAccessToken(), Set.of(userUuid));
+                if (userDtos.isEmpty()) {
+                    errors.put(USER_FIELD_PARAM_NAME, "Such user does not exist");
+                }
+            } catch (IllegalArgumentException ex) {
+                errors.put(USER_FIELD_PARAM_NAME, "User field is invalid");
+            }
+        }
+    }
+
+    private LocalDate validateDate(String source, String fieldName, Map<String, String> errors) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
+
+        LocalDate result = null;
+        if (source == null || source.isEmpty()) {
+            errors.put(fieldName, fieldName + " field is required");
+        } else {
+            try {
+                result = LocalDate.parse(source, formatter);
+            } catch (DateTimeParseException ex) {
+                errors.put(fieldName, fieldName + " filed is invalid");
+            }
+        }
+        return result;
     }
 
 

@@ -25,11 +25,10 @@ public class AuditService implements IAuditService {
     private static final String PAGE_FIELD_NAME = "page";
 
     private static final String SIZE_FIELD_NAME = "size";
+    
+    private final IAuditDao auditDao;
 
-
-    private IAuditDao auditDao;
-
-    private ConversionService conversionService;
+    private final ConversionService conversionService;
 
     public AuditService(IAuditDao auditDao, ConversionService conversionService) {
         this.auditDao = auditDao;
@@ -80,7 +79,6 @@ public class AuditService implements IAuditService {
 
     @Override
     public List<Audit> getForReport(ReportParamAudit reportParamAudit) {
-        validate(reportParamAudit);
 
         UUID user = reportParamAudit.getUser();
         LocalDateTime from = reportParamAudit.getFrom();
@@ -110,8 +108,4 @@ public class AuditService implements IAuditService {
 
     }
 
-    //    TODO
-    private void validate(ReportParamAudit reportParamAudit) {
-
-    }
 }
