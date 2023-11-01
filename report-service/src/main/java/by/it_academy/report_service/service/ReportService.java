@@ -120,7 +120,6 @@ public class ReportService implements IReportService {
     @Transactional
     @Override
     public Report update(ReportUpdateDto reportUpdateDto, UUID uuid, LocalDateTime dtUpdate) {
-        validate(reportUpdateDto);
 
         Report report = this.get(uuid);
 
@@ -237,11 +236,6 @@ public class ReportService implements IReportService {
             }
         }
 
-
-    }
-
-    //    TODO
-    private void validate(ReportUpdateDto dto) {
 
     }
 

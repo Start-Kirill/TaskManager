@@ -29,7 +29,6 @@ public class MinioReportLocationService implements IMinioReportLocationService {
 
     @Override
     public MinioReportLocation save(MinioReportLocationCreateDto dto) {
-        validate(dto);
 
         MinioReportLocation minioReportLocation = this.conversionService.convert(dto, MinioReportLocation.class);
         minioReportLocation.setUuid(UUID.randomUUID());
@@ -60,12 +59,6 @@ public class MinioReportLocationService implements IMinioReportLocationService {
     public boolean existsByReport(UUID reportUuid) {
         Report report = this.reportService.get(reportUuid);
         return this.minioReportLocationDao.existsByReport(report);
-    }
-
-
-    //    TODO
-    private void validate(MinioReportLocationCreateDto dto) {
-
     }
 
 }
