@@ -1,7 +1,9 @@
 package by.it_academy.user_service.endpoints.web.filters;
 
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
+import by.it_academy.task_manager_common.dto.UserDto;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
+import by.it_academy.task_manager_common.enums.UserRole;
 import by.it_academy.task_manager_common.exceptions.CommonErrorException;
 import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.service.api.IUserService;
@@ -15,6 +17,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -64,8 +68,21 @@ public class JwtFilter
             return;
         }
 
-        User user = this.userService.get(UUID.fromString(jwtTokenHandler.getUuid(token)));
-        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
+
+        UserDetailsImpl userDetails = null;
+
+        if (UserRole.SYSTEM.toString().equals(jwtTokenHandler.getRole(token))) {
+            userDetails = new UserDetailsImpl();
+            userDetails.setRole(UserRole.SYSTEM);
+            userDetails.setUsername(jwtTokenHandler.getMail(token));
+            userDetails.setPassword("System");
+            userDetails.setAccountNonLocked(true);
+            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(UserRole.SYSTEM.getRoleName()));
+            userDetails.setAuthorities(authorities);
+        } else {
+            User user = this.userService.get(UUID.fromString(jwtTokenHandler.getUuid(token)));
+            userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
+        }
 
         if (!userDetails.isAccountNonLocked()) {
             filterChain.doFilter(request, response);

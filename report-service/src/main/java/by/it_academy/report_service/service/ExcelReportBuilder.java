@@ -3,9 +3,12 @@ package by.it_academy.report_service.service;
 import by.it_academy.report_service.core.enums.ReportType;
 import by.it_academy.report_service.dao.entity.Report;
 import by.it_academy.report_service.service.api.IReportBuilder;
+import by.it_academy.report_service.service.exceptions.NotPossibleFormReportException;
 import by.it_academy.report_service.utils.JwtTokenHandler;
 import by.it_academy.task_manager_common.dto.AuditDto;
 import by.it_academy.task_manager_common.dto.ReportParamAudit;
+import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
+import by.it_academy.task_manager_common.enums.ErrorType;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -13,7 +16,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -89,8 +91,7 @@ public class ExcelReportBuilder implements IReportBuilder {
 
             return convert(workbook);
         } catch (IOException e) {
-//            TODO
-            throw new RuntimeException(e);
+            throw new NotPossibleFormReportException(List.of(new ErrorResponse(ErrorType.ERROR, "Excel report creation error")));
         }
 
     }
@@ -174,17 +175,12 @@ public class ExcelReportBuilder implements IReportBuilder {
         }
     }
 
-//    TODO Exeptions
     private byte[] convert(Workbook workbook) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             workbook.write(outputStream);
             return outputStream.toByteArray();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new NotPossibleFormReportException(List.of(new ErrorResponse(ErrorType.ERROR, "Convertible data to bytes error")));
         }
     }
-
-
 }

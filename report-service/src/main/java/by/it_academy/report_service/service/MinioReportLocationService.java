@@ -6,10 +6,14 @@ import by.it_academy.report_service.dao.entity.MinioReportLocation;
 import by.it_academy.report_service.dao.entity.Report;
 import by.it_academy.report_service.service.api.IMinioReportLocationService;
 import by.it_academy.report_service.service.api.IReportService;
+import by.it_academy.report_service.service.exceptions.NotPossibleReadDataException;
+import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
+import by.it_academy.task_manager_common.enums.ErrorType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
@@ -29,7 +33,6 @@ public class MinioReportLocationService implements IMinioReportLocationService {
 
     @Override
     public MinioReportLocation save(MinioReportLocationCreateDto dto) {
-        validate(dto);
 
         MinioReportLocation minioReportLocation = this.conversionService.convert(dto, MinioReportLocation.class);
         minioReportLocation.setUuid(UUID.randomUUID());
@@ -38,10 +41,13 @@ public class MinioReportLocationService implements IMinioReportLocationService {
         return this.minioReportLocationDao.save(minioReportLocation);
     }
 
-    //    TODO handle NoSuchElementException
     @Override
     public MinioReportLocation get(UUID uuid) {
-        return this.minioReportLocationDao.findById(uuid).orElseThrow();
+        try {
+            return this.minioReportLocationDao.findById(uuid).orElseThrow();
+        }catch (NoSuchElementException ex){
+            throw new NotPossibleReadDataException(List.of(new ErrorResponse(ErrorType.ERROR, "Such report location is not found")));
+        }
     }
 
     @Override
@@ -60,12 +66,6 @@ public class MinioReportLocationService implements IMinioReportLocationService {
     public boolean existsByReport(UUID reportUuid) {
         Report report = this.reportService.get(reportUuid);
         return this.minioReportLocationDao.existsByReport(report);
-    }
-
-
-    //    TODO
-    private void validate(MinioReportLocationCreateDto dto) {
-
     }
 
 }

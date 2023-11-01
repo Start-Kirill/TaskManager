@@ -3,14 +3,14 @@ package by.it_academy.report_service.dao;
 import by.it_academy.report_service.config.property.MinioProperty;
 import by.it_academy.report_service.dao.api.IFileSystemDao;
 import by.it_academy.report_service.dao.exceptions.SuchFileNotExists;
+import by.it_academy.report_service.service.exceptions.NotPossiblePutDataException;
+import by.it_academy.report_service.service.exceptions.NotPossibleReadDataException;
 import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MimeType;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -50,25 +50,8 @@ public class MinioDao implements IFileSystemDao {
                             .stream(new ByteArrayInputStream(data), data.length, -1)
                             .build()
             );
-//            TODO
-        } catch (ErrorResponseException e) {
-            throw new RuntimeException(e);
-        } catch (InsufficientDataException e) {
-            throw new RuntimeException(e);
-        } catch (InternalException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidResponseException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (ServerException e) {
-            throw new RuntimeException(e);
-        } catch (XmlParserException e) {
-            throw new RuntimeException(e);
+        } catch (Exception ex) {
+            throw new NotPossiblePutDataException(List.of(new ErrorResponse(ErrorType.ERROR, "Error saving data in Minio")));
         }
     }
 
@@ -99,25 +82,17 @@ public class MinioDao implements IFileSystemDao {
 
             return presignedObjectUrl;
 
-//            TODO
-        } catch (ErrorResponseException e) {
-            throw new RuntimeException(e);
-        } catch (InsufficientDataException e) {
-            throw new RuntimeException(e);
-        } catch (InternalException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidResponseException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (ServerException e) {
-            throw new RuntimeException(e);
-        } catch (XmlParserException e) {
-            throw new RuntimeException(e);
+        } catch (IOException |
+                 InvalidResponseException |
+                 ErrorResponseException |
+                 InsufficientDataException |
+                 InternalException |
+                 InvalidKeyException |
+                 NoSuchAlgorithmException |
+                 ServerException |
+                 XmlParserException e
+        ) {
+            throw new NotPossibleReadDataException(List.of(new ErrorResponse(ErrorType.ERROR, "Error getting downloading url")));
         }
 
     }

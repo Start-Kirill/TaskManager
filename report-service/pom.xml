@@ -133,6 +133,13 @@
             <version>3.5.2</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/io.github.openfeign/feign-httpclient -->
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-httpclient</artifactId>
+            <version>12.4</version>
+        </dependency>
+
     </dependencies>
 
     <build>

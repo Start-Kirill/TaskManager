@@ -8,6 +8,9 @@ import by.it_academy.report_service.service.support.spring.converters.MinioRepor
 import by.it_academy.report_service.service.support.spring.converters.ReportCreateDtoToReportConverter;
 import by.it_academy.task_manager_common.support.spring.converters.PageToCustomPageConverter;
 import by.it_academy.task_manager_common.support.spring.converters.UserDtoToUserDetailsConverter;
+import feign.Feign;
+import feign.httpclient.ApacheHttpClient;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -24,6 +27,11 @@ public class ApplicationConfig implements WebMvcConfigurer {
         registry.addConverter(new MinioReportLocationCreateDtoToMinioReportLocationConverter());
         registry.addConverter(new MapToReportParamAuditConverter());
         registry.addConverter(new ReportToReportDtoConverter());
+    }
+
+    @Bean
+    public Feign.Builder feign() {
+        return Feign.builder().client(new ApacheHttpClient());
     }
 
 
