@@ -131,7 +131,7 @@ public class UserService implements IUserService {
 
         LocalDateTime realVersion = user.getDateTimeUpdate().truncatedTo(ChronoUnit.MILLIS);
 
-        if (!realVersion.equals(version)) {
+        if (!realVersion.equals(version.truncatedTo(ChronoUnit.MILLIS))) {
             throw new VersionsNotMatchException(List.of(new ErrorResponse(ErrorType.ERROR, "User date updates (versions) don't match. Get up-to-date user")));
         }
 
@@ -208,12 +208,6 @@ public class UserService implements IUserService {
         throw new MailNotExistsException(errors);
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public boolean existsByMail(String mail) {
-        return this.userDao.existsByMail(mail);
-    }
-
 
     private void validate(UserCreateDto dto) {
         Map<String, String> errors = new HashMap<>();
@@ -264,21 +258,7 @@ public class UserService implements IUserService {
             errors.put(PASSWORD_FIELD_NAME, "Password is required");
         } else {
 
-            PasswordData passwordData;
-
-            if (user != null) {
-                passwordData = new PasswordData(user, password);
-            } else {
-                passwordData = new PasswordData(password);
-            }
-
-            PasswordValidator passwordValidator = new PasswordValidator(
-                    new LengthRule(8, 30),
-                    new CharacterRule(EnglishCharacterData.Special),
-                    new CharacterRule(CyrillicEnglishCharacterData.UpperCase),
-                    new UsernameRule(false, true, MatchBehavior.Contains)
-            );
-            RuleResult validate = passwordValidator.validate(passwordData);
+            RuleResult validate = getRuleResult(password, user);
             if (!validate.isValid()) {
                 List<RuleResultDetail> details = validate.getDetails();
                 StringBuilder stringErrors = new StringBuilder();
@@ -296,6 +276,25 @@ public class UserService implements IUserService {
             }
         }
         return errors;
+    }
+
+    private RuleResult getRuleResult(String password, String user) {
+        PasswordData passwordData;
+
+        if (user != null) {
+            passwordData = new PasswordData(user, password);
+        } else {
+            passwordData = new PasswordData(password);
+        }
+
+        PasswordValidator passwordValidator = new PasswordValidator(
+                new LengthRule(8, 30),
+                new CharacterRule(EnglishCharacterData.Special),
+                new CharacterRule(CyrillicEnglishCharacterData.UpperCase),
+                new UsernameRule(false, true, MatchBehavior.Contains)
+        );
+        RuleResult validate = passwordValidator.validate(passwordData);
+        return validate;
     }
 
     private void validate(Integer page, Integer size) {
