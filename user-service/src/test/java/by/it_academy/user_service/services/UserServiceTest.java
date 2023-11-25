@@ -1,4 +1,4 @@
-package by.it_academy.user_service;
+package by.it_academy.user_service.services;
 
 import by.it_academy.task_manager_common.dto.CustomPage;
 import by.it_academy.task_manager_common.enums.UserRole;
