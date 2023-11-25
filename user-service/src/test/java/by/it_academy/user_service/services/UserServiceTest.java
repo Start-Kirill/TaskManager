@@ -75,6 +75,7 @@ public class UserServiceTest {
     private UserService userService;
 
 
+
     @Test
     public void shouldSaveUser() {
         when(userDao.saveAndFlush(Mockito.any(User.class)))
