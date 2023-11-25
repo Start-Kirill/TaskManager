@@ -14,7 +14,6 @@ import by.it_academy.user_service.service.api.IUserAuditService;
 import by.it_academy.user_service.service.exceptions.common.UserNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.MailNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalAnswers;
@@ -73,7 +72,6 @@ public class UserServiceTest {
 
     @InjectMocks
     private UserService userService;
-
 
 
     @Test
