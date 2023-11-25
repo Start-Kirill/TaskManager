@@ -9,7 +9,6 @@ import by.it_academy.user_service.dao.entity.User;
 import by.it_academy.user_service.dao.entity.Verification;
 import by.it_academy.user_service.service.VerificationService;
 import by.it_academy.user_service.service.exceptions.common.VerificationCodeNotExistsException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -63,8 +63,8 @@ public class VerificationServiceTest {
         final VerificationCreateDto verificationCreateDto = mock(VerificationCreateDto.class);
         Verification actual = this.verificationService.save(verificationCreateDto);
 
-        Assertions.assertNotNull(actual);
-        Assertions.assertEquals(verification, actual);
+        assertNotNull(actual);
+        assertEquals(verification, actual);
     }
 
     @Test
@@ -80,8 +80,8 @@ public class VerificationServiceTest {
         final VerificationUpdateDto verificationUpdateDto = mock(VerificationUpdateDto.class);
         Verification update = this.verificationService.update(verificationUpdateDto, uuid, dtUpdate);
 
-        Assertions.assertNotNull(update);
-        Assertions.assertEquals(verification, update);
+        assertNotNull(update);
+        assertEquals(verification, update);
     }
 
     @Test
@@ -93,8 +93,8 @@ public class VerificationServiceTest {
 
         Verification actual = this.verificationService.get(user);
 
-        Assertions.assertNotNull(actual);
-        Assertions.assertEquals(verification, actual);
+        assertNotNull(actual);
+        assertEquals(verification, actual);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class VerificationServiceTest {
         final User user = mock(User.class);
         when(this.verificationDao.existsByUser(user)).thenReturn(false);
 
-        Assertions.assertThrows(VerificationCodeNotExistsException.class, () -> this.verificationService.get(user));
+        assertThrows(VerificationCodeNotExistsException.class, () -> this.verificationService.get(user));
     }
 
     @Test
@@ -113,8 +113,8 @@ public class VerificationServiceTest {
 
         List<Verification> actual = this.verificationService.get(verificationStatus);
 
-        Assertions.assertNotNull(actual);
-        Assertions.assertEquals(actual, verifications);
+        assertNotNull(actual);
+        assertEquals(actual, verifications);
     }
 
     @Test
@@ -126,8 +126,8 @@ public class VerificationServiceTest {
 
         Verification actual = this.verificationService.get(uuid);
 
-        Assertions.assertNotNull(actual);
-        Assertions.assertEquals(actual, verification);
+        assertNotNull(actual);
+        assertEquals(actual, verification);
     }
 
     @Test
@@ -135,13 +135,12 @@ public class VerificationServiceTest {
         final UUID uuid = mock(UUID.class);
         when(this.verificationDao.existsById(uuid)).thenReturn(false);
 
-        Assertions.assertThrows(VerificationCodeNotExistsException.class, () -> this.verificationService.get(uuid));
+        assertThrows(VerificationCodeNotExistsException.class, () -> this.verificationService.get(uuid));
     }
 
     @Test
     public void shouldGenerateCode() {
-        Assertions.assertNotNull(this.verificationService.generateCode());
+        assertNotNull(this.verificationService.generateCode());
     }
-
 
 }
