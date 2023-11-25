@@ -14,7 +14,6 @@ import by.it_academy.user_service.service.api.IUserAuditService;
 import by.it_academy.user_service.service.exceptions.common.UserNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.MailNotExistsException;
 import by.it_academy.user_service.service.exceptions.structured.NotValidUserBodyException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +33,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -74,14 +76,16 @@ public class UserServiceTest {
 
     @BeforeEach
     public void setUp() {
-        Mockito.lenient().when(userDao.saveAndFlush(Mockito.any(User.class)))
+
+    }
+
+    @Test
+    public void shouldSaveUser() {
+        when(userDao.saveAndFlush(Mockito.any(User.class)))
                 .thenAnswer(AdditionalAnswers.returnsFirstArg());
-
-        Mockito.lenient().when(passwordEncoder.encode(Mockito.any(CharSequence.class)))
+        when(passwordEncoder.encode(Mockito.any(CharSequence.class)))
                 .thenAnswer(m -> m.getArgument(0, CharSequence.class).toString());
-
-
-        Mockito.lenient().when(conversionService.convert(Mockito.any(UserCreateDto.class), Mockito.eq(User.class))).thenAnswer(mock -> {
+        when(conversionService.convert(Mockito.any(UserCreateDto.class), Mockito.eq(User.class))).thenAnswer(mock -> {
 
             User user = new User();
 
@@ -96,165 +100,266 @@ public class UserServiceTest {
             return user;
         });
 
-        Mockito.lenient().when(userDao.existsById(Mockito.any(UUID.class)))
-                .thenAnswer(m -> {
-                    UUID uuid = m.getArgument(0, UUID.class);
-                    return this.users.stream().anyMatch(u -> u.getUuid().equals(uuid));
-                });
+        User actual = this.userService.save(generateCorrectUserCreate());
 
-        Mockito.lenient().when(userDao.findById(Mockito.any(UUID.class)))
-                .thenAnswer(m -> {
-                    UUID uuid = m.getArgument(0, UUID.class);
-                    return users.stream().filter(u -> u.getUuid().equals(uuid)).findFirst();
-                });
-
-        Mockito.lenient().when(userDao.findAll(Mockito.any(PageRequest.class)))
-                .thenAnswer(m -> new PageImpl<>(users));
-
-        Mockito.lenient().when(conversionService.convert(Mockito.any(Page.class), Mockito.eq(CustomPage.class)))
-                .thenAnswer(m -> {
-                    CustomPage<User> userCustomPage = new CustomPage<>();
-                    userCustomPage.setContent(m.getArgument(0, Page.class).getContent());
-                    return userCustomPage;
-                });
-        Mockito.lenient().when(this.userDao.existsByMail(Mockito.any(String.class)))
-                .thenAnswer(m -> {
-                    String mail = m.getArgument(0, String.class);
-                    return users.stream().anyMatch(u -> u.getMail().equals(mail));
-                });
-        Mockito.lenient().when(this.userDao.findByMail(Mockito.any(String.class)))
-                .thenAnswer(m -> {
-                    String mail = m.getArgument(0, String.class);
-                    return users.stream().filter(u -> u.getMail().equals(mail)).findFirst();
-                });
-        Mockito.lenient().when(this.userDao.findAllByUuidIn(Mockito.any(Collection.class)))
-                .thenAnswer(m -> {
-                    Collection<UUID> willingUsers = (Collection<UUID>) m.getArgument(0, Collection.class);
-                    return users.stream().filter(u -> willingUsers.contains(u.getUuid())).toList();
-                });
-    }
-
-    @Test
-    public void shouldSaveUser() {
-        Assertions.assertNotNull(this.userService.save(generateCorrectUserCreate()));
+        assertNotNull(actual);
     }
 
     @Test
     public void shouldThrowWhileSave() {
-        Assertions.assertThrows(NotValidUserBodyException.class, () -> {
+        assertThrows(NotValidUserBodyException.class, () -> {
             this.userService.save(generateNotCorrectUserCreate());
         });
     }
 
     @Test
     public void shouldSaveProperly() {
+        when(userDao.saveAndFlush(Mockito.any(User.class)))
+                .thenAnswer(AdditionalAnswers.returnsFirstArg());
+        when(passwordEncoder.encode(Mockito.any(CharSequence.class)))
+                .thenAnswer(m -> m.getArgument(0, CharSequence.class).toString());
+        when(conversionService.convert(Mockito.any(UserCreateDto.class), Mockito.eq(User.class))).thenAnswer(mock -> {
+
+            User user = new User();
+
+            UserCreateDto argument1 = mock.getArgument(0, UserCreateDto.class);
+
+            user.setMail(argument1.getMail());
+            user.setFio(argument1.getFio());
+            user.setRole(argument1.getRole());
+            user.setStatus(argument1.getStatus());
+            user.setPassword(argument1.getPassword());
+
+            return user;
+        });
+
         User save = this.userService.save(generateCorrectUserCreate());
-        Assertions.assertEquals(save.getFio(), FIO);
-        Assertions.assertEquals(save.getMail(), CORRECT_MAIL);
-        Assertions.assertEquals(save.getRole(), UserRole.USER);
-        Assertions.assertEquals(save.getStatus(), UserStatus.ACTIVATED);
-        Assertions.assertEquals(save.getPassword(), CORRECT_PASSWORD);
-        Assertions.assertNotNull(save.getUuid());
-        Assertions.assertNotNull(save.getDateTimeCreate());
-        Assertions.assertNotNull(save.getDateTimeUpdate());
-        Assertions.assertTrue(save.getDateTimeCreate().isBefore(save.getDateTimeUpdate())
+
+        assertEquals(save.getFio(), FIO);
+        assertEquals(save.getMail(), CORRECT_MAIL);
+        assertEquals(save.getRole(), UserRole.USER);
+        assertEquals(save.getStatus(), UserStatus.ACTIVATED);
+        assertEquals(save.getPassword(), CORRECT_PASSWORD);
+        assertNotNull(save.getUuid());
+        assertNotNull(save.getDateTimeCreate());
+        assertNotNull(save.getDateTimeUpdate());
+        assertTrue(save.getDateTimeCreate().isBefore(save.getDateTimeUpdate())
                 || save.getDateTimeCreate().isEqual(save.getDateTimeUpdate()));
     }
 
     @Test
     public void shouldSaveByUser() {
-        Assertions.assertNotNull(this.userService.saveByUser(generateCorrectUserCreate()));
+        when(userDao.saveAndFlush(Mockito.any(User.class)))
+                .thenAnswer(AdditionalAnswers.returnsFirstArg());
+        when(passwordEncoder.encode(Mockito.any(CharSequence.class)))
+                .thenAnswer(m -> m.getArgument(0, CharSequence.class).toString());
+        when(conversionService.convert(Mockito.any(UserCreateDto.class), Mockito.eq(User.class))).thenAnswer(mock -> {
+
+            User user = new User();
+
+            UserCreateDto argument1 = mock.getArgument(0, UserCreateDto.class);
+
+            user.setMail(argument1.getMail());
+            user.setFio(argument1.getFio());
+            user.setRole(argument1.getRole());
+            user.setStatus(argument1.getStatus());
+            user.setPassword(argument1.getPassword());
+
+            return user;
+        });
+
+        User user = this.userService.saveByUser(generateCorrectUserCreate());
+
+        assertNotNull(user);
     }
 
     @Test
     public void shouldThrowWhileSaveByUser() {
-        Assertions.assertThrows(NotValidUserBodyException.class, () -> {
+        assertThrows(NotValidUserBodyException.class, () -> {
             this.userService.saveByUser(generateNotCorrectUserCreate());
         });
     }
 
     @Test
     public void shouldGetUser() {
+        when(userDao.existsById(Mockito.any(UUID.class)))
+                .thenAnswer(m -> {
+                    UUID uuid = m.getArgument(0, UUID.class);
+                    return this.users.stream().anyMatch(u -> u.getUuid().equals(uuid));
+                });
+        when(userDao.findById(Mockito.any(UUID.class)))
+                .thenAnswer(m -> {
+                    UUID uuid = m.getArgument(0, UUID.class);
+                    return users.stream().filter(u -> u.getUuid().equals(uuid)).findFirst();
+                });
+
         User user = this.userService.get(FIRST_USER_UUID);
-        Assertions.assertEquals(users.get(0), user);
+
+        assertEquals(users.get(0), user);
     }
 
     @Test
     public void shouldThrowWhileGetUser() {
-        Assertions.assertThrows(UserNotExistsException.class, () -> this.userService.get(UUID.randomUUID()));
+        assertThrows(UserNotExistsException.class, () -> this.userService.get(UUID.randomUUID()));
     }
 
     @Test
     public void shouldGetPage() {
-        Assertions.assertNotNull(userService.get(0, 1));
+        when(userDao.findAll(Mockito.any(PageRequest.class)))
+                .thenAnswer(m -> new PageImpl<>(users));
+        when(conversionService.convert(Mockito.any(Page.class), Mockito.eq(CustomPage.class)))
+                .thenAnswer(m -> {
+                    CustomPage<User> userCustomPage = new CustomPage<>();
+                    userCustomPage.setContent(m.getArgument(0, Page.class).getContent());
+                    return userCustomPage;
+                });
+
+        CustomPage<User> userCustomPage = userService.get(0, 1);
+
+        assertNotNull(userCustomPage);
     }
 
     @Test
     public void shouldThrowWhileGetPage() {
-        Assertions.assertThrows(NotCorrectPageDataException.class, () -> {
+        assertThrows(NotCorrectPageDataException.class, () -> {
             userService.get(0, 0);
         });
     }
 
     @Test
     public void shouldGetPageProperly() {
+        when(userDao.findAll(Mockito.any(PageRequest.class)))
+                .thenAnswer(m -> new PageImpl<>(users));
+        when(conversionService.convert(Mockito.any(Page.class), Mockito.eq(CustomPage.class)))
+                .thenAnswer(m -> {
+                    CustomPage<User> userCustomPage = new CustomPage<>();
+                    userCustomPage.setContent(m.getArgument(0, Page.class).getContent());
+                    return userCustomPage;
+                });
+
         CustomPage<User> userCustomPage = this.userService.get(0, 1);
-        Assertions.assertEquals(userCustomPage.getContent(), users);
-        Assertions.assertEquals(userCustomPage.getSize(), 1);
-        Assertions.assertEquals(userCustomPage.getNumber(), 0);
+
+        assertEquals(userCustomPage.getContent(), users);
+        assertEquals(userCustomPage.getSize(), 1);
+        assertEquals(userCustomPage.getNumber(), 0);
     }
 
     @Test
     public void shouldFindAllByUuids() {
         List<UUID> willingUsers = List.of(FIRST_USER_UUID, SECOND_USER_UUID);
-        Assertions.assertNotNull(userService.findAllByUuid(willingUsers));
+
+        assertNotNull(userService.findAllByUuid(willingUsers));
     }
 
     @Test
     public void shouldGetEmptyWhileFindAllByUuids() {
         List<UUID> willingUsers = List.of(UUID.randomUUID());
-        Assertions.assertTrue(userService.findAllByUuid(willingUsers).isEmpty());
+
+        assertTrue(userService.findAllByUuid(willingUsers).isEmpty());
     }
 
     @Test
     public void shouldFindAllByUuidsProperly() {
+        when(this.userDao.findAllByUuidIn(Mockito.any(Collection.class)))
+                .thenAnswer(m -> {
+                    Collection<UUID> willingUsers = (Collection<UUID>) m.getArgument(0, Collection.class);
+                    return users.stream().filter(u -> willingUsers.contains(u.getUuid())).toList();
+                });
+
         List<UUID> willingUsers = List.of(FIRST_USER_UUID, SECOND_USER_UUID);
-        Assertions.assertEquals(users, userService.findAllByUuid(willingUsers));
+
+        assertEquals(users, userService.findAllByUuid(willingUsers));
     }
 
     @Test
     public void shouldFindByMail() {
-        Assertions.assertNotNull(this.userService.findByMail(CORRECT_MAIL));
+        when(this.userDao.existsByMail(Mockito.any(String.class)))
+                .thenAnswer(m -> {
+                    String mail = m.getArgument(0, String.class);
+                    return users.stream().anyMatch(u -> u.getMail().equals(mail));
+                });
+        when(this.userDao.findByMail(Mockito.any(String.class)))
+                .thenAnswer(m -> {
+                    String mail = m.getArgument(0, String.class);
+                    return users.stream().filter(u -> u.getMail().equals(mail)).findFirst();
+                });
+
+        User user = this.userService.findByMail(CORRECT_MAIL);
+
+        assertNotNull(user);
     }
 
     @Test
     public void shouldThrowWhileFindByMail() {
-        Assertions.assertThrows(MailNotExistsException.class, () -> {
+        assertThrows(MailNotExistsException.class, () -> {
             this.userService.findByMail(INCORRECT_MAIL);
         });
     }
 
     @Test
     public void shouldFindByMailProperly() {
-        Assertions.assertEquals(CORRECT_MAIL, this.userService.findByMail(CORRECT_MAIL).getMail());
+        when(this.userDao.existsByMail(Mockito.any(String.class)))
+                .thenAnswer(m -> {
+                    String mail = m.getArgument(0, String.class);
+                    return users.stream().anyMatch(u -> u.getMail().equals(mail));
+                });
+        when(this.userDao.findByMail(Mockito.any(String.class)))
+                .thenAnswer(m -> {
+                    String mail = m.getArgument(0, String.class);
+                    return users.stream().filter(u -> u.getMail().equals(mail)).findFirst();
+                });
+
+        User user = this.userService.findByMail(CORRECT_MAIL);
+
+        assertEquals(CORRECT_MAIL, user.getMail());
     }
 
 
     @Test
     public void shouldUpdate() {
+        when(userDao.existsById(Mockito.any(UUID.class)))
+                .thenAnswer(m -> {
+                    UUID uuid = m.getArgument(0, UUID.class);
+                    return this.users.stream().anyMatch(u -> u.getUuid().equals(uuid));
+                });
+
+        when(userDao.findById(Mockito.any(UUID.class)))
+                .thenAnswer(m -> {
+                    UUID uuid = m.getArgument(0, UUID.class);
+                    return users.stream().filter(u -> u.getUuid().equals(uuid)).findFirst();
+                });
+        when(userDao.saveAndFlush(Mockito.any(User.class)))
+                .thenAnswer(AdditionalAnswers.returnsFirstArg());
+        when(passwordEncoder.encode(Mockito.any(CharSequence.class)))
+                .thenAnswer(m -> m.getArgument(0, CharSequence.class).toString());
+
         UserCreateDto correctUserCreateDto = generateCorrectUserCreate();
         LocalDateTime realVersion = this.users.get(0).getDateTimeUpdate();
-        Assertions.assertNotNull(this.userService.update(
+        User user = this.userService.update(
                 correctUserCreateDto,
                 FIRST_USER_UUID,
-                realVersion));
+                realVersion);
+
+        assertNotNull(user);
     }
 
     @Test
     public void shouldThrowWhileUpdate() {
+        when(userDao.existsById(Mockito.any(UUID.class)))
+                .thenAnswer(m -> {
+                    UUID uuid = m.getArgument(0, UUID.class);
+                    return this.users.stream().anyMatch(u -> u.getUuid().equals(uuid));
+                });
+        when(userDao.findById(Mockito.any(UUID.class)))
+                .thenAnswer(m -> {
+                    UUID uuid = m.getArgument(0, UUID.class);
+                    return users.stream().filter(u -> u.getUuid().equals(uuid)).findFirst();
+                });
+
         UserCreateDto correctUserCreateDto = generateCorrectUserCreate();
         LocalDateTime wrongVersion = LocalDateTime.now();
-        Assertions.assertThrows(VersionsNotMatchException.class, () -> {
+
+        assertThrows(VersionsNotMatchException.class, () -> {
             this.userService.update(
                     correctUserCreateDto,
                     FIRST_USER_UUID,
@@ -265,18 +370,35 @@ public class UserServiceTest {
 
     @Test
     public void shouldUpdateProperly() {
+        when(userDao.existsById(Mockito.any(UUID.class)))
+                .thenAnswer(m -> {
+                    UUID uuid = m.getArgument(0, UUID.class);
+                    return this.users.stream().anyMatch(u -> u.getUuid().equals(uuid));
+                });
+
+        when(userDao.findById(Mockito.any(UUID.class)))
+                .thenAnswer(m -> {
+                    UUID uuid = m.getArgument(0, UUID.class);
+                    return users.stream().filter(u -> u.getUuid().equals(uuid)).findFirst();
+                });
+        when(userDao.saveAndFlush(Mockito.any(User.class)))
+                .thenAnswer(AdditionalAnswers.returnsFirstArg());
+        when(passwordEncoder.encode(Mockito.any(CharSequence.class)))
+                .thenAnswer(m -> m.getArgument(0, CharSequence.class).toString());
+
         UserCreateDto userCreateDto = generateCorrectUserCreate();
         LocalDateTime dateTimeUpdate = this.users.get(0).getDateTimeUpdate();
         LocalDateTime dateTimeCreate = this.users.get(0).getDateTimeCreate();
         User update = this.userService.update(userCreateDto, FIRST_USER_UUID, dateTimeUpdate);
-        Assertions.assertEquals(userCreateDto.getFio(), update.getFio());
-        Assertions.assertEquals(userCreateDto.getMail(), update.getMail());
-        Assertions.assertEquals(userCreateDto.getPassword(), update.getPassword());
-        Assertions.assertEquals(userCreateDto.getRole(), update.getRole());
-        Assertions.assertEquals(userCreateDto.getStatus(), update.getStatus());
-        Assertions.assertEquals(dateTimeCreate, update.getDateTimeCreate());
-        Assertions.assertEquals(dateTimeUpdate, update.getDateTimeUpdate());
-        Assertions.assertEquals(FIRST_USER_UUID, update.getUuid());
+
+        assertEquals(userCreateDto.getFio(), update.getFio());
+        assertEquals(userCreateDto.getMail(), update.getMail());
+        assertEquals(userCreateDto.getPassword(), update.getPassword());
+        assertEquals(userCreateDto.getRole(), update.getRole());
+        assertEquals(userCreateDto.getStatus(), update.getStatus());
+        assertEquals(dateTimeCreate, update.getDateTimeCreate());
+        assertEquals(dateTimeUpdate, update.getDateTimeUpdate());
+        assertEquals(FIRST_USER_UUID, update.getUuid());
     }
 
 
