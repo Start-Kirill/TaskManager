@@ -74,10 +74,7 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    @BeforeEach
-    public void setUp() {
 
-    }
 
     @Test
     public void shouldSaveUser() {
