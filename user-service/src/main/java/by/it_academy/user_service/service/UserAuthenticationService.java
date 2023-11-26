@@ -109,7 +109,6 @@ public class UserAuthenticationService implements IUserAuthenticationService {
             throw new NotVerifyUserException(errors);
         }
 
-        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
         this.auditService.saveBySystem(user.getUuid(), "User was activated");
     }
 
