@@ -51,8 +51,6 @@ public class UserAuthenticationService implements IUserAuthenticationService {
 
     private final UserHolder userHolder;
 
-    private final INotificationService mailSenderService;
-
 
     public UserAuthenticationService(IUserService userService,
                                      ConversionService conversionService,
@@ -60,8 +58,7 @@ public class UserAuthenticationService implements IUserAuthenticationService {
                                      PasswordEncoder passwordEncoder,
                                      JwtTokenHandler tokenHandler,
                                      IUserAuditService auditService,
-                                     UserHolder userHolder,
-                                     INotificationService mailSenderService) {
+                                     UserHolder userHolder) {
         this.userService = userService;
         this.conversionService = conversionService;
         this.verificationCodeService = verificationCodeService;
@@ -69,7 +66,6 @@ public class UserAuthenticationService implements IUserAuthenticationService {
         this.tokenHandler = tokenHandler;
         this.auditService = auditService;
         this.userHolder = userHolder;
-        this.mailSenderService = mailSenderService;
     }
 
     @Transactional
@@ -113,7 +109,6 @@ public class UserAuthenticationService implements IUserAuthenticationService {
             throw new NotVerifyUserException(errors);
         }
 
-        UserDetailsImpl userDetails = this.conversionService.convert(user, UserDetailsImpl.class);
         this.auditService.saveBySystem(user.getUuid(), "User was activated");
     }
 
