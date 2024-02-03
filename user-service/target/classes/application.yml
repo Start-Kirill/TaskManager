@@ -4,6 +4,14 @@ spring:
     url: jdbc:postgresql://db:5432/user_service?ApplicationName=user-service
     username: user_service
     password: q1w2e3r4
+  flyway:
+    baseline-on-migrate: true
+    enable: true
+    user: user_service
+    password: q1w2e3r4
+    schemas: app
+  #    url: jdbc:h2:mem:DATABASE
+#    locations: filesystem:db/migration
   jpa:
     hibernate:
       ddl-auto: none
@@ -20,6 +28,10 @@ spring:
           auth: true
           starttls:
             enable: true
+  kafka:
+    consumer:
+      group-id: app.1
+    bootstrap-server: localhost:9092
 logging:
   level:
     org.springframework.web: DEBUG

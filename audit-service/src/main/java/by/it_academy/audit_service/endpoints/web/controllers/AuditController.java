@@ -1,15 +1,16 @@
 package by.it_academy.audit_service.endpoints.web.controllers;
 
-import by.it_academy.task_manager_common.dto.AuditDto;
 import by.it_academy.audit_service.dao.entity.Audit;
 import by.it_academy.audit_service.service.api.IAuditService;
 import by.it_academy.task_manager_common.dto.AuditCreateDto;
+import by.it_academy.task_manager_common.dto.AuditDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
 import by.it_academy.task_manager_common.dto.ReportParamAudit;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,6 +66,11 @@ public class AuditController {
     public ResponseEntity<?> create(@RequestBody AuditCreateDto dto) {
         this.auditService.create(dto);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @KafkaListener(topics = "audit")
+    public void auditListener(AuditCreateDto dto) {
+        this.create(dto);
     }
 
 }

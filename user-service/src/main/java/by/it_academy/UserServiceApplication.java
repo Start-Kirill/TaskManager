@@ -7,15 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.io.BufferedReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.concurrent.ConcurrentHashMap;
-
-
+@EnableKafka
 @EnableJpaRepositories
 @EnableTransactionManagement
 @EnableConfigurationProperties({AppProperty.class, JWTProperty.class})

@@ -10,19 +10,21 @@ import by.it_academy.user_service.service.api.IAuditClient;
 import by.it_academy.user_service.service.api.IUserAuditService;
 import by.it_academy.user_service.utils.JwtTokenHandler;
 import feign.FeignException;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
-public class UserAuditService implements IUserAuditService {
+@Primary
+public class UserAuditFeignService implements IUserAuditService {
 
     private final IAuditClient auditClient;
 
     private final JwtTokenHandler tokenHandler;
 
-    public UserAuditService(IAuditClient auditClient, JwtTokenHandler tokenHandler) {
+    public UserAuditFeignService(IAuditClient auditClient, JwtTokenHandler tokenHandler) {
         this.tokenHandler = tokenHandler;
         this.auditClient = auditClient;
     }
