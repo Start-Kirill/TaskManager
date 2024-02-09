@@ -9,6 +9,10 @@ spring:
       ddl-auto: none
     properties:
       hibernate.default_schema: app
+  kafka:
+    consumer:
+      group-id: app.1
+    bootstrap-server: kafka:9092
 logging:
   level:
     org.springframework.web: DEBUG
@@ -18,3 +22,4 @@ jwt:
 feign:
   user:
     url: http://user-service:8080/users
+

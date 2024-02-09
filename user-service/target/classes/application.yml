@@ -20,6 +20,10 @@ spring:
           auth: true
           starttls:
             enable: true
+  kafka:
+    consumer:
+      group-id: app.1
+    bootstrap-server: kafka:9092
 logging:
   level:
     org.springframework.web: DEBUG

@@ -1,6 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/audit_service?ApplicationName=audit-service
+  kafka:
+    bootstrap-server: localhost:9092
 server:
   port: 92
 feign:
