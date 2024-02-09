@@ -51,21 +51,3 @@ CREATE TABLE app.audit
 ALTER TABLE IF EXISTS app.audit
     OWNER to audit_service;
 
-CREATE TABLE app.limits
-(
-    uuid uuid,
-    expense_category text NOT NULL,
-    sum numeric(2) NOT NULL,
-    currency_uuid uuid NOT NULL,
-    datetime timestamp without time zone NOT NULL,
-    PRIMARY KEY (uuid),
-    FOREIGN KEY (currency_uuid)
-        REFERENCES app.currencies (uuid) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-        NOT VALID
-);
-
-ALTER TABLE IF EXISTS app.limits
-    OWNER to expense_manager
-

@@ -12,11 +12,7 @@ spring:
   kafka:
     consumer:
       group-id: app.1
-    bootstrap-server: localhost:9092
-#  jackson:
-#    deserialization:
-#      trusted:
-#        packages: by.it_academy.task_manager_common.dto
+    bootstrap-server: kafka:9092
 logging:
   level:
     org.springframework.web: DEBUG

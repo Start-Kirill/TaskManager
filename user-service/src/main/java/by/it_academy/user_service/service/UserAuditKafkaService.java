@@ -12,23 +12,24 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
+@Primary
 public class UserAuditKafkaService implements IUserAuditService {
 
     private static final String TOPIC_AUDIT = "audit";
 
-    private final KafkaTemplate<String, AuditCreateDto> kafkaTemplate;
+    private final KafkaTemplate<String, AuditCreateDto> kafkaAuditTemplate;
 
     private final JwtTokenHandler tokenHandler;
 
-    public UserAuditKafkaService(KafkaTemplate<String, AuditCreateDto> kafkaTemplate,
+    public UserAuditKafkaService(KafkaTemplate<String, AuditCreateDto> kafkaAuditTemplate,
                                  JwtTokenHandler tokenHandler) {
-        this.kafkaTemplate = kafkaTemplate;
+        this.kafkaAuditTemplate = kafkaAuditTemplate;
         this.tokenHandler = tokenHandler;
     }
 
     @Override
     public void save(String header, AuditCreateDto dto) {
-        this.kafkaTemplate.send(TOPIC_AUDIT, header, dto);
+        this.kafkaAuditTemplate.send(TOPIC_AUDIT, header, dto);
     }
     
 

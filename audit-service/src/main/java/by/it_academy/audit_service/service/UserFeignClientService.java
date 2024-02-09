@@ -7,17 +7,18 @@ import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
 import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.exceptions.commonInternal.FeignErrorException;
 import feign.FeignException;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
-public class UserClientService implements IUserClientService {
+public class UserFeignClientService implements IUserClientService {
 
     private final IUserClient userClient;
 
-    public UserClientService(IUserClient userClient) {
+    public UserFeignClientService(IUserClient userClient) {
         this.userClient = userClient;
     }
 
