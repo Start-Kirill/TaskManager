@@ -1,4 +1,4 @@
-package by.it_academy.user_service.config;
+package by.it_academy.task_service.config;
 
 import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -19,6 +19,7 @@ public class KafkaConfig {
 
     @Value("${spring.kafka.bootstrap-server}")
     private String KAFKA_SERVER;
+
 
     @Bean
     public Map<String, Object> producerConfigs() {
@@ -41,5 +42,4 @@ public class KafkaConfig {
     public KafkaTemplate<String, AuditCreateDto> kafkaAuditTemplate() {
         return new KafkaTemplate<>(auditProducerFactory());
     }
-
 }

@@ -2,45 +2,39 @@ package by.it_academy.task_service.service;
 
 import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.UserDetailsImpl;
-import by.it_academy.task_manager_common.dto.errors.ErrorResponse;
-import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.EssenceType;
-import by.it_academy.task_manager_common.exceptions.commonInternal.FeignErrorException;
-import by.it_academy.task_service.service.api.IAuditClient;
 import by.it_academy.task_service.service.api.IAuditClientService;
 import by.it_academy.task_service.utils.JwtTokenHandler;
-import feign.FeignException;
+import org.springframework.context.annotation.Primary;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
-public class AuditClientService implements IAuditClientService {
+@Primary
+public class AuditClientKafkaService implements IAuditClientService {
 
-    private final IAuditClient auditClient;
+    private static final String TOPIC_AUDIT = "audit";
+
+    private final KafkaTemplate<String, AuditCreateDto> kafkaAuditTemplate;
 
     private final JwtTokenHandler tokenHandler;
 
-    public AuditClientService(IAuditClient auditClient, JwtTokenHandler jwtTokenHandler) {
-        this.auditClient = auditClient;
-        this.tokenHandler = jwtTokenHandler;
+    public AuditClientKafkaService(KafkaTemplate<String, AuditCreateDto> kafkaAuditTemplate, JwtTokenHandler tokenHandler) {
+        this.kafkaAuditTemplate = kafkaAuditTemplate;
+        this.tokenHandler = tokenHandler;
     }
 
     @Override
     public void save(String header, AuditCreateDto dto) {
-        try {
-            this.auditClient.create(header, dto);
-        } catch (FeignException ex) {
-            throw new FeignErrorException(ex, List.of(new ErrorResponse(ErrorType.ERROR, "The server was unable to process the request correctly. Please contact administrator")));
-        }
+        this.kafkaAuditTemplate.send(TOPIC_AUDIT, header, dto);
     }
-
 
     @Override
     public void save(UserDetailsImpl userDetails, UUID performedEssence, String message, EssenceType type) {
         String token = this.tokenHandler.generateAccessToken(userDetails);
-        save(token, performedEssence.toString(), message, type);
+        this.save(token, performedEssence.toString(), message, type);
     }
 
     @Override

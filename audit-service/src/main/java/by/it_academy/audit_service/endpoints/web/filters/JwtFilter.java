@@ -12,6 +12,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,7 @@ public class JwtFilter
     private final IUserClientService userService;
 
 
-    public JwtFilter(IUserClientService userService, JwtTokenHandler jwtTokenHandler, ConversionService conversionService) {
+    public JwtFilter(@Qualifier(value = "userFeignClientService")IUserClientService userService, JwtTokenHandler jwtTokenHandler, ConversionService conversionService) {
         this.userService = userService;
         this.jwtTokenHandler = jwtTokenHandler;
         this.conversionService = conversionService;

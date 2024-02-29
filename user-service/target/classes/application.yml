@@ -4,6 +4,12 @@ spring:
     url: jdbc:postgresql://db:5432/user_service?ApplicationName=user-service
     username: user_service
     password: q1w2e3r4
+#  flyway:
+#    baseline-on-migrate: true
+#    enable: true
+#    user: user_service
+#    password: q1w2e3r4
+#    schemas: app
   jpa:
     hibernate:
       ddl-auto: none
