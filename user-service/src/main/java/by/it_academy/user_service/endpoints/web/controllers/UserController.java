@@ -9,8 +9,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -22,9 +20,6 @@ import java.util.UUID;
 @RequestMapping("/users")
 public class UserController {
 
-    private static final String TOPIC_USER_REQUEST = "user_request";
-
-    private static final String TOPIC_USER_RESPONSE = "user_response";
 
     private static final String CONTENT_FIELD_NAME = "content";
 
@@ -32,15 +27,11 @@ public class UserController {
 
     private final ConversionService conversionService;
 
-    private final KafkaTemplate<String, UserDto> kafkaUserTemplate;
-
 
     public UserController(IUserService userService,
-                          ConversionService conversionService,
-                          KafkaTemplate<String, UserDto> kafkaUserTemplate) {
+                          ConversionService conversionService) {
         this.userService = userService;
         this.conversionService = conversionService;
-        this.kafkaUserTemplate = kafkaUserTemplate;
     }
 
     @PostMapping
@@ -79,13 +70,6 @@ public class UserController {
         List<User> userList = this.userService.findAllByUuid(users);
         List<UserDto> userDtos = userList.stream().map(u -> this.conversionService.convert(u, UserDto.class)).toList();
         return ResponseEntity.status(HttpStatus.OK).body(userDtos);
-    }
-
-    @KafkaListener(topics = TOPIC_USER_REQUEST)
-    public void userRequestListener(UUID uuid) {
-        User user = this.userService.get(uuid);
-        UserDto userDto = this.conversionService.convert(user, UserDto.class);
-        this.kafkaUserTemplate.send(TOPIC_USER_RESPONSE, userDto);
     }
 
 }

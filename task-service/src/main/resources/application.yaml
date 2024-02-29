@@ -10,6 +10,10 @@ spring:
     properties:
       hibernate.default_schema: app
     show_sql: true
+  kafka:
+    consumer:
+      group-id: app.1
+    bootstrap-server: kafka:9092
 logging:
   level:
     org.springframework.web: DEBUG
