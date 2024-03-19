@@ -41,16 +41,15 @@ public class ExcelReportBuilder implements IReportBuilder {
 
     private static final String AUDIT_SIXTH_COLUMN_NAME = "Id";
 
-    private static final String PARAM_KEY_NAME = "params";
 
     private final JwtTokenHandler tokenHandler;
 
-    private final AuditClientService auditClientService;
+    private final AuditFeignClientService auditClientService;
 
     private final ConversionService conversionService;
 
     public ExcelReportBuilder(JwtTokenHandler tokenHandler,
-                              AuditClientService auditClientService,
+                              AuditFeignClientService auditClientService,
                               ConversionService conversionService) {
         this.tokenHandler = tokenHandler;
         this.auditClientService = auditClientService;

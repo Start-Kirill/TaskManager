@@ -9,19 +9,21 @@ import by.it_academy.task_manager_common.enums.ErrorType;
 import by.it_academy.task_manager_common.enums.EssenceType;
 import by.it_academy.task_manager_common.exceptions.commonInternal.FeignErrorException;
 import feign.FeignException;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
-public class AuditClientService implements IAuditClientService {
+@Primary
+public class AuditFeignClientService implements IAuditClientService {
 
     private final IAuditClient auditClient;
 
     private final JwtTokenHandler tokenHandler;
 
-    public AuditClientService(IAuditClient auditClient, JwtTokenHandler jwtTokenHandler) {
+    public AuditFeignClientService(IAuditClient auditClient, JwtTokenHandler jwtTokenHandler) {
         this.auditClient = auditClient;
         this.tokenHandler = jwtTokenHandler;
     }
