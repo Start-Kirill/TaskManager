@@ -1,6 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/report_service?ApplicationName=report-service
+  kafka:
+    bootstrap-server: localhost:9092
 server:
   port: 94
 feign:

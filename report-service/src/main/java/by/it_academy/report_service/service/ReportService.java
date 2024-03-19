@@ -25,6 +25,7 @@ import by.it_academy.task_manager_common.exceptions.commonInternal.InternalServe
 import by.it_academy.task_manager_common.exceptions.commonInternal.UnknownConstraintException;
 import by.it_academy.task_manager_common.exceptions.structured.NotCorrectPageDataException;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -75,7 +76,7 @@ public class ReportService implements IReportService {
                          UserHolder userHolder,
                          ConversionService conversionService,
                          IMinioService minioService,
-                         IAuditClientService auditClientService,
+                         @Qualifier("auditKafkaClientService") IAuditClientService auditClientService,
                          JwtTokenHandler tokenHandler,
                          IUserClientService userClientService) {
         this.reportDao = reportDao;
