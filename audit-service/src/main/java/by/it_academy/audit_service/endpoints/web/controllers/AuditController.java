@@ -6,6 +6,7 @@ import by.it_academy.task_manager_common.dto.AuditCreateDto;
 import by.it_academy.task_manager_common.dto.AuditDto;
 import by.it_academy.task_manager_common.dto.CustomPage;
 import by.it_academy.task_manager_common.dto.ReportParamAudit;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -18,9 +19,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+
 @RestController
 @RequestMapping("/audit")
 public class AuditController {
+
+    private static final String AUDIT_USER_QUEUE_NAME = "userAuditQueue";
 
     private static final String CONTENT_FIELD_NAME = "content";
 
@@ -70,6 +74,11 @@ public class AuditController {
 
     @KafkaListener(topics = "audit")
     public void auditListener(AuditCreateDto dto) {
+        this.create(dto);
+    }
+
+    @RabbitListener(queues = AUDIT_USER_QUEUE_NAME)
+    public void rabbitMQListener(AuditCreateDto dto) {
         this.create(dto);
     }
 
