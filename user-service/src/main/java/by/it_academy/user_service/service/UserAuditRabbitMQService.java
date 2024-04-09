@@ -5,31 +5,33 @@ import by.it_academy.task_manager_common.dto.UserDetailsImpl;
 import by.it_academy.task_manager_common.enums.EssenceType;
 import by.it_academy.user_service.service.api.IUserAuditService;
 import by.it_academy.user_service.utils.JwtTokenHandler;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
-public class UserAuditKafkaService implements IUserAuditService {
+@Primary
+public class UserAuditRabbitMQService implements IUserAuditService {
 
-    private static final String TOPIC_AUDIT = "audit";
+    @Value("${spring.rabbitmq.userAuditQueue}")
+    private String AUDIT_USER_QUEUE_NAME;
 
-    private final KafkaTemplate<String, AuditCreateDto> kafkaAuditTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
     private final JwtTokenHandler tokenHandler;
 
-    public UserAuditKafkaService(KafkaTemplate<String, AuditCreateDto> kafkaAuditTemplate,
-                                 JwtTokenHandler tokenHandler) {
-        this.kafkaAuditTemplate = kafkaAuditTemplate;
+    public UserAuditRabbitMQService(RabbitTemplate rabbitTemplate, JwtTokenHandler tokenHandler) {
+        this.rabbitTemplate = rabbitTemplate;
         this.tokenHandler = tokenHandler;
     }
 
     @Override
     public void save(String header, AuditCreateDto dto) {
-        this.kafkaAuditTemplate.send(TOPIC_AUDIT, header, dto);
+        rabbitTemplate.convertAndSend(AUDIT_USER_QUEUE_NAME, dto);
     }
-
 
     @Override
     public void save(UserDetailsImpl userDetails, UUID performedUser, String message) {

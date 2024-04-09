@@ -2,7 +2,11 @@ package by.it_academy.task_manager_common.dto;
 
 import by.it_academy.task_manager_common.enums.EssenceType;
 
-public class AuditCreateDto {
+import java.io.Serializable;
+
+public class AuditCreateDto  implements Serializable {
+
+    private static final long serialVersionUID = 42L;
 
     private String userToken;
 

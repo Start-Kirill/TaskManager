@@ -30,6 +30,9 @@ spring:
     consumer:
       group-id: app.1
     bootstrap-server: kafka:9092
+  rabbitmq:
+    userAuditQueue: userAuditQueue
+    host: rabbitmq
 logging:
   level:
     org.springframework.web: DEBUG

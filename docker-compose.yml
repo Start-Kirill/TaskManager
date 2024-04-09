@@ -30,6 +30,14 @@ services:
     networks:
       - taskmanager_ntwrk
 
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - taskmanager_ntwrk
+
   user-service:
     build: user-service
     image: taskmanager_user-service:1.0.0
@@ -39,6 +47,9 @@ services:
   audit-service:
     build: audit-service
     image: taskmanager_audit-service:1.0.0
+    depends_on:
+      - rabbitmq
+    restart: on-failure
     networks:
       - taskmanager_ntwrk
 

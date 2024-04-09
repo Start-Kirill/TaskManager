@@ -13,6 +13,9 @@ spring:
     consumer:
       group-id: app.1
     bootstrap-server: kafka:9092
+  rabbitmq:
+    host: rabbitmq
+    userAuditQueue: userAuditQueue
 logging:
   level:
     org.springframework.web: DEBUG
@@ -22,4 +25,5 @@ jwt:
 feign:
   user:
     url: http://user-service:8080/users
+
 

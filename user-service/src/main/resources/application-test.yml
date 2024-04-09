@@ -3,6 +3,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/user_service?ApplicationName=user-service
   kafka:
     bootstrap-server: localhost:9092
+  rabbitmq:
+    host: localhost
 server:
   port: 91
 app:
