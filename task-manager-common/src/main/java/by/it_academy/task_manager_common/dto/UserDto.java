@@ -25,8 +25,6 @@ public class UserDto {
 
     private UserStatus status;
 
-
-
     @JsonProperty("dt_create")
     @JsonSerialize(converter = LocalDateTimeToMillisecondsConverter.class)
     @JsonDeserialize(converter = MillisecondsToLocalDateTimeConverter.class)
